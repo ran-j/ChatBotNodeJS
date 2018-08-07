@@ -6,13 +6,12 @@ var logger = require('morgan');
 var ntlk = require('natural');
 var shuffle = require('shuffle-array');
 var np = require('numjs');
+const py = require('./libs/ExtraFunctions');
 //var model = require('scikit-learn');
 //var pickle = require('pickle');
 
 //intents
 var intents = require('./Libs/intents');
-
-const myEmitter = new MyEmitter();
 
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
@@ -30,10 +29,6 @@ var usersRouter = require('./routes/users');
 var app = express();
 
 var pickled;
-
-myEmitter.on('load', function(){
-  Init();
-});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -64,7 +59,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+Init();
 
 function Init(){
 	intents.forEach(function(intent, ii){
@@ -77,20 +72,20 @@ function Init(){
       //add to documents in our corpus
       documents.push({val: w, it:intent.tag});
       //add to our classes list
-      if(NotcontainsinArray(classes,intent.tag)){
+      if(py.NotcontainsinArray(classes,intent.tag)){
         classes.push(intent.tag);
       }
 		});
   });
   //stem and lower each word and remove duplicates 
-  words = stemWords(sort(words));
-  classes = sort(classes);
+  words = stemWords(py.sort(words));
+  classes = py.sort(classes);
 
-  console.log("documents"+ len(documents));
+  console.log("documents"+ py.len(documents));
   console.log(documents);
-  console.log("classes "+len(classes));
+  console.log("classes "+py.len(classes));
   console.log(classes);
-  console.log("unique stemmed words "+ len(words));
+  console.log("unique stemmed words "+ py.len(words));
   console.log(words);
 
   Training();
@@ -99,7 +94,7 @@ function Init(){
 function Training(){
   console.log('Training...');
   //create an empty array for our output
-  var output_empty = new Array(len(classes));
+  var output_empty = new Array(py.len(classes));
 
   documents.forEach(function(doc, i){
     //initialize our bag of words
@@ -112,7 +107,7 @@ function Training(){
     });
     //create our bag of words array
     words.forEach(function(w, ii){
-      if(NotcontainsinArray(pattern_words,w)){
+      if(py.NotcontainsinArray(pattern_words,w)){
         bag.push(0);
       }else{
         bag.push(1);
@@ -151,28 +146,16 @@ function Training(){
   // });
 }
 
-function NotcontainsinArray(A,value) {
-  return A.indexOf(value) < 0;
-};
-
-function sort(A){
-  var uniqueNames = A.filter(function(item, pos) {
-    return a.indexOf(item) == pos;
-  });
-  return uniqueNames;
-}
-
 function stemWords(A){
   var steamarray = [];
   ntlk.LancasterStemmer.attach();
   A.patterns.forEach(function(word, i){
-    if(NotcontainsinArray(ignore_words,word)){
+    if(py.NotcontainsinArray(ignore_words,word)){
       steamarray = word.toLowerCase().stem();
     }    
   });
   return steamarray;
 }
 
-function len(A){
-  return A.length;
-}
+module.exports = app;
+

@@ -87,5 +87,4 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
-  app.myEmitter.emit('load');
 }
