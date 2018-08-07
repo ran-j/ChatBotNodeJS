@@ -18,7 +18,7 @@ module.exports = new class SysFunctions {
     }
 
     NotcontainsinArray(A,value) {
-        return A.indexOf(value) < 0;
+        return !A.indexOf(value) > 0;
     }
 
     sort(A){

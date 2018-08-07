@@ -66,18 +66,14 @@ app.use(function(err, req, res, next) {
 
 function Init(){
 	intents.forEach(function(intent, ii){
-		intent.patterns.forEach(function(patterns, i){
-      if(py.isNotInArray(ignore_words,patterns)){
-        ntlk.LancasterStemmer.attach();
-        //tokenize and Stem each word in the sentence
-        var w = patterns.toLowerCase().tokenizeAndStem();   
-        if(py.NotcontainsinPattern_words(words,w)){
-          //add to our words list
-          words.push(w);
-          //add to documents in our corpus
-          documents.push({val: w, it:intent.tag});
-        }  
-      }      
+		intent.patterns.forEach(function(patterns, i){       
+      ntlk.LancasterStemmer.attach();
+      //tokenize and Stem each word in the sentence
+      var w = patterns.toLowerCase().tokenizeAndStem();  
+      //add to our words list
+      words.push(w);
+      //add to documents in our corpus
+      documents.push({val: w, it:intent.tag});
       //add to our classes list
       if(py.NotcontainsinArray(classes,intent.tag)){
         classes.push(intent.tag);
