@@ -18,7 +18,7 @@ module.exports = new class SysFunctions {
     }
 
     NotcontainsinArray(A,value) {
-        return !A.indexOf(value) > 0;
+        return A.indexOf(value) > 0;
     }
 
     sort(A){
@@ -42,6 +42,18 @@ module.exports = new class SysFunctions {
             }         
         }
         return otp;
+    }
+
+    multiDimensionalUnique(arr) {
+        var uniques = [];
+        var itemsFound = {};
+        for(var i = 0, l = arr.length; i < l; i++) {
+            var stringified = JSON.stringify(arr[i]);
+            if(itemsFound[stringified]) { continue; }
+            uniques.push(arr[i]);
+            itemsFound[stringified] = true;
+        }
+        return uniques;
     }
 
 };

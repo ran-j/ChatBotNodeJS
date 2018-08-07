@@ -81,7 +81,7 @@ function Init(){
 		});
   });
   //stem and lower each word and remove duplicates 
-  words = py.sort(words);
+  words = py.multiDimensionalUnique(words);
   classes = py.sort(classes);
 
   console.log("document s"+ py.len(documents));
