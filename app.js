@@ -24,6 +24,8 @@ var train_x, train_y;
 //create our training data
 var training = [], output = [];
 
+Init();
+
 var indexRouter =  require('./routes/index')(app);
 var usersRouter = require('./routes/users');
 
@@ -59,8 +61,6 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
-Init();
 
 function Init(){
 	intents.forEach(function(intent, ii){
