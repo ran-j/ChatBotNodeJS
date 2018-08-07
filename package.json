@@ -16,6 +16,7 @@
     "numjs": "^0.16.0",
     "pickle": "^0.2.0",
     "scikit-learn": "^0.1.0",
-    "shuffle-array": "^1.0.1"
+    "shuffle-array": "^1.0.1",
+    "static-eval": "^2.0.0"
   }
 }

@@ -17,11 +17,11 @@ var intents = require('./../Libs/intents');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Tensorflow JS' });
+  res.render('index', { title: 'Tensorflow JS' }); 
 });
 
 router.post('/ask',function(req,res,next){   
-  res.end(response(req.body.say));
+  res.status(200).end(response(req.body.say,req.body.uID,true));
 });
 
 }
@@ -71,23 +71,35 @@ function classify(sentence){
 
     var return_list = [];
     results.forEach(function(r, i){ 
-      return_list.append((classes[r[0]], r[1]));
+      return_list.push([classes[r[0]],r[1]]);
     });
     //return tuple of intent and probability
     return return_list
 }
 
-function response(sentence){
-  var results = classify(sentence);
+function response(sentence,userID,show_details){
+  var context = [];
+  var pos;
+  var results = classify(sentence);  
   //if we have a classification then find the matching intent tag
   if (results){
     //loop as long as there are matches to process
     while (results[i]) {
       intents.forEach(function(s, i){ 
-        //find a tag matching the first result
+        //set context for this intent if necessary
         if(s.tag == results[0][0]){
-          //a random response from the intent
-          return randomchoice(s['responses']);
+           if(inArray('context_set',s)){
+              pos = context.push({uID:userID, context:s['context_set']}) - 1;
+              if (show_details){
+                console.log('context: ' +s['context_set'])
+              }
+            }
+           //check if this intent is contextual and applies to this user's conversation
+           if(!inArray('context_set',s) || inArray(userID,context) &&  inArray('context_filter',s) && s['context_filter'] == context[pos].context){
+            console.log('tag: ' +s['tag']);
+            //a random response from the intent
+            return randomchoice(s['responses']);
+           }
         }
       });     
       results.shift();
@@ -98,6 +110,13 @@ function response(sentence){
 
 function randomchoice(A){
   return A[Math.floor(Math.random() * A.length)];
+}
+
+function inArray(key,A){
+  if(A[key] != undefined && A[key] != null && A[key].length > 0){
+    return true;
+  }
+  return false;
 }
 
 function len(A){

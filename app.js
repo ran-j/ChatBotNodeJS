@@ -6,8 +6,8 @@ var logger = require('morgan');
 var ntlk = require('natural');
 var shuffle = require('shuffle-array');
 var np = require('numjs');
-var model = require('scikit-learn');
-var pickle = require('pickle');
+//var model = require('scikit-learn');
+//var pickle = require('pickle');
 
 //intents
 var intents = require('./Libs/intents');
@@ -121,7 +121,7 @@ function Training(){
     //output is a '0' for each tag and '1' for current tag
     output_row = output_empty;
     output_row[classes.findIndex(x => x.it==doc.it)] = 1;    
-    training.append([bag, output_row]);
+    training.push([bag, output_row]);
   });
   //shuffle our features and turn into np.array
   shuffle(training);
