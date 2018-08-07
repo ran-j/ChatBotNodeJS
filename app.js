@@ -112,10 +112,10 @@ function TraiBuild(){
     });
     //create our bag of words array
     words.forEach(function(w, ii){
-      if(py.findRecursive(pattern_words,w)){
-        bag.push(0);
-      }else{
+      if(py.NotcontainsinPattern_words(pattern_words,w)){
         bag.push(1);
+      }else{
+        bag.push(0);
       }
     });
     //output is a '0' for each tag and '1' for current tag
