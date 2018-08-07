@@ -18,3 +18,5 @@ $ npm start bin/www
 ```
 
 In development
+
+Based on https://chatbotsmagazine.com/contextual-chat-bots-with-tensorflow-4391749d0077

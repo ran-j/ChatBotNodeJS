@@ -14,6 +14,7 @@ const py = require('./libs/ExtraFunctions');
 var intents = require('./Libs/intents');
 
 const tf = require('@tensorflow/tfjs');
+
 require('@tensorflow/tfjs-node');
 
 var words = [], classes = [], documents = [], ignore_words = ['?'];
