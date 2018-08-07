@@ -112,7 +112,7 @@ function TraiBuild(){
     });
     //create our bag of words array
     words.forEach(function(w, ii){
-      if(py.NotcontainsinPattern_words(pattern_words,w)){
+      if(py.findRecursive(pattern_words,w)){
         bag.push(0);
       }else{
         bag.push(1);
