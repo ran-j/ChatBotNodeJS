@@ -91,10 +91,10 @@ function Init(){
   console.log("unique stemmed words "+ py.len(words));
   console.log(words);
 
-  Training();
+  TraiBuild();
 }
 
-function Training(){
+function TraiBuild(){
   console.log('Training...');
   //create an empty array for our output
   var output_empty = new Array(py.len(classes));
@@ -106,7 +106,8 @@ function Training(){
     var pattern_words = doc.val;
     //stem each word
     pattern_words.forEach(function(wd, ii){
-      wd = word.toLowerCase().stem();
+      ntlk.LancasterStemmer.attach();
+      wd = wd.stem();
     });
     //create our bag of words array
     words.forEach(function(w, ii){
@@ -117,7 +118,7 @@ function Training(){
       }
     });
     //output is a '0' for each tag and '1' for current tag
-    output_row = output_empty;
+    var output_row = output_empty;
     output_row[classes.findIndex(x => x.it==doc.it)] = 1;    
     training.push([bag, output_row]);
   });
