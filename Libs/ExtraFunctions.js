@@ -33,14 +33,15 @@ module.exports = new class SysFunctions {
     }
 
     NotcontainsinPattern_words(A,value) {
-        for (i = 0; i < A.length; i++) {
-        	for (ii = 0; ii < A[i].length; ii++) {
+        var otp = false;
+        for (var i = 0; i < A.length; i++) {
+        	for (var ii = 0; ii < A[i].length; ii++) {
             	if(A[i][ii] == value){
-                	return false;
+                	otp = true;
                 }
             }         
         }
-        return true;
+        return otp;
     }
 
 };
