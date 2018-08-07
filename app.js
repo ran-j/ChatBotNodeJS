@@ -65,7 +65,7 @@ app.use(function(err, req, res, next) {
 function Init(){
 	intents.forEach(function(intent, ii){
 		intent.patterns.forEach(function(patterns, i){
-      tokenizer = new ntlk.TreebankWordTokenizer();
+      var tokenizer = new ntlk.TreebankWordTokenizer();
       //tokenize each word in the sentence
       var w = tokenizer.tokenize(patterns);
       //add to our words list
