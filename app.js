@@ -70,11 +70,13 @@ function Init(){
       if(py.isNotInArray(ignore_words,patterns)){
         ntlk.LancasterStemmer.attach();
         //tokenize and Stem each word in the sentence
-        var w = patterns.toLowerCase().tokenizeAndStem();     
-        //add to our words list
-        words.push(w);
-        //add to documents in our corpus
-        documents.push({val: w, it:intent.tag});
+        var w = patterns.toLowerCase().tokenizeAndStem();   
+        if(py.NotcontainsinPattern_words(words,w)){
+          //add to our words list
+          words.push(w);
+          //add to documents in our corpus
+          documents.push({val: w, it:intent.tag});
+        }  
       }      
       //add to our classes list
       if(py.NotcontainsinArray(classes,intent.tag)){
@@ -86,7 +88,7 @@ function Init(){
   words = py.sort(words);
   classes = py.sort(classes);
 
-  console.log("documents"+ py.len(documents));
+  console.log("document s"+ py.len(documents));
   console.log(documents);
   console.log("classes "+py.len(classes));
   console.log(classes);
@@ -109,11 +111,11 @@ function TraiBuild(){
     //stem each word
     pattern_words.forEach(function(wd, ii){
       ntlk.LancasterStemmer.attach();
-      wd = wd.stem();
+      wd = wd.toLowerCase().tokenizeAndStem();
     });
     //create our bag of words array
     words.forEach(function(w, ii){
-      if(py.NotcontainsinArray(pattern_words,w)){
+      if(py.NotcontainsinPattern_words(pattern_words,w)){
         bag.push(0);
       }else{
         bag.push(1);

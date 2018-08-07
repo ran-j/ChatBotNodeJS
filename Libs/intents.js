@@ -1,6 +1,6 @@
 var intents =  [
   {"tag": "greeting",
-   "patterns": ["Hi", "How are you", "Is anyone there?", "Hello", "Good day"],
+   "patterns": ["Hi", "How are you?", "Is anyone there?", "Hello", "Good day"],
    "responses": ["Hello, thanks for visiting", "Good to see you again", "Hi there, how can I help?"],
    "context_set": ""
   },

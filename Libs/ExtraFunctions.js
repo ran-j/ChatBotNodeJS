@@ -31,4 +31,16 @@ module.exports = new class SysFunctions {
     isNotInArray(value, array) {
         return !array.indexOf(value) > -1;
     }
+
+    NotcontainsinPattern_words(A,value) {
+        for (i = 0; i < A.length; i++) {
+        	for (ii = 0; ii < A[i].length; ii++) {
+            	if(A[i][ii] == value){
+                	return false;
+                }
+            }         
+        }
+        return true;
+    }
+
 };
