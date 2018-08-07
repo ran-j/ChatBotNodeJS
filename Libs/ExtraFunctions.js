@@ -27,4 +27,8 @@ module.exports = new class SysFunctions {
         });
         return uniqueNames;
     }    
+
+    isNotInArray(value, array) {
+        return !array.indexOf(value) > -1;
+    }
 };

@@ -65,13 +65,15 @@ app.use(function(err, req, res, next) {
 function Init(){
 	intents.forEach(function(intent, ii){
 		intent.patterns.forEach(function(patterns, i){
-      var tokenizer = new ntlk.TreebankWordTokenizer();
-      //tokenize each word in the sentence
-      var w = tokenizer.tokenize(patterns);
-      //add to our words list
-      words.push(w);
-      //add to documents in our corpus
-      documents.push({val: w, it:intent.tag});
+      if(py.isNotInArray(ignore_words,patterns)){
+        ntlk.LancasterStemmer.attach();
+        //tokenize and Stem each word in the sentence
+        var w = patterns.toLowerCase().tokenizeAndStem();     
+        //add to our words list
+        words.push(w);
+        //add to documents in our corpus
+        documents.push({val: w, it:intent.tag});
+      }      
       //add to our classes list
       if(py.NotcontainsinArray(classes,intent.tag)){
         classes.push(intent.tag);
@@ -79,7 +81,7 @@ function Init(){
 		});
   });
   //stem and lower each word and remove duplicates 
-  words = stemWords(py.sort(words));
+  words = py.sort(words);
   classes = py.sort(classes);
 
   console.log("documents"+ py.len(documents));
@@ -121,6 +123,7 @@ function Training(){
   });
   //shuffle our features and turn into np.array
   shuffle(training);
+
   training = np.array(training);
   //create train and test lists
   train_x = training.pick(null,0);
@@ -145,17 +148,6 @@ function Training(){
   //   console.log("pickled:", pickled);
   //   pickled = pickled;    
   // });
-}
-
-function stemWords(A){
-  var steamarray = [];
-  ntlk.LancasterStemmer.attach();
-  A.patterns.forEach(function(word, i){
-    if(py.NotcontainsinArray(ignore_words,word)){
-      steamarray = word.toLowerCase().stem();
-    }    
-  });
-  return steamarray;
 }
 
 module.exports = app;
