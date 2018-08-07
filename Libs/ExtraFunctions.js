@@ -23,7 +23,7 @@ module.exports = new class SysFunctions {
 
     sort(A){
         var uniqueNames = A.filter(function(item, pos) {
-            return a.indexOf(item) == pos;
+            return A.indexOf(item) == pos;
         });
         return uniqueNames;
     }    
