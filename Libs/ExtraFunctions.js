@@ -55,5 +55,9 @@ module.exports = new class SysFunctions {
         }
         return uniques;
     }
+    
+    findRecursive(arr1, toFind) {
+       return arr1.find(val => Array.isArray(val) ? findRecursive(val, toFind) : val === toFind) !== undefined;
+    }
 
 };
