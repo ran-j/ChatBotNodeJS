@@ -22,7 +22,8 @@ var words = [], classes = [], documents = [], ignore_words = ['?'];
 var train_x, train_y;
 
 //create our training data
-var training = [], output = [];
+var training = new Array();
+var output = [];
 
 Init();
 
@@ -124,6 +125,8 @@ function TraiBuild(){
   });
   //shuffle our features and turn into np.array
   shuffle(training);
+
+  console.log(training);
 
   training = np.array(training);
   //create train and test lists
