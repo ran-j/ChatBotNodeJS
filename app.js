@@ -73,7 +73,7 @@ function Init(){
       //add to our words list
       words.push(w);
       //add to documents in our corpus
-      documents.push({val: w, it:intent.tag});
+      documents.push([w,intent.tag]);
       //add to our classes list
       if(py.NotcontainsinArray(classes,intent.tag)){
         classes.push(intent.tag);
@@ -103,7 +103,7 @@ function TraiBuild(){
     //initialize our bag of words
     var bag = [];
     //list of tokenized words for the pattern
-    var pattern_words = doc.val;
+    var pattern_words = doc[0];
     //stem each word
     pattern_words.forEach(function(wd, ii){
       ntlk.LancasterStemmer.attach();
@@ -119,7 +119,7 @@ function TraiBuild(){
     });
     //output is a '0' for each tag and '1' for current tag
     var output_row = output_empty;
-    output_row[classes.findIndex(x => x.it==doc.it)] = 1;    
+    output_row[classes.findIndex(x => x[1]==doc[1])] = 1;    
     training.push([bag, output_row]);
   });
   //shuffle our features and turn into np.array
