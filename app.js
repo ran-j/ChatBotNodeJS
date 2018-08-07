@@ -7,6 +7,7 @@ var ntlk = require('natural');
 var shuffle = require('shuffle-array');
 var np = require('numjs');
 const py = require('./Libs/ExtraFunctions');
+var arrayContains = require('array-contains');
 //var model = require('scikit-learn');
 //var pickle = require('pickle');
 
@@ -84,7 +85,7 @@ function Init(){
   words = py.multiDimensionalUnique(words);
   classes = py.sort(classes);
 
-  console.log("document s"+ py.len(documents));
+  console.log("documents "+ py.len(documents));
   console.log(documents);
   console.log("classes "+py.len(classes));
   console.log(classes);
