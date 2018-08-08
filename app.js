@@ -67,14 +67,16 @@ app.use(function(err, req, res, next) {
 
 function Init(){
 	intents.forEach(function(intent, ii){
-		intent.patterns.forEach(function(patterns, i){     
-      //tokenize each word in the sentence
-      var tokenizer = new ntlk.WordTokenizer();
-      var w = tokenizer.tokenize(patterns.toLowerCase()); 
-      //add to our words list
-      words.push(w);
-      //add to documents in our corpus
-      documents.push([w,intent.tag]);
+		intent.patterns.forEach(function(patterns, i){   
+      if(py.isNotInArray(ignore_words,patterns)){  
+        //tokenize each word in the sentence
+        var tokenizer = new ntlk.WordTokenizer();
+        var w = tokenizer.tokenize(patterns.toLowerCase()); 
+        //add to our words list
+        words.push(w);
+        //add to documents in our corpus
+        documents.push([w,intent.tag]);
+      }
       //add to our classes list
       if(py.NotcontainsinArray(classes,intent.tag)){
         classes.push(intent.tag);
@@ -145,7 +147,6 @@ function TraiBuild(){
   //Start training (apply gradient descent algorithm)
   model.fit(train_x, train_y, n_epoch=1000, batch_size=8, show_metric=True);
   model.save('model.tflearn');
-
 }
 
 function stemwords(words){ 
