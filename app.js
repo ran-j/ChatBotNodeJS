@@ -67,10 +67,10 @@ app.use(function(err, req, res, next) {
 
 function Init(){
 	intents.forEach(function(intent, ii){
-		intent.patterns.forEach(function(patterns, i){       
-      ntlk.LancasterStemmer.attach();
-      //tokenize and Stem each word in the sentence
-      var w = patterns.toLowerCase().tokenizeAndStem();  
+		intent.patterns.forEach(function(patterns, i){     
+      //tokenize each word in the sentence
+      var tokenizer = new ntlk.WordTokenizer();
+      var w = tokenizer.tokenize(patterns.toLowerCase()); 
       //add to our words list
       words.push(w);
       //add to documents in our corpus
@@ -82,7 +82,7 @@ function Init(){
 		});
   });
   //stem and lower each word and remove duplicates 
-  words = py.multiDimensionalUnique(words);
+  var words = py.sort(stemwords)(py.multiDimensionalUnique(py.toOneArray(words)));
   classes = py.sort(classes);
 
   console.log("documents "+ py.len(documents));
@@ -96,9 +96,10 @@ function Init(){
 }
 
 function TraiBuild(){
+  console.log(' ');
   console.log('Training...');
   //create an empty array for our output
-  var output_empty = new Array(py.len(classes));
+  var output_empty = new Array(py.len(classes)).join('0').split('').map(parseFloat);  
 
   documents.forEach(function(doc, i){
     //initialize our bag of words
