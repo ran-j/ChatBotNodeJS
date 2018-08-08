@@ -32,8 +32,16 @@ module.exports = new class SysFunctions {
         return !array.indexOf(value) > -1;
     }
 
-    NotcontainsinPattern_words(A,value) {
-       return A.indexOf(value) > -1;
+    NotcontainsinPattern_words(A,B) {
+       var otp = false;
+      for (var i = 0; i < A.length; i++) {
+        for (var ii = 0; ii < B.length; ii++) {
+          if(A[i] == B[ii]){
+            otp = true;
+          }
+        }         
+      }
+      return otp; 
     }
 
     multiDimensionalUnique(arr) {
