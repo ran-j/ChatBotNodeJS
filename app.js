@@ -120,7 +120,7 @@ function TraiBuild(){
     });
     //output is a '0' for each tag and '1' for current tag
     var output_row = output_empty;
-    output_row[classes.findIndex(x => x[1]==doc[1])] = 1;    
+    output_row[classes.findIndex(x => x==doc[1])] = 1;    
     training.push([bag, output_row]);
   });
   //shuffle our features and turn into np.array
