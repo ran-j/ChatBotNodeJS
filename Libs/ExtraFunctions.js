@@ -68,4 +68,12 @@ module.exports = new class SysFunctions {
        return arr1.find(val => Array.isArray(val) ? findRecursive(val, toFind) : val === toFind) !== undefined;
     }
 
+    pick(matrix, col){
+        var column = [];
+        for(var i=0; i<matrix.length; i++){
+           column.push(matrix[i][col]);
+        }
+        return column;
+    }
+
 };

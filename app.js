@@ -82,9 +82,8 @@ function Init(){
 		});
   });
   //stem and lower each word and remove duplicates 
-  words = py.sort(stemwords(py.multiDimensionalUnique(py.toOneArray(words))));
+  words = py.sort(stemwords(py.multiDimensionalUnique(words)));
   classes = py.sort(classes);
-
   console.log("documents "+ py.len(documents));
   console.log(documents);
   console.log("classes "+py.len(classes));
@@ -97,50 +96,48 @@ function Init(){
 
 function TraiBuild(){
   console.log(' ');
-  console.log('Training...');
-  //create an empty array for our output
-  var output_empty = new Array(py.len(classes)).join('0').split('').map(parseFloat);  
-
+  console.log('Training...'); 
+ 
   documents.forEach(function(doc, i){
     //initialize our bag of words
     var bag = [];
-    //list of tokenized words for the pattern
-    var pattern_words = doc[0];
-    //stem each word
-    pattern_words.forEach(function(wd, ii){
+    //list of tokenized words for the pattern and stem each word
+    var pattern_words = doc[0].map((it, i, A) => {
       ntlk.LancasterStemmer.attach();
-      wd = wd.toLowerCase().tokenizeAndStem();
-    });
+      it = it.toLowerCase().stem();
+      return it;
+    });    
     //create our bag of words array
-    words.forEach(function(w, ii){
-      if(py.NotcontainsinPattern_words(pattern_words,w)){
+    words.forEach(function(word, ii){
+      if(py.NotcontainsinPattern_words(pattern_words,word)){
         bag.push(1);
       }else{
         bag.push(0);
       }
     });
+    //create an empty array for our output
     //output is a '0' for each tag and '1' for current tag
-    var output_row = output_empty;
+    var output_row = new Array(classes.length + 1).join('0').split('').map(parseFloat);
     output_row[classes.findIndex(x => x==doc[1])] = 1;    
     training.push([bag, output_row]);
   });
   //shuffle our features and turn into np.array
-  shuffle(training);
+  training = shuffle(training);
 
   console.log(training);
+  //training = np.array(training);
 
-  training = np.array(training);
   //create train and test lists
-  train_x = training.pick(null,0);
-  train_y = training.pick(null,1);
+  train_x = py.pick(training,0);
+  train_y = py.pick(training,1);
 
   //reset underlying graph data
   tf.reset_default_graph();
   //Build neural network
-  var net = tf.input_data(shape=[None, len(train_x[0])]);
+  var net = tf.input_data(shape=[None, py.len(train_x[0])]);
   net = tf.fully_connected(net, 8);
   net = tf.fully_connected(net, 8);
-  net = tf.fully_connected(net, len(train_y[0]), activation='softmax');
+  net = tf.fully_connected(net, py.len(train_y[0]), activation='softmax');
   net = tf.regression(net);
 
   //Define model and setup tensorboard
@@ -149,10 +146,6 @@ function TraiBuild(){
   model.fit(train_x, train_y, n_epoch=1000, batch_size=8, show_metric=True);
   model.save('model.tflearn');
 
-  // pickle.dump( {'words':words, 'classes':classes, 'train_x':train_x, 'train_y':train_y}, function(pickled) {
-  //   console.log("pickled:", pickled);
-  //   pickled = pickled;    
-  // });
 }
 
 function stemwords(words){ 
