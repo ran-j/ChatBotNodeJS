@@ -150,11 +150,13 @@ function TraiBuild(){
 }
 
 function stemwords(words){ 
-  return words.map((word, index, array) => {
-    ntlk.LancasterStemmer.attach();
-    word = word.stem();
-    return word;
-  })
+  return words.map((iten, index, array) => {
+    return iten.map((it, i, A) => {
+     ntlk.LancasterStemmer.attach();
+     it = it.stem();
+     return it;
+   });    
+  }) 
 }
 
 module.exports = app;
