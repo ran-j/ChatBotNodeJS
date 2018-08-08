@@ -82,7 +82,7 @@ function Init(){
 		});
   });
   //stem and lower each word and remove duplicates 
-  var words = py.sort(stemwords)(py.multiDimensionalUnique(py.toOneArray(words)));
+  words = py.sort(stemwords(py.multiDimensionalUnique(py.toOneArray(words))));
   classes = py.sort(classes);
 
   console.log("documents "+ py.len(documents));
@@ -153,6 +153,14 @@ function TraiBuild(){
   //   console.log("pickled:", pickled);
   //   pickled = pickled;    
   // });
+}
+
+function stemwords(words){ 
+  return words.map((word, index, array) => {
+    ntlk.LancasterStemmer.attach();
+    word = word.stem();
+    return word;
+  })
 }
 
 module.exports = app;

@@ -56,14 +56,6 @@ module.exports = new class SysFunctions {
         return uniques;
     }
 
-    stemwords(words){ 
-        return words.map((word, index, array) => {
-          ntlk.LancasterStemmer.attach();
-          word = word.stem();
-          return word;
-        })
-    }
-
     toOneArray(arrToConvert ){
         var newArr = [];
         for(var i = 0; i < arrToConvert.length; i++){
