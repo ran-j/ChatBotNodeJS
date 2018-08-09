@@ -78,13 +78,13 @@ function Init(){
         documents.push([w,intent.tag]);
       }
       //add to our classes list
-      if(py.NotcontainsinArray(classes,intent.tag)){
+      if(!py.ContainsinArray(classes,intent.tag)){
         classes.push(intent.tag);
       }
 		});
   });
   //stem and lower each word and remove duplicates 
-  words = py.sort(stemwords(py.multiDimensionalUnique(words)));
+  words = py.sort(stemwords(py.multiDimensionalUnique(py.toOneArray(words))));
   classes = py.sort(classes);
   console.log("documents "+ py.len(documents));
   console.log(documents);
@@ -111,7 +111,7 @@ function TraiBuild(){
     });    
     //create our bag of words array
     words.forEach(function(word, ii){
-      if(py.NotcontainsinPattern_words(pattern_words,word)){
+      if(!py.NotcontainsinArray(pattern_words,word)){
         bag.push(1);
       }else{
         bag.push(0);
@@ -149,7 +149,7 @@ function TraiBuild(){
   model.save('model.tflearn');
 }
 
-function stemwords(words){ 
+function stemwordstwo(words){ 
   return words.map((iten, index, array) => {
     return iten.map((it, i, A) => {
      ntlk.LancasterStemmer.attach();
@@ -157,6 +157,14 @@ function stemwords(words){
      return it;
    });    
   }) 
+}
+
+function stemwords(words){ 
+  return words.map((iten, index, array) => {
+    ntlk.LancasterStemmer.attach();
+    iten = iten.stem();
+    return iten;
+ }) 
 }
 
 module.exports = app;

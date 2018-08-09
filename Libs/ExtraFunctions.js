@@ -76,4 +76,15 @@ module.exports = new class SysFunctions {
         return column;
     }
 
+    ContainsinArray(arr,check){
+        var found = false;
+        for (var i = 0; i < check.length; i++) {
+            if (arr.indexOf(check[i]) > -1) {
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
+
 };
