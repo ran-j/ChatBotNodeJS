@@ -14,8 +14,6 @@ var ERROR_THRESHOLD = 0.25;
 
 var words = [], classes = [], documents = [], ignore_words = ['?'];
 
-var train_x, train_y;
-
 //create our training data
 var training = new Array();
 var output = [];
@@ -175,35 +173,27 @@ function TraiBuild(){
   //shuffle our features and turn into np.array
   training = shuffle(training);
 
-  console.log(training);
+  // console.log(training);
   //training = np.array(training);
 
   //create train and test lists
-  train_x = py.pick(training,0);
-  train_y = py.pick(training,1);
+  var train_x = py.pick(training,0);
+  var train_y = py.pick(training,1);
 
   // const xs = tf.tensor2d(train_x, [6, 1]);
   // const ys = tf.tensor2d(train_y, [6, 1]);
-  const xs = tf.tensor2d(train_x);
-  const ys = tf.tensor2d(train_y);
+  const xs = tf.tensor(train_x);
+  const ys = tf.tensor(train_y);
 
   //Build neural network
   model = tf.sequential();
-  model.add(tf.layers.dense({inputShape: [4], units: 100}));
+  model.add(tf.layers.dense({inputShape: [documents.length], units: 100}));
   model.add(tf.layers.dense({units: 4}));
   model.compile({loss: 'categoricalCrossentropy', optimizer: 'sgd'});
 
-  model.fit(xs, ys, {epochs: 500}); 
-}
-
-function stemwordstwo(words){ 
-  return words.map((iten, index, array) => {
-    return iten.map((it, i, A) => {
-     ntlk.LancasterStemmer.attach();
-     it = it.stem();
-     return it;
-   });    
-  }) 
+  model.fit(xs, ys, {epochs: 1000}); 
+  // model.save('model.json');
+  // const model = await tf.loadModel('file:///tmp/my-model-1/model.json');
 }
 
 function stemwords(words){ 
