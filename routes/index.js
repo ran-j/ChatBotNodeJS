@@ -172,26 +172,28 @@ function TraiBuild(){
   });
   //shuffle our features and turn into np.array
   training = shuffle(training);
-
-  // console.log(training);
-  //training = np.array(training);
-
+ 
   //create train and test lists
   var train_x = py.pick(training,0);
   var train_y = py.pick(training,1);
+ 
+  // Build and training neural network:
+  model = tf.sequential();
+  model.add(tf.layers.dense({units: training.length, activation: 'relu', inputShape: [words.length]}));
+  model.add(tf.layers.dense({units: classes.length, activation: 'linear'}));
+  model.compile({optimizer: 'sgd', loss: 'meanSquaredError'});
 
-  // const xs = tf.tensor2d(train_x, [6, 1]);
-  // const ys = tf.tensor2d(train_y, [6, 1]);
   const xs = tf.tensor(train_x);
   const ys = tf.tensor(train_y);
-
-  //Build neural network
-  model = tf.sequential();
-  model.add(tf.layers.dense({inputShape: [documents.length], units: 100}));
-  model.add(tf.layers.dense({units: 4}));
-  model.compile({loss: 'categoricalCrossentropy', optimizer: 'sgd'});
-
-  model.fit(xs, ys, {epochs: 1000}); 
+ 
+  model.fit(xs, ys, {
+    epochs: 100,
+    callbacks: {
+      onEpochEnd: async (epoch, log) => {
+        console.log(`Epoch ${epoch}: loss = ${log.loss}`);
+      }
+    }
+  });
   // model.save('model.json');
   // const model = await tf.loadModel('file:///tmp/my-model-1/model.json');
 }
