@@ -59,7 +59,7 @@ function bow(sentence, words, show_details){
 
 function classify(sentence){
     //generate probabilities from the model
-    var results = model.predict(tf.tensor2d([bow(sentence, words)]))[0];
+    var results = model.predict(tf.tensor([bow(sentence, words)]))[0];
     //filter out predictions below a threshold
     var aux;
     results.forEach(function(s, i){ 
