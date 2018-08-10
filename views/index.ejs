@@ -19,16 +19,19 @@
 
     form {
       background: #000;
-      padding: 3px;
+      padding: 6px;
       position: fixed;
       bottom: 0;
       width: 90%;
+      border: 2px solid red;
+      border-radius: 25px;
     }
 
     form input {
       border: 0;
       padding: 10px;
       width: 90%;
+      border-radius: 25px;
       margin-right: .5%;
     }
 
@@ -37,6 +40,7 @@
       background: rgb(130, 224, 255);
       border: none;
       padding: 10px;
+      border-radius: 25px;
     }
 
     #messages {
@@ -73,7 +77,7 @@
 
       <form action="">
         <input id="m" autocomplete="off" />
-        <button>Send</button>
+        <button class="w3-btn w3-white w3-border w3-round-large">Send <i class="fa fa-paper-plane" aria-hidden="true"></i></button>
       </form>
     </div>
   </div>
@@ -83,21 +87,21 @@
   $(function () {
     var userid = Math.random().toString(36).substring(1);
     $('form').submit(function () {
+      if($('#m').val().length > 0){
+        $('#messages').append($('<li>').text($('#m').val()));
 
-      $('#messages').append($('<li>').text($('#m').val()));
+        $.post("/ask", {
+          uID: userid,
+          say: $('#m').val()
+        },
+          function (result, response) {
+            if (result != null) {
+              $('#messages').append($('<li>').text(result));
+            }
+          });
 
-      $.post("/ask", {
-        uID: userid,
-        say: $('#m').val()
-      },
-        function (result, response) {
-          if (result != null) {
-            $('#messages').append($('<li>').text(result));
-          }
-        });
-
-      $('#m').val('');
-
+        $('#m').val('');
+      }      
       return false;
     });
   });
