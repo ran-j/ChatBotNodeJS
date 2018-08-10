@@ -34,21 +34,24 @@ router.post('/ask',function(req,res,next){
 });
 
 function clean_up_sentence(sentence){
-  //tokenize the pattern
-  sentence_words = nltk.word_tokenize(sentence);
-  //stem each word  
-  sentence_words = stemwordsD(sentence_words);
-  return sentence_words
+   //tokenize the pattern
+   var tokenizer = new ntlk.WordTokenizer();
+   var sentence_words = tokenizer.tokenize(sentence.toLowerCase());
+   //stem each word  
+   sentence_words = stemwordsToLower(sentence_words);
+ 
+   return sentence_words;
 }
 
 function bow(sentence, words, show_details){
     //tokenize the pattern
-    sentence_words = clean_up_sentence(sentence);
+    var sentence_words = clean_up_sentence(sentence);
     //bag of words
     var bag = new Array(words.length + 1).join('0').split('').map(parseFloat);
     sentence_words.forEach(function(s, i){ 
       words.forEach(function(v, ii){ 
         if(v == s){
+          //set 1 if found the match word and 0 for the others
           bag[ii] = 1;
           if(show_details){console.log("found in bag: "+w)}
         }
@@ -59,7 +62,7 @@ function bow(sentence, words, show_details){
 
 function classify(sentence){
     //generate probabilities from the model
-    var results = model.predict(tf.tensor([bow(sentence, words)]))[0];
+    var results = model.predict(tf.tensor(bow(sentence, words)))[0];
     //filter out predictions below a threshold
     var aux;
     results.forEach(function(s, i){ 
@@ -124,7 +127,7 @@ function Init(){
         //add to documents in our corpus
         documents.push([w,intent.tag]);
       }
-      //add to our classes list
+      //add the tag to classes list 
       if(!py.ContainsinArray(classes,intent.tag)){
         classes.push(intent.tag);
       }
@@ -164,20 +167,20 @@ function TraiBuild(){
         bag.push(0);
       }
     });
-    //create an empty array for our output
-    //output is a '0' for each tag and '1' for current tag
+    //create an empty array for output where '0' for each tag and '1' for current tag
     var output_row = new Array(classes.length + 1).join('0').split('').map(parseFloat);
-    output_row[classes.findIndex(x => x==doc[1])] = 1;    
+    output_row[classes.findIndex(x => x==doc[1])] = 1;  
+    //push on the arrays de values  
     training.push([bag, output_row]);
   });
-  //shuffle our features and turn into np.array
+  //shuffle our features
   training = shuffle(training);
  
-  //create train and test lists
+  //create train arrays
   var train_x = py.pick(training,0);
   var train_y = py.pick(training,1);
  
-  // Build and training neural network:
+  // Build neural network:
   model = tf.sequential();
   model.add(tf.layers.dense({units: training.length, activation: 'relu', inputShape: [words.length]}));
   model.add(tf.layers.dense({units: classes.length, activation: 'linear'}));
@@ -185,7 +188,7 @@ function TraiBuild(){
 
   const xs = tf.tensor(train_x);
   const ys = tf.tensor(train_y);
- 
+  //train model
   model.fit(xs, ys, {
     epochs: 100,
     callbacks: {
@@ -206,7 +209,7 @@ function stemwords(words){
  }) 
 }
 
-function stemwordsD(words){ 
+function stemwordsToLower(words){ 
   return words.map((iten, index, array) => {
     ntlk.LancasterStemmer.attach();
     iten = iten.toLowerCase().stem();
