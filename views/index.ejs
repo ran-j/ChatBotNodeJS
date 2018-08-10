@@ -1,11 +1,106 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
+
+<head>
+  <title>BotJS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font: 13px Helvetica, Arial;
+    }
+
+    form {
+      background: #000;
+      padding: 3px;
+      position: fixed;
+      bottom: 0;
+      width: 90%;
+    }
+
+    form input {
+      border: 0;
+      padding: 10px;
+      width: 90%;
+      margin-right: .5%;
+    }
+
+    form button {
+      width: 9%;
+      background: rgb(130, 224, 255);
+      border: none;
+      padding: 10px;
+    }
+
+    #messages {
+      list-style-type: none;
+      margin: 9px;
+      padding: 0;
+    }
+
+    #messages li {
+      padding: 5px 10px;
+    }
+
+    #messages li:nth-child(odd) {
+      background: #eee;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="w3-sidebar w3-bar-block w3-black w3-xxlarge" style="width:70px">
+    <a href="/" class="w3-bar-item w3-button">
+      <i class="fa fa-comments"></i>
+    </a>
+    <a href="/intents/" class="w3-bar-item w3-button">
+      <i class="fa fa-first-order"></i>
+    </a>
+  </div>
+
+  <div style="margin-left:70px">
+
+    <div class="w3-container">
+      <ul id="messages"></ul>
+
+      <form action="">
+        <input id="m" autocomplete="off" />
+        <button>Send</button>
+      </form>
+    </div>
+  </div>
+</body>
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+  $(function () {
+    var userid = Math.random().toString(36).substring(1);
+    $('form').submit(function () {
+
+      $('#messages').append($('<li>').text($('#m').val()));
+
+      $.post("/ask", {
+        uID: userid,
+        say: $('#m').val()
+      },
+        function (result, response) {
+          if (result != null) {
+            $('#messages').append($('<li>').text(result));
+          }
+        });
+
+      $('#m').val('');
+
+      return false;
+    });
+  });
+</script>
+
 </html>

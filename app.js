@@ -138,8 +138,8 @@ function TraiBuild(){
 
   // const xs = tf.tensor2d(train_x, [6, 1]);
   // const ys = tf.tensor2d(train_y, [6, 1]);
-  const xs = tf.tensor2d(train_x, [6, 1]);
-  const ys = tf.tensor2d(train_y, [6, 1]);
+  const xs = tf.tensor2d(train_x);
+  const ys = tf.tensor2d(train_y);
 
   //Build neural network
   model = tf.sequential();
