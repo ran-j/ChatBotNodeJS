@@ -147,7 +147,7 @@ function TraiBuild(){
   model.add(tf.layers.dense({units: 4}));
   model.compile({loss: 'categoricalCrossentropy', optimizer: 'sgd'});
 
-  await model.fit(xs, ys, {epochs: 500}); 
+  model.fit(xs, ys, {epochs: 500}); 
 }
 
 function stemwordstwo(words){ 
