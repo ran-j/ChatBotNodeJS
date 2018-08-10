@@ -26,6 +26,9 @@ var train_x, train_y;
 var training = new Array();
 var output = [];
 
+//model ts
+var model;
+
 //init modules and training
 Init();
 
@@ -143,7 +146,7 @@ function TraiBuild(){
   net = tf.regression(net);
 
   //Define model and setup tensorboard
-  var model = tf.DNN(net, tensorboard_dir='tflearn_logs');
+  model = tf.DNN(net, tensorboard_dir='tflearn_logs');
   //Start training (apply gradient descent algorithm)
   model.fit(train_x, train_y, n_epoch=1000, batch_size=8, show_metric=True);
   model.save('model.tflearn');

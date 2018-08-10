@@ -13,6 +13,7 @@ var words = app.words;
 var classes = app.classes;
 var train_x = app.train_x;
 var train_y = app.train_y;
+var model = app.model;
 var py = app.py;
 
 var intents = require('./../Libs/intents');
@@ -29,11 +30,8 @@ router.post('/ask',function(req,res,next){
 function clean_up_sentence(sentence){
   //tokenize the pattern
   sentence_words = nltk.word_tokenize(sentence);
-  //stem each word
-  sentence_words.forEach(function(patterns, i){   
-    ntlk.LancasterStemmer.attach();
-    patterns = word.toLowerCase().stem();
-  });
+  //stem each word  
+  sentence_words = stemwords(sentence_words);
   return sentence_words
 }
 
@@ -41,7 +39,7 @@ function bow(sentence, words, show_details){
     //tokenize the pattern
     sentence_words = clean_up_sentence(sentence);
     //bag of words
-    var bag = new Array(py.len(words));
+    var bag = new Array(words.length + 1).join('0').split('').map(parseFloat);
     sentence_words.forEach(function(s, i){ 
       words.forEach(function(v, ii){ 
         if(v == s){
@@ -50,7 +48,7 @@ function bow(sentence, words, show_details){
         }
       });
     });
-    return(np.array(bag));        
+    return bag;       
 }
 
 function classify(sentence){
@@ -95,7 +93,7 @@ function response(sentence,userID,show_details){
               }
             }
            //check if this intent is contextual and applies to this user's conversation
-           if(!py.inArray('context_set',s) || py.inArray(userID,context) &&  py.inArray('context_filter',s) && s['context_filter'] == context[pos].context){
+           if(!py.inArray('context_set',s) || !py.NotcontainsinArray(context,userID) &&  py.inArray('context_filter',s) && s['context_filter'] == context[pos].context){
             console.log('tag: ' +s['tag']);
             //a random response from the intent
             return py.randomchoice(s['responses']);
@@ -107,6 +105,16 @@ function response(sentence,userID,show_details){
     }
   }
 }
+
+function stemwords(words){ 
+  return words.map((iten, index, array) => {
+    ntlk.LancasterStemmer.attach();
+    iten = iten.toLowerCase().stem();
+    return iten;
+ }) 
+}
+
+
 }
 
 
