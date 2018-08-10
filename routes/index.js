@@ -12,14 +12,13 @@ const py = require('../Libs/ExtraFunctions');
 
 var ERROR_THRESHOLD = 0.25;
 
+var savemodel = __dirname.replace('routes','models/training-models');
+
 var words = [], classes = [], documents = [], ignore_words = ['?'];
 
 //create our training data
 var training = new Array();
 var output = [];
-
-//model ts
-var model;
 
 //init modules and training
 Init();
@@ -43,7 +42,7 @@ function clean_up_sentence(sentence){
    return sentence_words;
 }
 
-function bow(sentence, words, show_details){
+function bow(sentence, show_details){
     //tokenize the pattern
     var sentence_words = clean_up_sentence(sentence);
     //bag of words
@@ -53,7 +52,7 @@ function bow(sentence, words, show_details){
         if(v == s){
           //set 1 if found the match word and 0 for the others
           bag[ii] = 1;
-          if(show_details){console.log("found in bag: "+w)}
+          if(show_details){console.log("found in bag: "+v)}
         }
       });
     });
@@ -61,8 +60,12 @@ function bow(sentence, words, show_details){
 }
 
 function classify(sentence){
-    //generate probabilities from the model
-    var results = model.predict(tf.tensor(bow(sentence, words)))[0];
+   //load model
+    var model = tf.loadModel('file://'+savemodel+'/model.json');
+    //converter to tensor array
+    var data = tf.tensor(bow(sentence, true));
+     //generate probabilities from the model
+    var results = model.predict(data)[0];
     //filter out predictions below a threshold
     var aux;
     results.forEach(function(s, i){ 
@@ -181,7 +184,7 @@ function TraiBuild(){
   var train_y = py.pick(training,1);
  
   // Build neural network:
-  model = tf.sequential();
+  const model = tf.sequential();
   model.add(tf.layers.dense({units: training.length, activation: 'relu', inputShape: [words.length]}));
   model.add(tf.layers.dense({units: classes.length, activation: 'linear'}));
   model.compile({optimizer: 'sgd', loss: 'meanSquaredError'});
@@ -197,8 +200,9 @@ function TraiBuild(){
       }
     }
   });
-  // model.save('model.json');
-  // const model = await tf.loadModel('file:///tmp/my-model-1/model.json');
+  console.log('Saving model'); 
+  model.save('file://'+savemodel);
+  console.log('Model Saved'); 
 }
 
 function stemwords(words){ 
