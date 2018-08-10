@@ -15,6 +15,7 @@ var train_x = app.train_x;
 var train_y = app.train_y;
 var model = app.model;
 var py = app.py;
+var tf = app.tf;
 
 var intents = require('./../Libs/intents');
 
@@ -53,7 +54,7 @@ function bow(sentence, words, show_details){
 
 function classify(sentence){
     //generate probabilities from the model
-    var results = model.predict([bow(sentence, words)])[0];
+    var results = model.predict(tf.tensor2d([bow(sentence, words)]))[0];
     //filter out predictions below a threshold
     var aux;
     results.forEach(function(s, i){ 

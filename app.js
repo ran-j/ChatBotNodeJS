@@ -136,20 +136,18 @@ function TraiBuild(){
   train_x = py.pick(training,0);
   train_y = py.pick(training,1);
 
-  //reset underlying graph data
-  tf.reset_default_graph();
-  //Build neural network
-  var net = tf.input_data(shape=[None, py.len(train_x[0])]);
-  net = tf.fully_connected(net, 8);
-  net = tf.fully_connected(net, 8);
-  net = tf.fully_connected(net, py.len(train_y[0]), activation='softmax');
-  net = tf.regression(net);
+  // const xs = tf.tensor2d(train_x, [6, 1]);
+  // const ys = tf.tensor2d(train_y, [6, 1]);
+  const xs = tf.tensor2d(train_x, [6, 1]);
+  const ys = tf.tensor2d(train_y, [6, 1]);
 
-  //Define model and setup tensorboard
-  model = tf.DNN(net, tensorboard_dir='tflearn_logs');
-  //Start training (apply gradient descent algorithm)
-  model.fit(train_x, train_y, n_epoch=1000, batch_size=8, show_metric=True);
-  model.save('model.tflearn');
+  //Build neural network
+  model = tf.sequential();
+  model.add(tf.layers.dense({inputShape: [4], units: 100}));
+  model.add(tf.layers.dense({units: 4}));
+  model.compile({loss: 'categoricalCrossentropy', optimizer: 'sgd'});
+
+  await model.fit(xs, ys, {epochs: 500}); 
 }
 
 function stemwordstwo(words){ 
