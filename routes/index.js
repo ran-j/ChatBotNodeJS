@@ -181,8 +181,8 @@ function TraiBuild(){
   training = shuffle(training);
  
   //create train arrays
-  var train_x = py.toOneArray(py.pick(training,0));
-  var train_y = py.toOneArray(py.pick(training,1));
+  var train_x = py.pick(training,0);
+  var train_y = py.pick(training,1);
  
   // Build neural network:
   const model = tf.sequential();
