@@ -170,8 +170,9 @@ function TraiBuild(){
         bag.push(0);
       }
     });
-    //create an empty array for output where '0' for each tag and '1' for current tag
+    //create an empty array for output
     var output_row = new Array(classes.length + 1).join('0').split('').map(parseFloat);
+    // set '0' for each tag and '1' for current tag
     output_row[classes.findIndex(x => x==doc[1])] = 1;  
     //push on the arrays de values  
     training.push([bag, output_row]);
@@ -180,8 +181,8 @@ function TraiBuild(){
   training = shuffle(training);
  
   //create train arrays
-  var train_x = py.pick(training,0);
-  var train_y = py.pick(training,1);
+  var train_x = py.toOneArray(py.pick(training,0));
+  var train_y = py.toOneArray(py.pick(training,1));
  
   // Build neural network:
   const model = tf.sequential();
@@ -191,6 +192,7 @@ function TraiBuild(){
 
   const xs = tf.tensor(train_x);
   const ys = tf.tensor(train_y);
+
   //train model
   model.fit(xs, ys, {
     epochs: 100,
@@ -199,10 +201,11 @@ function TraiBuild(){
         console.log(`Epoch ${epoch}: loss = ${log.loss}`);
       }
     }
+  }).then(() => {;
+    console.log('Saving model'); 
+    model.save('file://'+savemodel);
+    console.log('Model Saved'); 
   });
-  console.log('Saving model'); 
-  model.save('file://'+savemodel);
-  console.log('Model Saved'); 
 }
 
 function stemwords(words){ 
