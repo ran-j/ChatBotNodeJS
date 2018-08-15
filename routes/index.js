@@ -186,8 +186,8 @@ function TraiBuild(){
  
   // Build neural network:
   const model = tf.sequential();
-  model.add(tf.layers.dense({units: training.length, activation: 'relu', inputShape: [words.length]}));
-  model.add(tf.layers.dense({units: classes.length, activation: 'linear'}));
+  model.add(tf.layers.dense({units: training.length, activation: 'relu', inputShape: [train_x[0].length]}));
+  model.add(tf.layers.dense({units: train_y[0].length, activation: 'linear'}));
   model.compile({optimizer: 'sgd', loss: 'meanSquaredError'});
 
   const xs = tf.tensor(train_x);
@@ -205,7 +205,6 @@ function TraiBuild(){
     console.log('Saving model'); 
     model.save('file://'+savemodel);
     console.log('Model Saved'); 
-    model.predict(tf.tensor2d([5], [1, 1])).print();
   });
 }
 
