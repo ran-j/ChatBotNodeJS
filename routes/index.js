@@ -195,7 +195,8 @@ function TraiBuild(){
 
   //train model
   model.fit(xs, ys, {
-    epochs: 100,
+    epochs: 1000,
+    batchSize: 8,
     callbacks: {
       onEpochEnd: async (epoch, log) => {
         console.log(`Epoch ${epoch}: loss = ${log.loss}`);
