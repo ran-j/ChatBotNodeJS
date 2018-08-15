@@ -205,6 +205,7 @@ function TraiBuild(){
     console.log('Saving model'); 
     model.save('file://'+savemodel);
     console.log('Model Saved'); 
+    model.predict(tf.tensor2d([5], [1, 1])).print();
   });
 }
 
