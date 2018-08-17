@@ -71,9 +71,7 @@ async function classify(sentence){
     //filter out predictions below a threshold
     var results = results.filter((prediction, index, array) => prediction > ERROR_THRESHOLD);
     //sort by strength of probability    
-    results.sort(function(first, second) {
-      return second[1] - first[1];
-    }).reverse();
+    results.sort(function(a, b){return a - b}).reverse();
     var return_list = [];
     results.forEach(function(r, i){ 
       return_list.push([classes[r[0]],r[1]]);
