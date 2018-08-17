@@ -59,28 +59,21 @@ function bow(sentence, show_details){
     return bag;       
 }
 
-function classify(sentence){
+async function classify(sentence){
    //load model
-    var model = tf.loadModel('file://'+savemodel+'/model.json');
+    var model = await tf.loadModel('file://'+savemodel+'/model.json');
     //bow sentence
     const bowData = bow(sentence, true);
     //converter to tensor array
     var data = tf.tensor2d(bowData, [1, bowData.length]);
      //generate probabilities from the model
-    var results = model.predict(data).dataSync()[0];
+    var predictions = model.predict(data).dataSync();
     //filter out predictions below a threshold
-    var aux;
-    results.forEach(function(s, i){ 
-      if(s > ERROR_THRESHOLD){
-        aux.push(s);
-      }
-    });
-    results = aux;
+    var results = results.filter((prediction, index, array) => prediction > ERROR_THRESHOLD);
     //sort by strength of probability    
     results.sort(function(first, second) {
       return second[1] - first[1];
     }).reverse();
-
     var return_list = [];
     results.forEach(function(r, i){ 
       return_list.push([classes[r[0]],r[1]]);
