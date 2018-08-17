@@ -62,10 +62,12 @@ function bow(sentence, show_details){
 function classify(sentence){
    //load model
     var model = tf.loadModel('file://'+savemodel+'/model.json');
+    //bow sentence
+    const bowData = bow(sentence, true);
     //converter to tensor array
-    var data = tf.tensor(bow(sentence, true));
+    var data = tf.tensor2d(bowData, [1, bowData.length]);
      //generate probabilities from the model
-    var results = model.predict(data)[0];
+    var results = model.predict(data).dataSync()[0];
     //filter out predictions below a threshold
     var aux;
     results.forEach(function(s, i){ 
