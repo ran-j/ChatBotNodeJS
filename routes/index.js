@@ -30,6 +30,7 @@ router.get('/', function(req, res, next) {
 
 router.post('/ask',async function(req,res,next){   
   var resp = await response(req.body.say,req.body.uID,true);
+  console.log(resp)
   res.status(200).end(resp);
 });
 
@@ -89,6 +90,7 @@ async function classify(sentence){
 async function response(sentence,userID,show_details){
   var context = [];
   var pos;
+  var reply = 'Sorry I dont understanding'
   var i = 0;
   var results = await classify(sentence);  
   //if we have a classification then find the matching intent tag
@@ -107,8 +109,8 @@ async function response(sentence,userID,show_details){
            //check if this intent is contextual and applies to this user's conversation
            if(!py.inArray('context_set',s) || !py.NotcontainsinArray(context,userID) &&  py.inArray('context_filter',s) && s['context_filter'] == context[pos].context){
             console.log('tag: ' +s['tag']);
-            //a random response from the intent
-            return py.randomchoice(s['responses']);
+            //a random response from the intent             
+            reply = py.randomchoice(s['responses']);                         
            }
         }
       });     
@@ -116,6 +118,8 @@ async function response(sentence,userID,show_details){
       i++;
     }
   }
+  //console.log(reply)
+  return reply;
 }
 
 function Init(){
