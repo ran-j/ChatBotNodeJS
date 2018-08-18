@@ -63,15 +63,16 @@ async function classify(sentence){
    //load model
     var model = await tf.loadModel('file://'+savemodel+'/model.json');
     //bow sentence
-    const bowData = bow(sentence, true);
+    const bowData = await bow(sentence, true);
     //converter to tensor array
-    var data = tf.tensor2d(bowData, [1, bowData.length]);
+    var data = await tf.tensor2d(bowData, [1, bowData.length]);
      //generate probabilities from the model
     var predictions = await model.predict(data).dataSync();
     //filter out predictions below a threshold    
-    var results = predictions.map((prediction, index, array) => {
+    var results = [];
+    predictions.map((prediction, index, array) => {
       if(prediction > ERROR_THRESHOLD){
-        return [index,prediction];
+        results.push([index,prediction]);
       }      
     });
     //sort by strength of probability    
