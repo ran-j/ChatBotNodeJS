@@ -91,7 +91,7 @@ async function classify(sentence){
 async function response(sentence,userID,show_details){
   var context = [];
   var pos;
-  var reply = 'Sorry I dont understanding'
+  var reply = py.randomchoice(['Sorry I did not understand','Sorry, I still can not understand everything.']);
   var i = 0;
   var results = await classify(sentence);  
   //if we have a classification then find the matching intent tag
