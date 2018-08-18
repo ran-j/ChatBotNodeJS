@@ -67,9 +67,13 @@ async function classify(sentence){
     //converter to tensor array
     var data = tf.tensor2d(bowData, [1, bowData.length]);
      //generate probabilities from the model
-    var predictions = model.predict(data).dataSync();
-    //filter out predictions below a threshold
-    var results = results.filter((prediction, index, array) => prediction > ERROR_THRESHOLD);
+    var predictions = await model.predict(data).dataSync();
+    //filter out predictions below a threshold    
+    var results = predictions.map((prediction, index, array) => {
+      if(prediction > ERROR_THRESHOLD){
+        return [index,prediction];
+      }      
+    });
     //sort by strength of probability    
     results.sort(function(a, b){return a - b}).reverse();
     var return_list = [];
