@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>ChatJs</title>
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+    <!-- bootstrap 3.0.2 -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- font Awesome -->
+    <link href="css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <!-- Ionicons -->
+    <link href="css/ionicons.min.css" rel="stylesheet" type="text/css" />
+    <!-- Theme style -->
+    <link href="css/AdminLTE.css" rel="stylesheet" type="text/css" />
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+          <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+    <style>
+        .container-fluid {
+            margin-right: auto;
+            margin-left: auto;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .menssages-board-user {
+            height: 10%;
+            /* overflow-y: scroll; */
+            overflow-x: hidden;
+        }
+
+        .nopadding {
+            padding: 0 !important;
+        }
+
+        html,
+        body {
+            background: #333;
+        }
+    </style>
+</head>
+
+<body class="skin-black">
+    <div class="col-md-2"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-8" style="padding-top: 35px;">
+                <div class="menssages-board-user nopadding col-md-12 height-msg-board" style="height: 832px;">
+                    <div class="box box-success">
+                        <div class="box-header">
+                            <h3 class="box-title">
+                                <i class="fa fa-comments-o"></i> Chat</h3>
+                        </div>
+
+                        <div class="box-body chat" id="chat-box" style="height: 702px;">                          
+                        </div>
+                        <!-- /.chat -->
+
+                        <div class="box-footer">
+                            <div class="input-group">
+                                <input class="form-control" id="m"  placeholder="Digite a sua mensagem..." />
+                                <div class="input-group-btn">
+                                    <button class="btn btn-success" id="btnsend">
+                                        <i class="fa fa-location-arrow"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.box (chat box) -->
+                </div>
+                <!-- /.col -->
+            </div>
+
+        </div>
+    </div>
+
+</body>
+<!-- jQuery 2.0.2 -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+<script>
+    $(function () {
+      var userid = Math.random().toString(36).substring(1);
+      $('#btnsend').click(function() {
+        if($('#m').val().length > 0){
+            var d = new Date();
+            var n = d.getHours();
+            var m = d.getMinutes();
+            var hora = n+":"+m;
+
+            $('#chat-box').append('<div class="item"><img src="img/user.png" alt="user image" class="online"/><p class="message"><a href="#" class="name"><small class="text-muted pull-right"><i class="fa fa-clock-o"></i>'+hora+'</small> You</a>'+$('#m').val()+'</p></div>');
+  
+          $.post("/ask", {
+            uID: userid,
+            say: $('#m').val()
+          },
+            function (result, response) {
+              if (result != null) {                
+                $('#chat-box').append('<div class="item"><img src="img/bot1.png" alt="user image" class="online" /><p class="message"><a href="#" class="name"><small class="text-muted pull-right"><i class="fa fa-clock-o"></i>'+hora+'</small> BotJs </a>'+result+'</p></div>');
+              }
+            });  
+          $('#m').val('');
+        }     
+      });
+    });
+  </script>
+
+</html>

@@ -21,11 +21,11 @@ var training = new Array();
 var output = [];
 
 //init modules and training
-Init();
+BuildAgent();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Tensorflow JS' }); 
+  res.render('chat', { title: 'Tensorflow JS' }); 
 });
 
 router.post('/ask',async function(req,res,next){   
@@ -122,7 +122,7 @@ async function response(sentence,userID,show_details){
   return reply;
 }
 
-function Init(){
+function BuildAgent(){
 	intents.forEach(function(intent, ii){
 		intent.patterns.forEach(function(patterns, i){   
       if(py.isNotInArray(ignore_words,patterns)){  
@@ -150,10 +150,10 @@ function Init(){
   console.log("unique stemmed words "+ py.len(words));
   console.log(words);
 
-  TraiBuild();
+  TrainBuilder();
 }
 
-function TraiBuild(){
+function TrainBuilder(){
   console.log(' ');
   console.log('Training...'); 
  
