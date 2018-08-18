@@ -3,7 +3,7 @@ module.exports = new class SysFunctions {
     }
   
     randomchoice(A){
-       return A[Math.floor(Math.random() * A.length)];
+       return A[Math.floor(Math.random()*A.length)]
     }
 
     inArray(key,A){

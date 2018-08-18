@@ -28,8 +28,9 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Tensorflow JS' }); 
 });
 
-router.post('/ask',function(req,res,next){   
-  res.status(200).end(response(req.body.say,req.body.uID,true));
+router.post('/ask',async function(req,res,next){   
+  var resp = await response(req.body.say,req.body.uID,true);
+  res.status(200).end(resp);
 });
 
 function clean_up_sentence(sentence){
@@ -85,10 +86,11 @@ async function classify(sentence){
     return return_list
 }
 
-function response(sentence,userID,show_details){
+async function response(sentence,userID,show_details){
   var context = [];
   var pos;
-  var results = classify(sentence);  
+  var i = 0;
+  var results = await classify(sentence);  
   //if we have a classification then find the matching intent tag
   if (results){
     //loop as long as there are matches to process
