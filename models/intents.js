@@ -11,6 +11,10 @@ var IntentsSchema = new mongoose.Schema({
     type : Array ,
     required: true,
   },
+  title: {
+    type : String ,
+    required: true,
+  },  
   responses: {
     type: Array,
     required: true,

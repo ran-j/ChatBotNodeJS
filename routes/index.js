@@ -7,7 +7,8 @@ require('@tensorflow/tfjs-node');
 
 var router = express.Router();
  
-var intents = require('../Libs/intents');
+var intents = [];
+
 const py = require('../Libs/ExtraFunctions');
 
 var ERROR_THRESHOLD = 0.25;
@@ -122,38 +123,42 @@ async function response(sentence,userID,show_details){
   return reply;
 }
 
-function BuildAgent(){
-	intents.forEach(function(intent, ii){
-		intent.patterns.forEach(function(patterns, i){   
-      if(py.isNotInArray(ignore_words,patterns)){  
-        //tokenize each word in the sentence
-        var tokenizer = new ntlk.WordTokenizer();
-        var w = tokenizer.tokenize(patterns.toLowerCase()); 
-        //add to our words list
-        words.push(w);
-        //add to documents in our corpus
-        documents.push([w,intent.tag]);
-      }
-      //add the tag to classes list 
-      if(!py.ContainsinArray(classes,intent.tag)){
-        classes.push(intent.tag);
-      }
-		});
-  });
-  //stem and lower each word and remove duplicates 
-  words = py.sort(stemwords(py.multiDimensionalUnique(py.toOneArray(words))));
-  classes = py.sort(classes);
-  console.log("documents "+ py.len(documents));
-  console.log(documents);
-  console.log("classes "+py.len(classes));
-  console.log(classes);
-  console.log("unique stemmed words "+ py.len(words));
-  console.log(words);
+async function BuildAgent(){ 
+    await require('../models/intents').find({},function(err,inte){
+      intents =  inte.length > 0 ?  inte : require('../Libs/intents');
+    });
 
-  TrainBuilder();
+    intents.forEach(function(intent, ii){
+      intent.patterns.forEach(function(patterns, i){   
+        if(py.isNotInArray(ignore_words,patterns)){  
+          //tokenize each word in the sentence
+          var tokenizer = new ntlk.WordTokenizer();
+          var w = tokenizer.tokenize(patterns.toLowerCase()); 
+          //add to our words list
+          words.push(w);
+          //add to documents in our corpus
+          documents.push([w,intent.tag]);
+        }
+        //add the tag to classes list 
+        if(!py.ContainsinArray(classes,intent.tag)){
+          classes.push(intent.tag);
+        }
+      });
+    });
+    //stem and lower each word and remove duplicates 
+    words = py.sort(stemwords(py.multiDimensionalUnique(py.toOneArray(words))));
+    classes = py.sort(classes);
+    console.log("documents "+ py.len(documents));
+    console.log(documents);
+    console.log("classes "+py.len(classes));
+    console.log(classes);
+    console.log("unique stemmed words "+ py.len(words));
+    console.log(words);
+  
+    TrainBuilder(); 
 }
 
-function TrainBuilder(){
+async function TrainBuilder(){
   console.log(' ');
   console.log('Training...'); 
  
@@ -206,9 +211,9 @@ function TrainBuilder(){
         console.log(`Epoch ${epoch}: loss = ${log.loss}`);
       }
     }
-  }).then(() => {;
-    console.log('Saving model'); 
-    model.save('file://'+savemodel);
+  }).then(async () => {;
+    console.log('Saving model....'); 
+    await model.save('file://'+savemodel);
     console.log('Model Saved'); 
   });
 }

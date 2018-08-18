@@ -7,7 +7,10 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/intents', function(req, res, next) {
-  res.render('intents', { title: 'Tensorflow JS' });  
+  require('../models/intents').find({},function(err,inte){
+    var intents =  inte.length > 0 ?  inte : require('../Libs/intents');
+    res.render('intents', { intents });  
+  }); 
 });
 
 module.exports = router;

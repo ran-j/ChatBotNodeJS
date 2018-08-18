@@ -3,11 +3,25 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var mongoose = require('mongoose');
+var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
 
 var app = express();
 
 var indexRouter =  require('./routes/index');
 var intentsRouter = require('./routes/intents');
+
+//set mongoDB path
+mongoose.connect('mongodb://localhost/ChatWebDB');
+//Connect
+var db = mongoose.connection;
+//handle error
+db.on('error', console.error.bind(console, 'connection error:'));
+//db open
+db.once('open', function () {
+  console.log('Connected with BD');
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -19,6 +33,18 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/required', express.static(path.join(__dirname, 'public')));
+
+app.use(session({
+  name: 'BotJs',
+  secret: 'work ward',
+  resave: true,
+  saveUninitialized: false,
+  //cookie: { maxAge: 24 * 60 * 60 * 1000, secure: true, httpOnly: true },
+  // cookie: { maxAge: 24 * 60 * 60 * 1000 },
+  store: new MongoStore({
+    mongooseConnection: db
+  })
+}));
 
 app.use('/', indexRouter);
 app.use('/admin', intentsRouter);
