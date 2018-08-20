@@ -9,7 +9,7 @@ var router = express.Router();
  
 var intents = [];
 
-var ERROR_THRESHOLD = 0.25;
+var ERROR_THRESHOLD = 0.30;
 
 var modelpath = __dirname.replace('routes','models/training-models');
 
