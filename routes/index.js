@@ -6,16 +6,19 @@ require('@tensorflow/tfjs-node');
 const arr = require('../Libs/ExtraFunctions');
 
 var router = express.Router();
- 
+
+//intents array
 var intents = [];
 
+//confidence to respond
 var CONFIDENCE = 0.30;
 
+//path to model already save
 var modelpath = __dirname.replace('routes','models/training-models');
 
 var words = [], classes = [], documents = [], ignore_words = ['?'];
 
-//create our training data
+//Training data
 var training = new Array();
 
 //init modules and training
@@ -28,15 +31,14 @@ router.get('/', function(req, res, next) {
 
 router.post('/ask',async function(req,res,next){   
   var resp = await response(req.body.say,req.body.uID,true);
-  console.log(resp)
   res.status(200).end(resp);
 });
 
-function clean_up_sentence(sentence){
-  //stem and tokenize the pattern
-    natural.LancasterStemmer.attach();
+function clean_up_sentence(sentence){  
+    natural.PorterStemmer.attach();
+    //stem and tokenize the pattern
     sentence_words =  sentence.toLowerCase().tokenizeAndStem();
-  //return wordslist
+    //return wordslist
     return sentence_words;
 }
 
@@ -58,7 +60,7 @@ function bow(sentence, show_details){
 }
 
 async function classify(sentence){
-   //load model
+    //load model
     var model = await tf.loadModel('file://'+modelpath+'/model.json');
     //bow sentence
     const bowData = await bow(sentence, true);
@@ -127,7 +129,7 @@ async function BuildAgent(){
       intent.patterns.forEach(function(patterns, i){   
         if(arr.isNotInArray(ignore_words,patterns)){  
           //stem and tokenize each word in the sentence
-          natural.LancasterStemmer.attach();
+          natural.PorterStemmer.attach();
           var w = patterns.toLowerCase().tokenizeAndStem();  
           //add to our words list
           words.push(w);
@@ -144,14 +146,7 @@ async function BuildAgent(){
     words = arr.sort(arr.multiDimensionalUnique(arr.toOneArray(words)));
     classes = arr.sort(classes);
 
-    await TrainBuilder();
-
-    console.log("documents "+ arr.len(documents));
-    console.log(documents);
-    console.log("classes "+arr.len(classes));
-    console.log(classes);
-    console.log("unique stemmed words "+ arr.len(words));
-    console.log(words);       
+    await TrainBuilder();          
 }
 
 async function TrainBuilder(){
@@ -211,6 +206,12 @@ async function TrainBuilder(){
     console.log('Saving model....'); 
     await model.save('file://'+modelpath);
     console.log('Model Saved.'); 
+    console.log("documents "+ arr.len(documents));
+    console.log(documents);
+    console.log("classes "+arr.len(classes));
+    console.log(classes);
+    console.log("unique stemmed words "+ arr.len(words));
+    console.log(words); 
   });
 }
 
