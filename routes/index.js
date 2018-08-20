@@ -9,7 +9,7 @@ var router = express.Router();
  
 var intents = [];
 
-var ERROR_THRESHOLD = 0.30;
+var CONFIDENCE = 0.30;
 
 var modelpath = __dirname.replace('routes','models/training-models');
 
@@ -69,7 +69,7 @@ async function classify(sentence){
     //filter out predictions below a threshold    
     var results = [];
     predictions.map((prediction, index, array) => {
-      if(prediction > ERROR_THRESHOLD){
+      if(prediction > CONFIDENCE){
         results.push([index,prediction]);
       }      
     });

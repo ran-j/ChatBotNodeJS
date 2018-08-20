@@ -3,7 +3,7 @@ module.exports = {
         {
           name: "botJs",
           script: "./bin/www",
-          watch: true,
+          watch: false,
           env: {
               "PORT": 3000,
               "NODE_ENV": "production"
