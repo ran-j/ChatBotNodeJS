@@ -215,11 +215,11 @@ async function TrainBuilder(){
     await model.save('file://'+modelpath);
     console.log('Model Saved.'); 
     
-    console.log("documents "+ arr.len(documents));
+    console.log("documents "+ documents.length);
     console.log(documents);
-    console.log("classes "+arr.len(classes));
+    console.log("classes "+classes.length);
     console.log(classes);
-    console.log("unique stemmed words "+ arr.len(words));
+    console.log("unique stemmed words "+ words.length);
     console.log(words); 
   });
 }
