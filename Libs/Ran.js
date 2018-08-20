@@ -10,12 +10,6 @@ if(!Array.prototype.First){
     }
 }
 
-if(!Array.prototype.In){ //NotcontainsinArray return A.indexOf(value) < 0; to isNotInArray return !array.indexOf(value) > -1;  to ContainsinArray
-    String.prototype.In = function(value){      
-        return value.indexOf(String(this)) > -1;
-    }
-}
-
 if(!Array.prototype.sorted){//sort
     Array.prototype.sorted = function(){
         let arr = this;
@@ -45,3 +39,15 @@ if(!Array.prototype.Pick){
     }
 }
 
+if(!Array.prototype.Random){ 
+    Array.prototype.Random = function(){     
+        return this[Math.floor(Math.random()*this.length)]
+    }
+}
+
+if(!String.prototype.ReplaceAll){  
+    String.prototype.ReplaceAll = function(search, replacement){      
+        let target = this;
+        return target.replace(new RegExp(search, 'g'), replacement);
+    }
+}

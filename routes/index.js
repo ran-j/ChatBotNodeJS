@@ -4,6 +4,7 @@ var shuffle = require('shuffle-array');
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
 const arr = require('../Libs/ExtraFunctions');
+const BotConfig = require('../Libs/BotConfig');
 
 var router = express.Router();
 
@@ -11,7 +12,9 @@ var router = express.Router();
 var intents = [];
 
 //confidence to respond
-var CONFIDENCE = 0.30;
+var CONFIDENCE = BotConfig.BotConfidence.medium;
+//load bot name
+var BotName = BotConfig.BotName;
 
 //path to model already save
 var modelpath = __dirname.replace('routes','models/training-models');
@@ -25,17 +28,22 @@ var training = new Array();
 BuildAgent();
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', async (req, res, next) => {
   res.render('chat', { title: 'Tensorflow JS' }); 
 });
 
-router.post('/ask',async function(req,res,next){   
-  var resp = await response(req.body.say,req.body.uID,true);
-  res.status(200).end(resp);
+/* POST get response from bot. */
+router.post('/ask',async (req, res, next) => {  
+  try {
+    var resp = await response(req.body.say,req.body.uID,true);
+    res.status(200).end(resp);
+  } catch (error) {
+    res.status(500).end(error);
+  }   
 });
 
 function clean_up_sentence(sentence){  
-    natural.PorterStemmer.attach();
+    natural.LancasterStemmer.attach();
     //stem and tokenize the pattern
     sentence_words =  sentence.toLowerCase().tokenizeAndStem();
     //return wordslist
@@ -129,7 +137,7 @@ async function BuildAgent(){
       intent.patterns.forEach(function(patterns, i){   
         if(arr.isNotInArray(ignore_words,patterns)){  
           //stem and tokenize each word in the sentence
-          natural.PorterStemmer.attach();
+          natural.LancasterStemmer.attach();
           var w = patterns.toLowerCase().tokenizeAndStem();  
           //add to our words list
           words.push(w);
@@ -206,6 +214,7 @@ async function TrainBuilder(){
     console.log('Saving model....'); 
     await model.save('file://'+modelpath);
     console.log('Model Saved.'); 
+    
     console.log("documents "+ arr.len(documents));
     console.log(documents);
     console.log("classes "+arr.len(classes));
