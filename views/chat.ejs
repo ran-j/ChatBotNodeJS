@@ -57,13 +57,13 @@
                                 <i class="fa fa-comments-o"></i> Chat</h3>
                         </div>
 
-                        <div class="box-body chat" id="chat-box" style="height: 702px;">                          
+                        <div class="box-body chat" id="chat-box" style="height: 702px;">
                         </div>
                         <!-- /.chat -->
 
                         <div class="box-footer">
                             <div class="input-group">
-                                <input class="form-control" id="m"  placeholder="Digite a sua mensagem..." />
+                                <input class="form-control" id="m" placeholder="Digite a sua mensagem..." />
                                 <div class="input-group-btn">
                                     <button class="btn btn-success" id="btnsend">
                                         <i class="fa fa-location-arrow"></i>
@@ -85,29 +85,41 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
 <script>
     $(function () {
-      var userid = Math.random().toString(36).substring(1);
-      $('#btnsend').click(function() {
-        if($('#m').val().length > 0){
-            var d = new Date();
-            var n = d.getHours();
-            var m = d.getMinutes();
-            var hora = n+":"+m;
+        var userid = Math.random().toString(36).substring(1);
+        $('input').on("keypress", function (e) {
+            /* ENTER PRESSED*/
+            if (e.keyCode == 13) {
+                send();
+                return false;
+            }
+        });
 
-            $('#chat-box').append('<div class="item"><img src="img/user.png" alt="user image" class="online"/><p class="message"><a href="#" class="name"><small class="text-muted pull-right"><i class="fa fa-clock-o"></i>'+hora+'</small> You</a>'+$('#m').val()+'</p></div>');
-  
-          $.post("/ask", {
-            uID: userid,
-            say: $('#m').val()
-          },
-            function (result, response) {
-              if (result != null) {                
-                $('#chat-box').append('<div class="item"><img src="img/bot1.png" alt="user image" class="online" /><p class="message"><a href="#" class="name"><small class="text-muted pull-right"><i class="fa fa-clock-o"></i>'+hora+'</small> BotJs </a>'+result+'</p></div>');
-              }
-            });  
-          $('#m').val('');
-        }     
-      });
+        $('#btnsend').click(function () {
+            send();
+        });
+
+        function send() {
+            if ($('#m').val().length > 0) {
+                var d = new Date();
+                var n = d.getHours();
+                var m = d.getMinutes();
+                var hora = n + ":" + m;
+
+                $('#chat-box').append('<div class="item"><img src="img/user.png" alt="user image" class="online"/><p class="message"><a href="#" class="name"><small class="text-muted pull-right"><i class="fa fa-clock-o"></i>' + hora + '</small> You</a>' + $('#m').val() + '</p></div>');
+
+                $.post("/ask", {
+                    uID: userid,
+                    say: $('#m').val()
+                },
+                    function (result, response) {
+                        if (result != null) {
+                            $('#chat-box').append('<div class="item"><img src="img/bot1.png" alt="user image" class="online" /><p class="message"><a href="#" class="name"><small class="text-muted pull-right"><i class="fa fa-clock-o"></i>' + hora + '</small> BotJs </a>' + result + '</p></div>');
+                        }
+                    });
+                $('#m').val('');
+            }
+        }
     });
-  </script>
+</script>
 
 </html>
