@@ -11,6 +11,9 @@ var router = express.Router();
 //intents array
 var intents = [];
 
+//synonyms array
+var synonyms = [];
+
 //confidence to respond
 var CONFIDENCE = BotConfig.BotConfidence.medium;
 //load bot name
@@ -133,16 +136,40 @@ async function BuildAgent(){
       intents =  inte.length > 0 ?  inte : require('../Libs/intents');
     });
 
+    await require('../models/synonyms').find({},function(err,synonym){
+      synonyms =  synonym.length > 0 ?  synonym : require('../Libs/synonyms');
+    });
+
+    //populate intents with sysnonyms
+    intents.forEach(function(intent, ii){   
+      intent.patterns.forEach(function(patterns, i){   
+        //add synamomn to training
+        synonyms.forEach(function(syn){           
+          //check if the current word has sysnonym
+          if(patterns == syn.keyWord){   
+            //push the sysnonyms to training             
+            intents.push(
+              {"tag": intent.tag,
+                "patterns": syn.synonyms,
+                "title": intent.title,
+                "responses": intent.responses
+              }
+            );                        
+          }            
+        })
+      })
+    })
+
     intents.forEach(function(intent, ii){
       intent.patterns.forEach(function(patterns, i){   
         if(arr.isNotInArray(ignore_words,patterns)){  
           //stem and tokenize each word in the sentence
           natural.LancasterStemmer.attach();
-          var w = patterns.toLowerCase().tokenizeAndStem();  
-          //add to our words list
-          words.push(w);
-          //add to documents in our corpus
-          documents.push([w,intent.tag]);
+          var wd = patterns.toLowerCase().tokenizeAndStem();           
+          //add to words list
+          words.push(wd);
+          //add to documents in corpus
+          documents.push([wd,intent.tag]);         
         }
         //add the tag to classes list 
         if(!arr.ContainsinArray(classes,intent.tag)){
@@ -162,7 +189,7 @@ async function TrainBuilder(){
   console.log('Training...'); 
  
   documents.forEach(function(doc, i){
-    //initialize our bag of words
+    //initialize bag of words
     var bag = [];
     //list of tokenized words for the pattern and stem each word
     var pattern_words = doc[0].map((it, i, A) => {
@@ -170,7 +197,7 @@ async function TrainBuilder(){
       it = it.toLowerCase().stem();
       return it;
     });    
-    //create our bag of words array
+    //create bag of words array
     words.forEach(function(word, ii){
       if(!arr.NotcontainsinArray(pattern_words,word)){
         bag.push(1);
@@ -185,7 +212,7 @@ async function TrainBuilder(){
     //push on the arrays de values  
     training.push([bag, output_row]);
   });
-  //shuffle our features
+  //shuffle features
   training = shuffle(training);
  
   //create train arrays
