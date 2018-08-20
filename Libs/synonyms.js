@@ -1,5 +1,5 @@
 var synonym = [
-    {"tag": "Salutitions",
+    {"title": "Synonyms for salutitions",
         "keyWord": 'Hi',
         "synonyms": ['hello', 'hey','heii']
     }

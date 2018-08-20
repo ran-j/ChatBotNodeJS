@@ -1,0 +1,40 @@
+<!-- Left side column. contains the logo and sidebar -->
+<aside class="left-side sidebar-offcanvas">                
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">                
+        <!-- /.search form -->
+        <!-- sidebar menu: : style can be found in sidebar.less -->
+        <ul class="sidebar-menu">
+            <% if (focus === 0) { %>       
+                <li class="active">
+            <% } else { %>
+                <li>       
+            <% } %>           
+                <a href="/admin/intents">
+                    <i class="fa fa-sitemap"></i> <span>Intents</span>
+                </a>
+            </li>  
+
+            
+            <% if (focus === 1) { %>       
+                <li class="active">
+            <% } else { %>
+                <li>       
+            <% } %>
+                <a href="/admin/synonyms">
+                    <i class="fa fa-tag"></i> <span>Synonyms</span>
+                </a>
+            </li> 
+
+            <% if (focus === 2) { %>       
+                <li class="active">
+            <% } else { %>
+                <li>       
+            <% } %>
+                <a href="#">
+                    <i class="fa fa-book"></i><span>Reports</span>
+                </a>
+            </li>                                           
+    </section>
+    <!-- /.sidebar -->
+</aside>

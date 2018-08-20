@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <% include ../Fixed/Header.ejs %>
+    
+    <body class="skin-black">
+        <!-- header logo: style can be found in header.less -->
+        <header class="header">
+            <a href="/admin" class="logo">
+                <!-- Add the class icon to your logo image or logo icon to add the margining -->
+                BotJS
+            </a>
+            <!-- Header Navbar: style can be found in header.less -->
+            <nav class="navbar navbar-static-top" role="navigation">
+                <!-- Sidebar toggle button-->
+                <a href="#" class="navbar-btn sidebar-toggle" data-toggle="offcanvas" role="button">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </a>
+
+                <% include ../Fixed/you.ejs %>
+            </nav>
+        </header>
+
+
+        <div class="wrapper row-offcanvas row-offcanvas-left">
+            <% include ../Fixed/NavBar.ejs %>
+
+            <!-- Right side column. Contains the navbar and content of the page -->
+            <aside class="right-side">    
+                
+                <!-- Main content -->
+                <section class="content">                        
+                        <div class="table-responsive">
+                            <div class="col-sm-12 text-center">
+                                <button class="btn btn-info"><i class="fa fa-plus-square"></i> New register </button>
+                                <button class="btn btn-success"><i class="fa fa-refresh"></i> Build agent</button>                                        
+                            </div>
+                            <br> <br>  
+                            <!-- .table - Uses sparkline charts-->
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>Tag</th>
+                                    <th>Title</th>
+                                    <th>Action</th>
+                                </tr>
+                                <% intents.forEach(function(customer){ %>
+                                    <tr>                                      
+                                        <td> <a href="/admin/edit/<%= customer.tag %>"><%= customer.tag %> </a> </td>
+                                        <td> <%= customer.title %> </td>
+                                        <td> <button class="btn btn-sm btn-danger"><i class="fa fa-trash-o"></i></button> &nbsp; <button class="btn btn-sm btn-success"><i class="fa fa-tags"></i></button> </td>
+                                    </tr>
+                                <% }) %> 
+                                 
+                            </table><!-- /.table -->
+                        </div>
+                </section><!-- /.content -->
+                
+            </aside><!-- /.right-side -->
+        </div><!-- ./wrapper -->
+
+
+        <% include ../Fixed/footer.ejs %>       
+            
+    </body>
+</html>

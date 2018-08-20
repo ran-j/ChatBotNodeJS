@@ -1,12 +1,10 @@
 var mongoose = require('mongoose');
 
 var synonymSchema = new mongoose.Schema({
-  tag: {
-    type: String,
-    unique: true,
+  title: {
+    type : String ,
     required: true,
-    trim: true
-  },
+  }, 
   keyWord: {
     type : String ,
     required: true,

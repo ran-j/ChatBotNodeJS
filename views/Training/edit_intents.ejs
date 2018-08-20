@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <% include ../Fixed/Header.ejs %>
+    
+    <body class="skin-black">
+        <!-- header logo: style can be found in header.less -->
+        <header class="header">
+            <a href="/admin" class="logo">
+                <!-- Add the class icon to your logo image or logo icon to add the margining -->
+                BotJS
+            </a>
+            <!-- Header Navbar: style can be found in header.less -->
+            <nav class="navbar navbar-static-top" role="navigation">
+                <!-- Sidebar toggle button-->
+                <a href="#" class="navbar-btn sidebar-toggle" data-toggle="offcanvas" role="button">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </a>
+                <% include ../Fixed/you.ejs %>
+            </nav>
+        </header>
+
+
+        <div class="wrapper row-offcanvas row-offcanvas-left">
+            <% include ../Fixed/NavBar.ejs %>
+
+            <!-- Right side column. Contains the navbar and content of the page -->
+            <aside class="right-side">    
+                
+                 <!-- Main content -->
+                 <section class="content">                        
+                    <div class="row">
+                       <div class="col-md-12">
+                           <!-- general form elements -->
+                           <div class="box box-primary">
+                               <div class="box-header">
+                                   <h3 class="box-title">Edit Intent</h3>
+                               </div><!-- /.box-header -->
+                               <!-- form start -->
+                               <form role="form">
+                                   <div class="box-body">
+                                       <div class="form-group">
+                                           <label for="exampleInputEmail1">Tag</label>
+                                           <input type="email" class="form-control" disabled value="<%= intent.tag %>">
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="exampleInputPassword1">Title</label>
+                                           <input type="email" class="form-control" disabled value="<%= intent.title %>">
+                                       </div>
+                                       <div class="form-group">                                           
+                                           <table class="table table-bordered">                                                
+                                            <table class="table table-bordered"> 
+                                                <tr>
+                                                    <th style="width: 90%">Response</th>
+                                                    <th>Action</th>                                                       
+                                                </tr>          
+                                                <% intent.responses.forEach(function(customer){ %>
+                                                    <tr>
+                                                        <td><%= customer %></td>
+                                                        <td><button class="btn btn-sm btn-danger"><i class="fa fa-trash-o"></i></button></td>  
+                                                    </tr>                                                            
+                                                <% }) %>                                                                           
+                                            </table>
+                                       </div>
+                                   </div>
+                                   <div class="box-footer">
+                                       <button type="submit" class="btn btn-primary">Save</button>
+                                   </div>
+                               </form>
+                           </div>
+                       </div>
+                    </div>
+            </section><!-- /.content -->
+             
+            </aside><!-- /.right-side -->
+        </div><!-- ./wrapper -->
+
+
+        <% include ../Fixed/footer.ejs %>       
+            
+    </body>
+</html>
