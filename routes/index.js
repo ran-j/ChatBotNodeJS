@@ -3,19 +3,19 @@ var ntlk = require('natural');
 var shuffle = require('shuffle-array');
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
-
+const arr = require('../Libs/ExtraFunctions');
 
 var router = express.Router();
  
 var intents = [];
 
-const py = require('../Libs/ExtraFunctions');
-
 var ERROR_THRESHOLD = 0.25;
 
-var savemodel = __dirname.replace('routes','models/training-models');
+var modelpath = __dirname.replace('routes','models/training-models');
 
 var words = [], classes = [], documents = [], ignore_words = ['?'];
+
+var fallback = ['Sorry I did not understand','Sorry, I still can not understand everything.'];
 
 //create our training data
 var training = new Array();
@@ -36,13 +36,10 @@ router.post('/ask',async function(req,res,next){
 });
 
 function clean_up_sentence(sentence){
-   //tokenize the pattern
-   var tokenizer = new ntlk.WordTokenizer();
-   var sentence_words = tokenizer.tokenize(sentence.toLowerCase());
-   //stem each word  
-   sentence_words = stemwordsToLower(sentence_words);
- 
-   return sentence_words;
+  //stem and tokenize the pattern
+    sentence_words =  sentence.toLowerCase().tokenizeAndStem();
+  //return wordslist
+    return sentence_words;
 }
 
 function bow(sentence, show_details){
@@ -64,7 +61,7 @@ function bow(sentence, show_details){
 
 async function classify(sentence){
    //load model
-    var model = await tf.loadModel('file://'+savemodel+'/model.json');
+    var model = await tf.loadModel('file://'+modelpath+'/model.json');
     //bow sentence
     const bowData = await bow(sentence, true);
     //converter to tensor array
@@ -91,7 +88,7 @@ async function classify(sentence){
 async function response(sentence,userID,show_details){
   var context = [];
   var pos;
-  var reply = py.randomchoice(['Sorry I did not understand','Sorry, I still can not understand everything.']);
+  var reply = arr.randomchoice(fallback);
   var i = 0;
   var results = await classify(sentence);  
   //if we have a classification then find the matching intent tag
@@ -101,17 +98,17 @@ async function response(sentence,userID,show_details){
       intents.forEach(function(s, i){ 
         //set context for this intent if necessary
         if(s.tag == results[0][0]){
-           if(py.inArray('context_set',s)){
+           if(arr.inArray('context_set',s)){
               pos = context.push({uID:userID, context:s['context_set']}) - 1;
               if (show_details){
                 console.log('context: ' +s['context_set'])
               }
             }
            //check if this intent is contextual and applies to this user's conversation
-           if(!py.inArray('context_set',s) || !py.NotcontainsinArray(context,userID) &&  py.inArray('context_filter',s) && s['context_filter'] == context[pos].context){
+           if(!arr.inArray('context_set',s) || !arr.NotcontainsinArray(context,userID) &&  arr.inArray('context_filter',s) && s['context_filter'] == context[pos].context){
             console.log('tag: ' +s['tag']);
             //a random response from the intent             
-            reply = py.randomchoice(s['responses']);                         
+            reply = arr.randomchoice(s['responses']);                         
            }
         }
       });     
@@ -130,29 +127,28 @@ async function BuildAgent(){
 
     intents.forEach(function(intent, ii){
       intent.patterns.forEach(function(patterns, i){   
-        if(py.isNotInArray(ignore_words,patterns)){  
-          //tokenize each word in the sentence
-          var tokenizer = new ntlk.WordTokenizer();
-          var w = tokenizer.tokenize(patterns.toLowerCase()); 
+        if(arr.isNotInArray(ignore_words,patterns)){  
+          //stem and tokenize each word in the sentence
+          var w = patterns.toLowerCase().tokenizeAndStem();  
           //add to our words list
           words.push(w);
           //add to documents in our corpus
           documents.push([w,intent.tag]);
         }
         //add the tag to classes list 
-        if(!py.ContainsinArray(classes,intent.tag)){
+        if(!arr.ContainsinArray(classes,intent.tag)){
           classes.push(intent.tag);
         }
       });
     });
     //stem and lower each word and remove duplicates 
-    words = py.sort(stemwords(py.multiDimensionalUnique(py.toOneArray(words))));
-    classes = py.sort(classes);
-    console.log("documents "+ py.len(documents));
+    words = arr.sort(arr.multiDimensionalUnique(arr.toOneArray(words)));
+    classes = arr.sort(classes);
+    console.log("documents "+ arr.len(documents));
     console.log(documents);
-    console.log("classes "+py.len(classes));
+    console.log("classes "+arr.len(classes));
     console.log(classes);
-    console.log("unique stemmed words "+ py.len(words));
+    console.log("unique stemmed words "+ arr.len(words));
     console.log(words);
   
     TrainBuilder(); 
@@ -173,7 +169,7 @@ async function TrainBuilder(){
     });    
     //create our bag of words array
     words.forEach(function(word, ii){
-      if(!py.NotcontainsinArray(pattern_words,word)){
+      if(!arr.NotcontainsinArray(pattern_words,word)){
         bag.push(1);
       }else{
         bag.push(0);
@@ -190,8 +186,8 @@ async function TrainBuilder(){
   training = shuffle(training);
  
   //create train arrays
-  var train_x = py.pick(training,0);
-  var train_y = py.pick(training,1);
+  var train_x = arr.pick(training,0);
+  var train_y = arr.pick(training,1);
  
   // Build neural network:
   const model = tf.sequential();
@@ -213,25 +209,9 @@ async function TrainBuilder(){
     }
   }).then(async () => {;
     console.log('Saving model....'); 
-    await model.save('file://'+savemodel);
+    await model.save('file://'+modelpath);
     console.log('Model Saved'); 
   });
-}
-
-function stemwords(words){ 
-  return words.map((iten, index, array) => {
-    ntlk.LancasterStemmer.attach();
-    iten = iten.stem();
-    return iten;
- }) 
-}
-
-function stemwordsToLower(words){ 
-  return words.map((iten, index, array) => {
-    ntlk.LancasterStemmer.attach();
-    iten = iten.toLowerCase().stem();
-    return iten;
- }) 
 }
 
 module.exports = router;
