@@ -1,5 +1,5 @@
 var express = require('express');
-var ntlk = require('natural');
+var natural = require('natural');
 var shuffle = require('shuffle-array');
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
@@ -15,11 +15,8 @@ var modelpath = __dirname.replace('routes','models/training-models');
 
 var words = [], classes = [], documents = [], ignore_words = ['?'];
 
-var fallback = ['Sorry I did not understand','Sorry, I still can not understand everything.'];
-
 //create our training data
 var training = new Array();
-var output = [];
 
 //init modules and training
 BuildAgent();
@@ -37,6 +34,7 @@ router.post('/ask',async function(req,res,next){
 
 function clean_up_sentence(sentence){
   //stem and tokenize the pattern
+    natural.LancasterStemmer.attach();
     sentence_words =  sentence.toLowerCase().tokenizeAndStem();
   //return wordslist
     return sentence_words;
@@ -88,7 +86,7 @@ async function classify(sentence){
 async function response(sentence,userID,show_details){
   var context = [];
   var pos;
-  var reply = arr.randomchoice(fallback);
+  var reply = arr.randomchoice(intents[0].responses);
   var i = 0;
   var results = await classify(sentence);  
   //if we have a classification then find the matching intent tag
@@ -129,6 +127,7 @@ async function BuildAgent(){
       intent.patterns.forEach(function(patterns, i){   
         if(arr.isNotInArray(ignore_words,patterns)){  
           //stem and tokenize each word in the sentence
+          natural.LancasterStemmer.attach();
           var w = patterns.toLowerCase().tokenizeAndStem();  
           //add to our words list
           words.push(w);
@@ -144,14 +143,15 @@ async function BuildAgent(){
     //stem and lower each word and remove duplicates 
     words = arr.sort(arr.multiDimensionalUnique(arr.toOneArray(words)));
     classes = arr.sort(classes);
+
+    await TrainBuilder();
+
     console.log("documents "+ arr.len(documents));
     console.log(documents);
     console.log("classes "+arr.len(classes));
     console.log(classes);
     console.log("unique stemmed words "+ arr.len(words));
-    console.log(words);
-  
-    TrainBuilder(); 
+    console.log(words);       
 }
 
 async function TrainBuilder(){
@@ -163,7 +163,7 @@ async function TrainBuilder(){
     var bag = [];
     //list of tokenized words for the pattern and stem each word
     var pattern_words = doc[0].map((it, i, A) => {
-      ntlk.LancasterStemmer.attach();
+      natural.LancasterStemmer.attach();
       it = it.toLowerCase().stem();
       return it;
     });    
@@ -210,7 +210,7 @@ async function TrainBuilder(){
   }).then(async () => {;
     console.log('Saving model....'); 
     await model.save('file://'+modelpath);
-    console.log('Model Saved'); 
+    console.log('Model Saved.'); 
   });
 }
 

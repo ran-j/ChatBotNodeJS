@@ -1,4 +1,9 @@
 var intents =  [
+  {"tag": "fallback",
+   "patterns": [],
+   "title": "FallBack response",
+   "responses": ['Sorry I did not understand','Sorry, I still can not understand everything.']
+  },
   {"tag": "greeting",
    "patterns": ["Hi", "How are you?", "Is anyone there?", "Hello", "Good day"],
    "title": "Salutations",
