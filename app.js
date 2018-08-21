@@ -1,4 +1,3 @@
-var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -6,27 +5,17 @@ var logger = require('morgan');
 var mongoose = require('mongoose');
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
+const BotConfig = require('./Libs/BotConfig');
 
 var app = express();
 
 var indexRouter =  require('./routes/index');
 var intentsRouter = require('./routes/intents');
 
-var url = 'mongodb://localhost/BotJs';
-
-mongoose.connect(url)
-.then(() => {
-    mongoose.connection.on('error', err => {
-        console.log('mongoose connection error: '+err);
-    });
-
-    console.log('connected - attempting reconnect');
-    return mongoose.connect(url);
-})
-.catch(err => {
-    console.log('rejected promise: '+err);
-    mongoose.disconnect();
-});
+mongoose
+  .connect(BotConfig.DB)
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log(err));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -47,7 +36,7 @@ app.use(session({
   //cookie: { maxAge: 24 * 60 * 60 * 1000, secure: true, httpOnly: true },
   // cookie: { maxAge: 24 * 60 * 60 * 1000 },
   store: new MongoStore({
-    mongooseConnection: db
+    mongooseConnection: mongoose.connection
   })
 }));
 
@@ -55,12 +44,12 @@ app.use('/', indexRouter);
 app.use('/admin', intentsRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
   res.render('404'); 
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use((err, req, res, next) => {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

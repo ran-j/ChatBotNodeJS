@@ -54,6 +54,7 @@ async function clean_up_sentence(sentence){
       synonyms =  synonym.length > 0 ?  synonym : require('../Libs/synonyms');
     });
 
+    //if exist a synonym for the words in the list they will be replaced with their synonym
     await sentence_words.forEach(function(word,i){
       synonyms.forEach(function(syn){           
         syn.synonyms.forEach(function(syns){
