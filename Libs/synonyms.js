@@ -1,6 +1,6 @@
 var synonym = [
     {"title": "Synonyms for salutitions",
-        "keyWord": 'Hi',
+        "keyWord": 'hi',
         "synonyms": ['hello', 'hey','heii']
     }
 ]

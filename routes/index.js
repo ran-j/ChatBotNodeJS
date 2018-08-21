@@ -45,17 +45,35 @@ router.post('/ask',async (req, res, next) => {
   }   
 });
 
-function clean_up_sentence(sentence){  
-    natural.LancasterStemmer.attach();
+async function clean_up_sentence(sentence){  
+    var tokenizer = new natural.WordTokenizer();
     //stem and tokenize the pattern
-    sentence_words =  sentence.toLowerCase().tokenizeAndStem();
+    sentence_words = await tokenizer.tokenize(sentence);
+
+    await require('../models/synonyms').find({},function(err,synonym){
+      synonyms =  synonym.length > 0 ?  synonym : require('../Libs/synonyms');
+    });
+
+    await sentence_words.forEach(function(word,i){
+      synonyms.forEach(function(syn){           
+        syn.synonyms.forEach(function(syns){
+          natural.LancasterStemmer.attach();
+          if(syns.toLowerCase() == word.toLowerCase()){
+            sentence_words[i] = word.replace(word,syn.keyWord).toLowerCase().stem();
+          }else{
+            sentence_words[i] = sentence_words[i].toLowerCase().stem();
+          }
+        })       
+      })
+    })   
+
     //return wordslist
     return sentence_words;
 }
 
-function bow(sentence, show_details){
+async function bow(sentence, show_details){
     //tokenize the pattern
-    var sentence_words = clean_up_sentence(sentence);
+    var sentence_words = await clean_up_sentence(sentence);
     //bag of words
     var bag = new Array(words.length + 1).join('0').split('').map(parseFloat);
     sentence_words.forEach(function(s, i){ 
@@ -135,31 +153,7 @@ async function BuildAgent(){
     await require('../models/intents').find({},function(err,inte){
       intents =  inte.length > 0 ?  inte : require('../Libs/intents');
     });
-
-    await require('../models/synonyms').find({},function(err,synonym){
-      synonyms =  synonym.length > 0 ?  synonym : require('../Libs/synonyms');
-    });
-
-    //populate intents with sysnonyms
-    intents.forEach(function(intent, ii){   
-      intent.patterns.forEach(function(patterns, i){   
-        //add synamomn to training
-        synonyms.forEach(function(syn){           
-          //check if the current word has sysnonym
-          if(patterns == syn.keyWord){   
-            //push the sysnonyms to training             
-            intents.push(
-              {"tag": intent.tag,
-                "patterns": syn.synonyms,
-                "title": intent.title,
-                "responses": intent.responses
-              }
-            );                        
-          }            
-        })
-      })
-    })
-
+   
     intents.forEach(function(intent, ii){
       intent.patterns.forEach(function(patterns, i){   
         if(arr.isNotInArray(ignore_words,patterns)){  

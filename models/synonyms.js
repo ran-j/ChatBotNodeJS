@@ -8,6 +8,7 @@ var synonymSchema = new mongoose.Schema({
   keyWord: {
     type : String ,
     required: true,
+    lowercase: true,
   }, 
   synonyms: {
     type: Array,

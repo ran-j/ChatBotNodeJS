@@ -12,15 +12,20 @@ var app = express();
 var indexRouter =  require('./routes/index');
 var intentsRouter = require('./routes/intents');
 
-//set mongoDB path
-mongoose.connect('mongodb://localhost/ChatWebDB');
-//Connect
-var db = mongoose.connection;
-//handle error
-db.on('error', console.error.bind(console, 'connection error:'));
-//db open
-db.once('open', function () {
-  console.log('Connected with BD');
+var url = 'mongodb://localhost/BotJs';
+
+mongoose.connect(url)
+.then(() => {
+    mongoose.connection.on('error', err => {
+        console.log('mongoose connection error: '+err);
+    });
+
+    console.log('connected - attempting reconnect');
+    return mongoose.connect(url);
+})
+.catch(err => {
+    console.log('rejected promise: '+err);
+    mongoose.disconnect();
 });
 
 // view engine setup
