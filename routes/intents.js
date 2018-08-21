@@ -33,7 +33,7 @@ router.get('/edit/:tag', async (req, res, next) => {
         res.render('Training/edit_intents', { intent, focus: 1 });
       }
     });
-    if(!foundres){res.render('404');}
+    if(!found){res.render('404');}
   });    
 });
 
@@ -47,7 +47,7 @@ router.get('/training/:tag', async (req, res, next) => {
         res.render('Training/training', { intent, focus: 1 });
       }
     });
-    if(!foundres){res.render('404');}
+    if(!found){res.render('404');}
   });    
 });
 
