@@ -34,21 +34,20 @@
                 <section class="content">                        
                         <div class="table-responsive">
                             <div class="col-sm-12 text-center">
-                                <button class="btn btn-info"><i class="fa fa-plus-square"></i> New synonym </button>
-                                <button class="btn btn-success"><i class="fa fa-refresh"></i> Build agent</button>                                        
+                                <button class="btn btn-info"><i class="fa fa-plus-square"></i> New synonym </button>                                     
                             </div>
                             <br> <br>  
                             <!-- .table - Uses sparkline charts-->
                             <table class="table table-striped">
                                 <tr>
-                                    <th>Key Word</th>
                                     <th>Title</th>
+                                    <th>Key Word</th>                                    
                                     <th>Action</th>
                                 </tr>
                                 <% synonyms.forEach(function(customer){ %>
-                                    <tr>                                      
-                                        <td> <a href="/admin/editkey/<%= customer.keyWord %>"><%= customer.keyWord %> </a> </td>
-                                        <td> <%= customer.title %> </td>
+                                    <tr>                
+                                        <td> <%= customer.title %> </td>                      
+                                        <td> <a href="/admin/editkey/<%= customer.keyWord %>"><%= customer.keyWord %> </a> </td>                                        
                                         <td> <button class="btn btn-sm btn-danger"><i class="fa fa-trash-o"></i></button></td>
                                     </tr>
                                 <% }) %> 

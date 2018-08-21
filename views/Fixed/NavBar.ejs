@@ -5,7 +5,18 @@
         <!-- /.search form -->
         <!-- sidebar menu: : style can be found in sidebar.less -->
         <ul class="sidebar-menu">
+
             <% if (focus === 0) { %>       
+                <li class="active">
+            <% } else { %>
+                <li>       
+            <% } %>           
+                <a href="/admin/home">
+                    <i class="fa fa-dashboard"></i> <span>Home</span>
+                </a>
+            </li> 
+
+            <% if (focus === 1) { %>       
                 <li class="active">
             <% } else { %>
                 <li>       
@@ -14,9 +25,8 @@
                     <i class="fa fa-sitemap"></i> <span>Intents</span>
                 </a>
             </li>  
-
             
-            <% if (focus === 1) { %>       
+            <% if (focus === 2) { %>       
                 <li class="active">
             <% } else { %>
                 <li>       
@@ -26,7 +36,7 @@
                 </a>
             </li> 
 
-            <% if (focus === 2) { %>       
+            <% if (focus === 3) { %>       
                 <li class="active">
             <% } else { %>
                 <li>       

@@ -41,15 +41,15 @@
                             <!-- .table - Uses sparkline charts-->
                             <table class="table table-striped">
                                 <tr>
-                                    <th>Tag</th>
                                     <th>Title</th>
+                                    <th>Tag</th>                                    
                                     <th>Action</th>
                                 </tr>
                                 <% intents.forEach(function(customer){ %>
-                                    <tr>                                      
-                                        <td> <a href="/admin/edit/<%= customer.tag %>"><%= customer.tag %> </a> </td>
-                                        <td> <%= customer.title %> </td>
-                                        <td> <button class="btn btn-sm btn-danger"><i class="fa fa-trash-o"></i></button> &nbsp; <button class="btn btn-sm btn-success"><i class="fa fa-tags"></i></button> </td>
+                                    <tr>      
+                                        <td> <%= customer.title %> </td>                                
+                                        <td> <a href="/admin/edit/<%= customer.tag %>"><%= customer.tag %> </a> </td>                                        
+                                        <td> <button class="btn btn-sm btn-danger"><i class="fa fa-trash-o"></i></button> &nbsp; <button class="btn btn-sm btn-success" onclick="window.location.href='/admin/training/<%= customer.tag %>'"><i class="fa fa-tags"></i></button> </td>
                                     </tr>
                                 <% }) %> 
                                  
@@ -64,4 +64,8 @@
         <% include ../Fixed/footer.ejs %>       
             
     </body>
+    <script>
+        
+    
+    </script>
 </html>
