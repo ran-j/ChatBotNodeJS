@@ -30,6 +30,7 @@ router.get('/edit/:tag', async (req, res, next) => {
     let found = false;
     intents.forEach((intent) =>{
       if(intent.tag == req.params.tag){
+        found = true;
         res.render('Training/edit_intents', { intent, focus: 1 });
       }
     });
