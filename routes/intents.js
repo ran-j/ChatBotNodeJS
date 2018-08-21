@@ -27,12 +27,13 @@ router.get('/synonyms', async (req, res, next) => {
 router.get('/edit/:tag', async (req, res, next) => {  
   require('../models/intents').find({},(err,inte) =>{
     var intents =  inte.length > 0 ?  inte : require('../Libs/intents');
+    let found = false;
     intents.forEach((intent) =>{
       if(intent.tag == req.params.tag){
         res.render('Training/edit_intents', { intent, focus: 1 });
       }
     });
-    res.render('404');
+    if(!foundres){res.render('404');}
   });    
 });
 
