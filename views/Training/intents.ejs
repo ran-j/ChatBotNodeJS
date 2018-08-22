@@ -81,19 +81,19 @@
                         data: {},
                         dataType:"text xml",
                         success: function(xml, textStatus, xhr) {                             
-                            if(xhr.status == 200){
-                                swal(xhr.responseText);
+                            if(xhr.status == 200){                                 
+                                swal("Success !!", xhr.responseText, "success");
                             }else{
-                                swal(xhr.responseText);
+                                sweetAlert("Oops...", xhr.responseText, "error");                                
                             }                           
                         },
                         complete: function(xhr, textStatus) {
                             if(xhr.status == 200){
-                                swal(xhr.responseText);
+                                swal("Success !!", xhr.responseText, "success");
                             }else{
-                                swal(xhr.responseText);
+                                sweetAlert("Oops...", xhr.responseText, "error");
                             } 
-                        } 
+                        }
                     });
                 });
         };

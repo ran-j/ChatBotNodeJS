@@ -38,12 +38,17 @@ router.get('/', async (req, res, next) => {
 });
 
 router.post('/build', async (req, res, next) => {  
-  if(!isAgentBuilding){
-    //init modules and training
-    await BuildAgent();
-    res.status(200).end('Agent built');
+  if(isAgentBuilding == false){
+    try {
+      //init modules and training
+      await BuildAgent();
+      //responde
+      res.status(200).end('Agent built');
+    } catch (error) {
+      res.status(500).end('Erro on build agent');
+    }    
   }else{
-    res.status(500).end('Erro on build')
+    res.status(403).end('Agent are building');
   }  
 });
 
@@ -166,7 +171,8 @@ async function BuildAgent(){
     await require('../models/intents').find({},function(err,inte){
       intents =  inte.length > 0 ?  inte : require('../Libs/intents');
     });
-   
+    isAgentBuilding = true;
+
     intents.forEach(function(intent, ii){
       intent.patterns.forEach(function(patterns, i){   
         if(arr.isNotInArray(ignore_words,patterns)){  
@@ -242,12 +248,12 @@ async function TrainBuilder(){
   const ys = tf.tensor(train_y);
 
   //train model
-  model.fit(xs, ys, {
+  await model.fit(xs, ys, {
     epochs: 1000,
     batchSize: 8,
     callbacks: {
       onEpochEnd: async (epoch, log) => {
-        console.log(`Epoch ${epoch}: loss = ${log.loss}`);
+        console.log(`Epoch ${epoch}: loss = ${log.loss}`);        
       }
     }
   }).then(async () => {;
