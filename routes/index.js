@@ -27,12 +27,24 @@ var words = [], classes = [], documents = [], ignore_words = ['?'];
 //Training data
 var training = new Array();
 
+var isAgentBuilding = true;
+
 //init modules and training
 BuildAgent();
 
 /* GET home page. */
 router.get('/', async (req, res, next) => {
   res.render('chat', { title: 'Tensorflow JS' }); 
+});
+
+router.post('/build', async (req, res, next) => {  
+  if(!isAgentBuilding){
+    //init modules and training
+    await BuildAgent();
+    res.status(200).end('Agent built');
+  }else{
+    res.status(500).end('Erro on build')
+  }  
 });
 
 /* POST get response from bot. */
@@ -176,12 +188,18 @@ async function BuildAgent(){
     words = arr.sort(arr.multiDimensionalUnique(arr.toOneArray(words)));
     classes = arr.sort(classes);
 
-    await TrainBuilder();          
+    console.log(' ');
+    console.log('Training...'); 
+
+    await TrainBuilder();      
+    
+    isAgentBuilding = false;
+
+    console.log(' ');
+    console.log('Training finished'); 
 }
 
-async function TrainBuilder(){
-  console.log(' ');
-  console.log('Training...'); 
+async function TrainBuilder(){ 
  
   documents.forEach(function(doc, i){
     //initialize bag of words

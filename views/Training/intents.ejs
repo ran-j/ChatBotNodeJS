@@ -35,7 +35,7 @@
                         <div class="table-responsive">
                             <div class="col-sm-12 text-center">
                                 <button class="btn btn-info"><i class="fa fa-plus-square"></i> New register </button>
-                                <button class="btn btn-success"><i class="fa fa-refresh"></i> Build agent</button>                                        
+                                <button class="btn btn-success buildA"><i class="fa fa-refresh"></i> Build agent</button>                                        
                             </div>
                             <br> <br>  
                             <!-- .table - Uses sparkline charts-->
@@ -65,7 +65,38 @@
             
     </body>
     <script>
-        
+        document.querySelector('.buildA').onclick = function(){
+            swal({
+                    title: "Build Agent !",
+                    text: "are you sure ?",
+                    type: "info",
+                    showCancelButton: true,
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true,
+                },
+                function(){
+                    $.ajax({
+                        url: "/build",
+                        type: "POST",
+                        data: {},
+                        dataType:"text xml",
+                        success: function(xml, textStatus, xhr) {                             
+                            if(xhr.status == 200){
+                                swal(xhr.responseText);
+                            }else{
+                                swal(xhr.responseText);
+                            }                           
+                        },
+                        complete: function(xhr, textStatus) {
+                            if(xhr.status == 200){
+                                swal(xhr.responseText);
+                            }else{
+                                swal(xhr.responseText);
+                            } 
+                        } 
+                    });
+                });
+        };
     
     </script>
 </html>
