@@ -44,6 +44,10 @@ module.exports = new class SysFunctions {
       return otp; 
     }
 
+    ignore_wordsFilter(wd,igwords){
+        return wd.filter((word, index, array) => igwords.indexOf(word) < 0);
+    }
+
     multiDimensionalUnique(arr) {
         var uniques = [];
         var itemsFound = {};

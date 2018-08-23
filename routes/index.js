@@ -163,7 +163,6 @@ async function response(sentence,userID,show_details){
       i++;
     }
   }
-  //console.log(reply)
   return reply;
 }
 
@@ -174,25 +173,32 @@ async function BuildAgent(){
     isAgentBuilding = true;
 
     intents.forEach(function(intent, ii){
-      intent.patterns.forEach(function(patterns, i){   
-        if(arr.isNotInArray(ignore_words,patterns)){  
-          //stem and tokenize each word in the sentence
-          natural.LancasterStemmer.attach();
-          var wd = patterns.toLowerCase().tokenizeAndStem();           
-          //add to words list
-          words.push(wd);
-          //add to documents in corpus
-          documents.push([wd,intent.tag]);         
-        }
+      intent.patterns.forEach(function(pattern, i){  
+        //stem and tokenize each word in the sentence     
+        var tokenizer = new natural.WordTokenizer();
+        var wd = tokenizer.tokenize(pattern);      
+        //add to words list     
+        words.push(wd);
+        //add to documents in corpus
+        documents.push([wd,intent.tag]);       
         //add the tag to classes list 
         if(!arr.ContainsinArray(classes,intent.tag)){
           classes.push(intent.tag);
         }
       });
     });
+    //stem and lower each word
+    words = words.map((iten, index, array) => {
+      return iten.map((w, i, a) => {
+        natural.LancasterStemmer.attach();
+        w = w.toLowerCase().stem();
+        return w;
+      }); 
+    }) 
     //stem and lower each word and remove duplicates 
-    words = arr.sort(arr.multiDimensionalUnique(arr.toOneArray(words)));
-    classes = arr.sort(classes);
+    words = arr.ignore_wordsFilter(arr.sort(arr.toOneArray(words)),ignore_words);
+     //stem and lower each word and remove duplicates
+    classes = arr.sort(classes);  
 
     console.log(' ');
     console.log('Training...'); 
@@ -271,7 +277,7 @@ async function TrainBuilder(){
 }
 
 async function GetFallBack(){ 
-  let rt = ['Sorry I did not understand'];
+  let rt = ["What did you mean ?","I'm not understanding you"];
   intents.forEach((intent)=>{
     if(intent.tag == 'fallback'){
       rt = intent.responses
