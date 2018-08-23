@@ -135,7 +135,7 @@ async function classify(sentence){
 async function response(sentence,userID,show_details){
   var context = [];
   var pos;
-  var reply = arr.randomchoice(intents[0].responses);
+  var reply = arr.randomchoice(await GetFallBack());
   var i = 0;
   var results = await classify(sentence);  
   //if we have a classification then find the matching intent tag
@@ -268,6 +268,16 @@ async function TrainBuilder(){
     console.log("unique stemmed words "+ words.length);
     console.log(words); 
   });
+}
+
+async function GetFallBack(){ 
+  let rt = ['Sorry I did not understand'];
+  intents.forEach((intent)=>{
+    if(intent.tag == 'fallback'){
+      rt = intent.responses
+    }  
+  })     
+  return rt;
 }
 
 module.exports = router;
