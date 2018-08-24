@@ -167,18 +167,21 @@ async function response(sentence,userID,show_details){
 }
 
 async function BuildAgent(){ 
-    await require('../models/intents').find({},function(err,inte){
+    await require('../models/intents').find({},async (err,inte) =>{
       intents =  inte.length > 0 ?  inte : require('../Libs/intents');
     });
     isAgentBuilding = true;
+    var wwd = [];
+    documents = [];
+    classes = [];
 
-    intents.forEach(function(intent, ii){
-      intent.patterns.forEach(function(pattern, i){  
+    intents.forEach(async (intent, ii) =>{
+      intent.patterns.forEach(async (pattern, i) =>{  
         //stem and tokenize each word in the sentence     
         var tokenizer = new natural.WordTokenizer();
         var wd = tokenizer.tokenize(pattern);      
         //add to words list     
-        words.push(wd);
+        wwd.push(wd);
         //add to documents in corpus
         documents.push([wd,intent.tag]);       
         //add the tag to classes list 
@@ -188,18 +191,20 @@ async function BuildAgent(){
       });
     });
     //stem and lower each word
-    words = words.map((iten, index, array) => {
+    words = wwd.map((iten, index, array) => {
       return iten.map((w, i, a) => {
         natural.LancasterStemmer.attach();
         w = w.toLowerCase().stem();
         return w;
       }); 
-    }) 
+    })     
     //stem and lower each word and remove duplicates 
     words = arr.ignore_wordsFilter(arr.sort(arr.toOneArray(words)),ignore_words);
-     //stem and lower each word and remove duplicates
+    //stem and lower each word and remove duplicates
     classes = arr.sort(classes);  
 
+    console.log(' ');
+    console.log('Words prepared.')
     console.log(' ');
     console.log('Training...'); 
 
@@ -212,8 +217,7 @@ async function BuildAgent(){
 }
 
 async function TrainBuilder(){ 
- 
-  documents.forEach(function(doc, i){
+  documents.forEach(async (doc, i) =>{
     //initialize bag of words
     var bag = [];
     //list of tokenized words for the pattern and stem each word
@@ -223,7 +227,7 @@ async function TrainBuilder(){
       return it;
     });    
     //create bag of words array
-    words.forEach(function(word, ii){
+    words.forEach(async (word, ii) =>{
       if(!arr.NotcontainsinArray(pattern_words,word)){
         bag.push(1);
       }else{
@@ -262,17 +266,16 @@ async function TrainBuilder(){
         console.log(`Epoch ${epoch}: loss = ${log.loss}`);        
       }
     }
-  }).then(async () => {;
-    console.log('Saving model....'); 
-    await model.save('file://'+modelpath);
-    console.log('Model Saved.'); 
-    
-    console.log("documents "+ documents.length);
-    console.log(documents);
-    console.log("classes "+classes.length);
-    console.log(classes);
-    console.log("unique stemmed words "+ words.length);
-    console.log(words); 
+  }).then(async () => {
+      console.log('Saving model....'); 
+      await model.save('file://'+modelpath).then(async ()=>{
+        console.log(' ');
+        console.log('Model Saved.');     
+        console.log(' ');
+        console.log("documents "+ documents.length);
+        console.log("classes "+classes.length);
+        console.log("unique stemmed words "+ words.length);
+      });    
   });
 }
 
