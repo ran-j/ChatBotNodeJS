@@ -32,9 +32,8 @@
                                            <label for="exampleInputPassword1">Title</label>
                                            <input type="text" class="form-control" disabled value="<%= intent.title %>">
                                        </div>
-                                       <div class="form-group">                                           
-                                           <table class="table table-bordered">                                                
-                                            <table class="table table-bordered"> 
+                                       <div class="form-group">                                                                                   
+                                            <table class="table table-bordered" id="tableI"> 
                                                 <tr>
                                                     <th style="width: 90%">Response</th>
                                                     <th>Action</th>                                                       
@@ -42,9 +41,13 @@
                                                 <% intent.responses.forEach(function(customer){ %>
                                                     <tr>
                                                         <td><%= customer %></td>
-                                                        <td><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></td>  
+                                                        <td><button class="btn btn-sm btn-danger">Delete <i class="fas fa-trash"></i></button></td>  
                                                     </tr>                                                            
-                                                <% }) %>                                                                           
+                                                <% }) %>  
+                                                <tr>
+                                                    <td><input type="text" class="form-control" placeholder='Type new response'></td>
+                                                    <td><button class="btn btn-sm btn-success">Add <i class="fas fa-save"></i></button></td>  
+                                                </tr>                                                                           
                                             </table>
                                        </div>
                                    </div>

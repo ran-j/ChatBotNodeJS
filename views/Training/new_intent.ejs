@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <% include ../Fixed/Header.ejs %>
+    
+    <body class="skin-black">
+        <% include ../Fixed/HeaderLogo.ejs %>
+
+
+        <div class="wrapper row-offcanvas row-offcanvas-left">
+            <% include ../Fixed/NavBar.ejs %>
+
+            <!-- Right side column. Contains the navbar and content of the page -->
+            <aside class="right-side">    
+                
+                 <!-- Main content -->
+                 <section class="content">                        
+                    <div class="row">
+                       <div class="col-md-12">
+                           <!-- general form elements -->
+                           <div class="box box-primary">
+                               <div class="box-header">
+                                   <h3 class="box-title">New Intent</h3>
+                               </div><!-- /.box-header -->
+                               <!-- form start -->
+                               <form role="form">
+                                   <div class="box-body">
+                                       <div class="form-group">
+                                           <label for="exampleInputEmail1">Tag</label>
+                                           <input type="text" class="form-control" id="tag">
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="exampleInputPassword1">Title</label>
+                                           <input type="text" class="form-control" id='title'>
+                                       </div>
+                                       <div class="form-group">                                                                   
+                                            <table class="table table-bordered" id="tableIP"> 
+                                                <tr>
+                                                    <th style="width: 90%">Response</th>
+                                                    <th>Action</th>                                                       
+                                                </tr>   
+                                                <tr>
+                                                    <td><input type="text" class="form-control" placeholder='Type new response'></td>
+                                                    <td><button class="btn btn-sm btn-success">Add <i class="fas fa-save"></i></button></td>  
+                                                </tr>                                                                           
+                                            </table>
+                                       </div>
+                                       <div class="form-group">                                                                   
+                                            <table class="table table-bordered" id="tableIR"> 
+                                                <tr>
+                                                    <th style="width: 90%">Patterns</th>
+                                                    <th>Action</th>                                                       
+                                                </tr>   
+                                                <tr>
+                                                    <td><input type="text" class="form-control" placeholder='Type new response'></td>
+                                                    <td><button class="btn btn-sm btn-success">Add <i class="fas fa-save"></i></button></td>  
+                                                </tr>                                                                           
+                                            </table>
+                                       </div>                                      
+                                   </div>
+                                   <div class="box-footer">
+                                       <button type="submit" class="btn btn-primary">Save</button>
+                                   </div>
+                               </form>
+                           </div>
+                       </div>
+                    </div>
+            </section><!-- /.content -->
+             
+            </aside><!-- /.right-side -->
+        </div><!-- ./wrapper -->
+
+
+        <% include ../Fixed/footer.ejs %>       
+            
+    </body>
+</html>

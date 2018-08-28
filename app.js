@@ -58,6 +58,7 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500);
     res.render('error');
   }else{
+    console.error(err);
     res.render('500');
   }  
 });
