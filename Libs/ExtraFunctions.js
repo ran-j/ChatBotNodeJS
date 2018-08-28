@@ -6,6 +6,10 @@ module.exports = new class SysFunctions {
        return A[Math.floor(Math.random()*A.length)]
     }
 
+    UserFilter(arr1, toFind) {
+        return arr1.find(val => Array.isArray(val) ? findRecursive(val, toFind) : val.uID === toFind) !== undefined;
+    }
+
     inArray(key,A){
         if(A[key] != undefined && A[key] != null && A[key].length > 0){
             return true;

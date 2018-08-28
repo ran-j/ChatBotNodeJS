@@ -21,6 +21,9 @@ var IntentsSchema = new mongoose.Schema({
   },
   context_set: {
     type: String,
+  },
+  context_filter: {
+    type: String,
   }
 });
 

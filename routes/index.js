@@ -27,7 +27,11 @@ var words = [], classes = [], documents = [], ignore_words = ['?'];
 //Training data
 var training = new Array();
 
+//lock for build agent
 var isAgentBuilding = true;
+
+//context for intents
+var context = [];
 
 //init modules and training
 BuildAgent();
@@ -132,9 +136,7 @@ async function classify(sentence){
     return return_list
 }
 
-async function response(sentence,userID,show_details){
-  var context = [];
-  var pos;
+async function response(sentence,userID,show_details){ 
   var reply = arr.randomchoice(await GetFallBack());
   var i = 0;
   var results = await classify(sentence);  
@@ -146,14 +148,16 @@ async function response(sentence,userID,show_details){
         //set context for this intent if necessary
         if(s.tag == results[0][0]){
            if(arr.inArray('context_set',s)){
-              pos = context.push({uID:userID, context:s['context_set']}) - 1;
+              setContext(userID,s['context_set']);            
               if (show_details){
                 console.log('context: ' +s['context_set'])
               }
             }
            //check if this intent is contextual and applies to this user's conversation
-           if(!arr.inArray('context_set',s) || !arr.NotcontainsinArray(context,userID) &&  arr.inArray('context_filter',s) && s['context_filter'] == context[pos].context){
-            console.log('tag: ' +s['tag']);
+           if(!arr.inArray('context_filter',s) || arr.UserFilter(context,userID) &&  arr.inArray('context_filter',s) && s['context_filter'] == context[context.findIndex(x => x.uID== userID)].ctx){
+            if (show_details){
+              console.log('tag: ' +s['tag']);
+            }            
             //a random response from the intent             
             reply = arr.randomchoice(s['responses']);                         
            }
@@ -164,6 +168,13 @@ async function response(sentence,userID,show_details){
     }
   }
   return reply;
+}
+function setContext(userid,contextText){
+  if(!arr.UserFilter(context,userid)){
+    context.push({uID:userid, ctx:contextText})
+  }else{
+    context[context.findIndex(x => x.uID== userid)].context = contextText;
+  }
 }
 
 async function BuildAgent(){ 
@@ -200,7 +211,7 @@ async function BuildAgent(){
     })     
     //stem and lower each word and remove duplicates 
     words = arr.ignore_wordsFilter(arr.sort(arr.toOneArray(words)),ignore_words);
-    //stem and lower each word and remove duplicates
+    //lower each word and remove duplicates
     classes = arr.sort(classes);  
 
     console.log(' ');
