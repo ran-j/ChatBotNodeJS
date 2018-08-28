@@ -1,102 +1,110 @@
 <!DOCTYPE html>
 <html>
-    <% include ../Fixed/Header.ejs %>
-    
-    <body class="skin-black">
-        <!-- header logo: style can be found in header.less -->
-        <header class="header">
-            <a href="/admin" class="logo">
-                <!-- Add the class icon to your logo image or logo icon to add the margining -->
-                BotJS
-            </a>
-            <!-- Header Navbar: style can be found in header.less -->
-            <nav class="navbar navbar-static-top" role="navigation">
-                <!-- Sidebar toggle button-->
-                <a href="#" class="navbar-btn sidebar-toggle" data-toggle="offcanvas" role="button">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </a>
+<% include ../Fixed/Header.ejs %>
 
-                <% include ../Fixed/you.ejs %>
-            </nav>
-        </header>
+    <body class="skin-black">
+            
+        <% include ../Fixed/HeaderLogo.ejs %>
 
 
         <div class="wrapper row-offcanvas row-offcanvas-left">
             <% include ../Fixed/NavBar.ejs %>
 
-            <!-- Right side column. Contains the navbar and content of the page -->
-            <aside class="right-side">    
-                
-                <!-- Main content -->
-                <section class="content">                        
+                <!-- Right side column. Contains the navbar and content of the page -->
+                <aside class="right-side">
+
+                    <!-- Main content -->
+                    <section class="content">
                         <div class="table-responsive">
                             <div class="col-sm-12 text-center">
-                                <button class="btn btn-info"><i class="fa fa-plus-square"></i> New register </button>
-                                <button class="btn btn-success buildA"><i class="fa fa-refresh"></i> Build agent</button>                                        
+                                <button class="btn btn-info">
+                                    <i class="fa fa-plus-square"></i> New register </button>
+                                <button class="btn btn-success buildA">
+                                    <i class="fas fa-sync"></i> Build agent</button>
                             </div>
-                            <br> <br>  
+                            <br>
+                            <br>
                             <!-- .table - Uses sparkline charts-->
                             <table class="table table-striped">
                                 <tr>
                                     <th>Title</th>
-                                    <th>Tag</th>                                    
+                                    <th>Tag</th>
                                     <th>Action</th>
                                 </tr>
                                 <% intents.forEach(function(customer){ %>
-                                    <tr>      
-                                        <td> <%= customer.title %> </td>                                
-                                        <td> <a href="/admin/edit/<%= customer.tag %>"><%= customer.tag %> </a> </td>                                        
-                                        <td> <button class="btn btn-sm btn-danger"><i class="fa fa-trash-o"></i></button> &nbsp; <button class="btn btn-sm btn-success" onclick="window.location.href='/admin/training/<%= customer.tag %>'"><i class="fa fa-tags"></i></button> </td>
+                                    <tr>
+                                        <td>
+                                            <%= customer.title %>
+                                        </td>
+                                        <td>
+                                            <a href="/admin/edit/<%= customer.tag %>">
+                                                <%= customer.tag %>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button> &nbsp;
+                                            <button class="btn btn-sm btn-success" onclick="window.location.href='/admin/training/<%= customer.tag %>'">
+                                                <i class="fas fa-graduation-cap"></i>
+                                            </button>
+                                            &nbsp;
+                                            <button class="btn btn-sm btn-primary" onclick="window.location.href='/admin/link/<%= customer.tag %>'">
+                                                <i class="fas fa-bezier-curve"></i>
+                                            </button>
+                                        </td>
                                     </tr>
-                                <% }) %> 
-                                 
-                            </table><!-- /.table -->
+                                    <% }) %>
+
+                            </table>
+                            <!-- /.table -->
                         </div>
-                </section><!-- /.content -->
-                
-            </aside><!-- /.right-side -->
-        </div><!-- ./wrapper -->
+                    </section>
+                    <!-- /.content -->
+
+                </aside>
+                <!-- /.right-side -->
+        </div>
+        <!-- ./wrapper -->
 
 
-        <% include ../Fixed/footer.ejs %>       
-            
+        <% include ../Fixed/footer.ejs %>
+
     </body>
     <script>
-        document.querySelector('.buildA').onclick = function(){
+        document.querySelector('.buildA').onclick = function () {
             swal({
-                    title: "Build Agent !",
-                    text: "are you sure ?",
-                    type: "info",
-                    showCancelButton: true,
-                    closeOnConfirm: false,
-                    showLoaderOnConfirm: true,
-                },
-                function(){
+                title: "Build Agent !",
+                text: "are you sure ?",
+                type: "info",
+                showCancelButton: true,
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true,
+            },
+                function () {
                     $.ajax({
                         url: "/build",
                         type: "POST",
                         data: {},
-                        dataType:"text xml",
-                        success: function(xml, textStatus, xhr) {                             
-                            if(xhr.status != 200){                                 
+                        dataType: "text xml",
+                        success: function (xml, textStatus, xhr) {
+                            if (xhr.status != 200) {
                                 sweetAlert("Oops...", xhr.responseText, "error");
-                            }else{
-                                swal("Success !!", xhr.responseText, "success");                                                                
-                            }                           
+                            } else {
+                                swal("Success !!", xhr.responseText, "success");
+                            }
                         },
-                        complete: function(xhr, textStatus) {
-                            if(xhr.status != 200){                                 
+                        complete: function (xhr, textStatus) {
+                            if (xhr.status != 200) {
                                 sweetAlert("Oops...", xhr.responseText, "error");
-                            }else{
-                                swal("Success !!", xhr.responseText, "success");                                                                
-                            }  
+                            } else {
+                                swal("Success !!", xhr.responseText, "success");
+                            }
                         }
                     });
                 });
         };
-    
+
     </script>
+
 </html>

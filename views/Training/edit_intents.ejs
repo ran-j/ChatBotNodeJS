@@ -3,24 +3,7 @@
     <% include ../Fixed/Header.ejs %>
     
     <body class="skin-black">
-        <!-- header logo: style can be found in header.less -->
-        <header class="header">
-            <a href="/admin" class="logo">
-                <!-- Add the class icon to your logo image or logo icon to add the margining -->
-                BotJS
-            </a>
-            <!-- Header Navbar: style can be found in header.less -->
-            <nav class="navbar navbar-static-top" role="navigation">
-                <!-- Sidebar toggle button-->
-                <a href="#" class="navbar-btn sidebar-toggle" data-toggle="offcanvas" role="button">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </a>
-                <% include ../Fixed/you.ejs %>
-            </nav>
-        </header>
+        <% include ../Fixed/HeaderLogo.ejs %>
 
 
         <div class="wrapper row-offcanvas row-offcanvas-left">
@@ -59,7 +42,7 @@
                                                 <% intent.responses.forEach(function(customer){ %>
                                                     <tr>
                                                         <td><%= customer %></td>
-                                                        <td><button class="btn btn-sm btn-danger"><i class="fa fa-trash-o"></i></button></td>  
+                                                        <td><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></td>  
                                                     </tr>                                                            
                                                 <% }) %>                                                                           
                                             </table>
