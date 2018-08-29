@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var synonymModel = require('../models/synonyms');
+var intentsModels = require('../models/intents');
 
 /* GET users listing. */
 router.get('/', (req, res, next) => {
@@ -20,7 +21,7 @@ router.get('/new/synonym', (req, res, next) => {
 });
 
 router.get('/intents', (req, res, next) => {  
-  require('../models/intents').find({},(err,inte) =>{
+  intentsModels.find({},(err,inte) =>{
     var intents =  inte.length > 0 ?  inte : require('../Libs/intents');
     res.render('Training/intents', { intents, focus: 1 });  
   }); 
@@ -34,7 +35,7 @@ router.get('/synonyms',(req, res, next) => {
 });
 
 router.get('/edit/:tag',(req, res, next) => {  
-  require('../models/intents').find({},(err,inte) =>{
+  intentsModels.find({},(err,inte) =>{
     var intents =  inte.length > 0 ?  inte : require('../Libs/intents');
     let found = false;
     intents.forEach((intent) =>{
@@ -48,7 +49,7 @@ router.get('/edit/:tag',(req, res, next) => {
 });
 
 router.get('/training/:tag', (req, res, next) => {  
-  require('../models/intents').find({},(err,inte) =>{
+  intentsModels.find({},(err,inte) =>{
     var intents =  inte.length > 0 ?  inte : require('../Libs/intents');
     let found = false;
     intents.forEach((intent) =>{
