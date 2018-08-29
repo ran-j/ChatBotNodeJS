@@ -33,32 +33,32 @@
                                            <input type="text" class="form-control" id='title'>
                                        </div>
                                        <div class="form-group">                                                                   
-                                            <table class="table table-bordered" id="tableIP"> 
-                                                <tr>
-                                                    <th style="width: 90%">Response</th>
-                                                    <th>Action</th>                                                       
-                                                </tr>   
-                                                <tr>
-                                                    <td><input type="text" class="form-control" placeholder='Type new response'></td>
-                                                    <td><button class="btn btn-sm btn-success">Add <i class="fas fa-save"></i></button></td>  
-                                                </tr>                                                                           
-                                            </table>
-                                       </div>
-                                       <div class="form-group">                                                                   
                                             <table class="table table-bordered" id="tableIR"> 
                                                 <tr>
                                                     <th style="width: 90%">Patterns</th>
                                                     <th>Action</th>                                                       
                                                 </tr>   
-                                                <tr>
-                                                    <td><input type="text" class="form-control" placeholder='Type new Patterns'></td>
-                                                    <td><button class="btn btn-sm btn-success">Add <i class="fas fa-save"></i></button></td>  
-                                                </tr>                                                                           
+                                                <tr id="textC">
+                                                    <td><input type="text" class="form-control newpattern" placeholder='Type new pattern'></td>
+                                                    <td><button class="btn btn-sm btn-success appendB" type="button" onclick="BtnaddA()">Add <i class="fas fa-save"></i></button></td>  
+                                                </tr>                                                                          
                                             </table>
-                                       </div>                                      
+                                       </div>   
+                                       <div class="form-group">                                                                   
+                                            <table class="table table-bordered" id="tableIP"> 
+                                                <tr>
+                                                    <th style="width: 90%">Response</th>
+                                                    <th>Action</th>                                                       
+                                                </tr>   
+                                                <tr id="textB">
+                                                    <td><input type="text" class="form-control newresponse" placeholder='Type new response'></td>
+                                                    <td><button class="btn btn-sm btn-success appendB" type="button" onclick="BTNadd()">Add <i class="fas fa-save"></i></button></td>  
+                                                </tr>                                                                             
+                                            </table>
+                                       </div>                                                                          
                                    </div>
-                                   <div class="box-footer">
-                                       <button type="submit" class="btn btn-primary">Save</button>
+                                   <div class="box-footer text-center">
+                                       <button type="submit" class="btn btn-primary btn-lg">Save</button>
                                    </div>
                                </form>
                            </div>
@@ -70,7 +70,37 @@
         </div><!-- ./wrapper -->
 
 
-        <% include ../Fixed/footer.ejs %>       
+        <% include ../Fixed/footer.ejs %>   
+        
+        <script>
+       
+            function BTNadd() {
+                var textinp = $( '.newresponse' ).val();
+                if(textinp.trim().length > 0){                  
+                    var tr = $('#textB');
+                    tr.css("background-color","#FF3700");
+                    tr.fadeOut(400, function(){
+                        tr.remove();
+                    });
+                    $( "#tableIP" ).append('<tr><td>'+textinp+'</td><td><button class="btn btn-sm btn-danger">Delete <i class="fas fa-trash"></i></button></td></tr>')
+                    $( "#tableIP" ).append( '<tr id="textB"><td><input type="text" class="form-control newresponse" placeholder="Type new response"></td><td><button class="btn btn-sm btn-success" onclick="BTNadd()" type="button">Add <i class="fas fa-save"></i></button></td></tr>' );
+                }             
+            }
+
+            function BtnaddA() {
+                var textinp = $( '.newpattern' ).val();
+                if(textinp.trim().length > 0){                  
+                    var tr = $('#textC');
+                    tr.css("background-color","#FF3700");
+                    tr.fadeOut(400, function(){
+                        tr.remove();
+                    });
+                    $( "#tableIR" ).append('<tr><td>'+textinp+'</td><td><button class="btn btn-sm btn-danger">Delete <i class="fas fa-trash"></i></button></td></tr>')
+                    $( "#tableIR" ).append( '<tr id="textC"><td><input type="text" class="form-control newpattern" placeholder="Type new pattern"></td><td><button class="btn btn-sm btn-success" onclick="BtnaddA()" type="button">Add <i class="fas fa-save"></i></button></td></tr>' );
+                }             
+            }
+          
+        </script>
             
     </body>
 </html>
