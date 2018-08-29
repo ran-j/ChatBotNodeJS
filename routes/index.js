@@ -5,6 +5,8 @@ const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
 const arr = require('../Libs/ExtraFunctions');
 const BotConfig = require('../Libs/BotConfig');
+var synonymModel = require('../models/synonyms');
+var intentsModels = require('../models/intents');
 
 var router = express.Router();
 
@@ -71,7 +73,7 @@ async function clean_up_sentence(sentence){
     //stem and tokenize the pattern
     sentence_words = await tokenizer.tokenize(sentence);
 
-    await require('../models/synonyms').find({},function(err,synonym){
+    await synonymModel.find({},function(err,synonym){
       synonyms =  synonym.length > 0 ?  synonym : require('../Libs/synonyms');
     });
 
@@ -94,46 +96,46 @@ async function clean_up_sentence(sentence){
 }
 
 async function bow(sentence, show_details){
-    //tokenize the pattern
-    var sentence_words = await clean_up_sentence(sentence);
-    //bag of words
-    var bag = new Array(words.length + 1).join('0').split('').map(parseFloat);
-    sentence_words.forEach(function(s, i){ 
-      words.forEach(function(v, ii){ 
-        if(v == s){
-          //set 1 if found the match word and 0 for the others
-          bag[ii] = 1;
-          if(show_details){console.log("found in bag: "+v)}
-        }
-      });
+  //tokenize the pattern
+  var sentence_words = await clean_up_sentence(sentence);
+  //bag of words
+  var bag = new Array(words.length + 1).join('0').split('').map(parseFloat);
+  sentence_words.forEach(function(s, i){ 
+    words.forEach(function(v, ii){ 
+      if(v == s){
+        //set 1 if found the match word and 0 for the others
+        bag[ii] = 1;
+        if(show_details){console.log("found in bag: "+v)}
+      }
     });
-    return bag;       
+  });
+  return bag;       
 }
 
 async function classify(sentence){
-    //load model
-    var model = await tf.loadModel('file://'+modelpath+'/model.json');
-    //bow sentence
-    const bowData = await bow(sentence, true);
-    //converter to tensor array
-    var data = await tf.tensor2d(bowData, [1, bowData.length]);
-     //generate probabilities from the model
-    var predictions = await model.predict(data).dataSync();
-    //filter out predictions below a threshold    
-    var results = [];
-    predictions.map((prediction, index, array) => {
-      if(prediction > CONFIDENCE){
-        results.push([index,prediction]);
-      }      
-    });
-    //sort by strength of probability    
-    results.sort(function(a, b){return a - b}).reverse();
-    var return_list = [];
-    results.forEach(function(r, i){ 
-      return_list.push([classes[r[0]],r[1]]);
-    });
-    //return tuple of intent and probability
-    return return_list
+  //load model
+  var model = await tf.loadModel('file://'+modelpath+'/model.json');
+  //bow sentence
+  const bowData = await bow(sentence, true);
+  //converter to tensor array
+  var data = await tf.tensor2d(bowData, [1, bowData.length]);
+    //generate probabilities from the model
+  var predictions = await model.predict(data).dataSync();
+  //filter out predictions below a threshold    
+  var results = [];
+  predictions.map((prediction, index, array) => {
+    if(prediction > CONFIDENCE){
+      results.push([index,prediction]);
+    }      
+  });
+  //sort by strength of probability    
+  results.sort(function(a, b){return a - b}).reverse();
+  var return_list = [];
+  results.forEach(function(r, i){ 
+    return_list.push([classes[r[0]],r[1]]);
+  });
+  //return tuple of intent and probability
+  return return_list
 }
 
 async function response(sentence,userID,show_details){ 
@@ -169,6 +171,7 @@ async function response(sentence,userID,show_details){
   }
   return reply;
 }
+
 function setContext(userid,contextText){
   if(!arr.UserFilter(context,userid)){
     context.push({uID:userid, ctx:contextText})
@@ -178,10 +181,11 @@ function setContext(userid,contextText){
 }
 
 async function BuildAgent(){ 
-    await require('../models/intents').find({},async (err,inte) =>{
+    isAgentBuilding = true;
+    await intentsModels.find({},async (err,inte) =>{
       intents =  inte.length > 0 ?  inte : require('../Libs/intents');
     });
-    isAgentBuilding = true;
+    
     var wwd = [];
     documents = [];
     classes = [];
