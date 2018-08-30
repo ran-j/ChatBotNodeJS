@@ -30,7 +30,7 @@ var words = [], classes = [], documents = [], ignore_words = ['?'];
 var training = new Array();
 
 //lock for build agent
-var isAgentBuilding = true;
+var isAgentBuilding = false;
 
 //context for intents
 var context = [];
