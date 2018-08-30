@@ -58,7 +58,7 @@
                                        </div>                                                                          
                                    </div>
                                    <div class="box-footer text-center">
-                                       <button type="submit" class="btn btn-primary btn-lg">Save</button>
+                                       <button type="button" class="btn btn-primary btn-lg" onclick="Save()">Save</button>
                                    </div>
                                </form>
                            </div>
@@ -73,33 +73,71 @@
         <% include ../Fixed/footer.ejs %>   
         
         <script>
-       
-            function BTNadd() {
-                var textinp = $( '.newresponse' ).val();
-                if(textinp.trim().length > 0){                  
-                    var tr = $('#textB');
-                    tr.css("background-color","#FF3700");
-                    tr.fadeOut(400, function(){
-                        tr.remove();
-                    });
-                    $( "#tableIP" ).append('<tr><td>'+textinp+'</td><td><button class="btn btn-sm btn-danger">Delete <i class="fas fa-trash"></i></button></td></tr>')
-                    $( "#tableIP" ).append( '<tr id="textB"><td><input type="text" class="form-control newresponse" placeholder="Type new response"></td><td><button class="btn btn-sm btn-success" onclick="BTNadd()" type="button">Add <i class="fas fa-save"></i></button></td></tr>' );
-                }             
-            }
+            
+            var response = [];
+            var pattern = [];
 
             function BtnaddA() {
                 var textinp = $( '.newpattern' ).val();
                 if(textinp.trim().length > 0){                  
                     var tr = $('#textC');
                     tr.css("background-color","#FF3700");
+                    pattern.push(textinp);
                     tr.fadeOut(400, function(){
                         tr.remove();
                     });
-                    $( "#tableIR" ).append('<tr><td>'+textinp+'</td><td><button class="btn btn-sm btn-danger">Delete <i class="fas fa-trash"></i></button></td></tr>')
+                    $( "#tableIR" ).append('<tr id="'+pattern.length+'"><td>'+textinp+'</td><td><button class="btn btn-sm btn-danger"type="button" value="'+pattern.length+'" onclick="DeletePattern(this)">Delete <i class="fas fa-trash"></i></button></td></tr>')
                     $( "#tableIR" ).append( '<tr id="textC"><td><input type="text" class="form-control newpattern" placeholder="Type new pattern"></td><td><button class="btn btn-sm btn-success" onclick="BtnaddA()" type="button">Add <i class="fas fa-save"></i></button></td></tr>' );
                 }             
             }
-          
+       
+            function BTNadd() {
+                var textinp = $( '.newresponse' ).val();
+                if(textinp.trim().length > 0){                  
+                    var tr = $('#textB');
+                    tr.css("background-color","#FF3700");
+                    response.push(textinp);
+                    tr.fadeOut(400, function(){
+                        tr.remove();
+                    });
+                    $( "#tableIP" ).append('<tr id="'+response.length+'"><td>'+textinp+'</td><td><button class="btn btn-sm btn-danger" type="button" value="'+response.length+'" onclick="DeleteResponse(this)">Delete <i class="fas fa-trash"></i></button></td></tr>')
+                    $( "#tableIP" ).append( '<tr id="textB"><td><input type="text" class="form-control newresponse" placeholder="Type new response"></td><td><button class="btn btn-sm btn-success" onclick="BTNadd()" type="button">Add <i class="fas fa-save"></i></button></td></tr>' );
+                }             
+            }            
+            
+            function Save(){
+                if($('#tag').val() && $('#title').val()){
+                    $.ajax({
+                        type: "POST",
+                        url: "/intent/new",
+                        data: {                    
+                            tag: $('#tag').val(),
+                            patterns: JSON.stringify(pattern),
+                            title: $('#title').val(),
+                            response: JSON.stringify(response)                    
+                        },
+                        success: function(msg){                             
+                            swal("Success !!", msg, "success");
+                        },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                            sweetAlert("Oops...", XMLHttpRequest.responseText, "error");
+                        }
+                    });                                 
+                }else{
+                    sweetAlert("Oops...", 'Required fields Tag and Title.', "error");
+                }       
+            }
+
+            function DeleteResponse(v){                
+                document.getElementById(v.value).remove();   
+                response.splice(parseInt(v.value -1), 1);            
+            }
+
+            function DeletePattern(v){                
+                document.getElementById(v.value).remove();   
+                pattern.splice(parseInt(v.value -1), 1);            
+            }
+              
         </script>
             
     </body>

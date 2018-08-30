@@ -36,7 +36,7 @@ var isAgentBuilding = true;
 var context = [];
 
 //init modules and training
-BuildAgent();
+// BuildAgent();
 
 /* GET home page. */
 router.get('/', async (req, res, next) => {
@@ -56,6 +56,33 @@ router.post('/build', async (req, res, next) => {
   }else{
     res.status(403).end('Agent are building');
   }  
+});
+
+router.post('/intent/new', async (req, res, next) => { 
+  if(req.body.tag && req.body.title){
+    intentsModels.find({tag: req.body.tag},function(err,Inte){
+      if(err){
+        console.error(err);
+        res.status(500).end('Error');
+      }
+      if(Inte != null && Inte.length == 0){
+        var newIntent = {
+          tag : req.body.tag,
+          patterns: JSON.parse(req.body.patterns),
+          title: req.body.title,
+          responses: JSON.parse(req.body.response),          
+        }
+        intentsModels.create(newIntent).then(()=>{
+          res.status(200).end('Intent created');
+        }).catch((e)=>{
+          console.error(e);
+          res.status(500).end('Internal error');
+        })
+      }else{
+        res.status(403).end('Tag already exist.');
+      }
+    })
+  }
 });
 
 /* POST get response from bot. */
