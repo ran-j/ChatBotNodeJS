@@ -65,7 +65,7 @@ router.post('/intent/new', async (req, res, next) => {
         console.error(err);
         res.status(500).end('Error');
       }
-      if(Inte != null && Inte.length == 0){
+      if(Inte === undefined || Inte.length == 0){
         var newIntent = {
           tag : req.body.tag,
           patterns: JSON.parse(req.body.patterns),
@@ -83,6 +83,18 @@ router.post('/intent/new', async (req, res, next) => {
       }
     })
   }
+});
+
+router.post('/intent/delete', function(req, res) { 
+  intentsModels.remove({tag: req.body.tag}, function(err) {
+    if (!err) {
+      res.status(200).end('Intent deleted');
+    }
+    else {
+      console.error(err)
+      res.status(500).end('Error');
+    }
+  });  
 });
 
 /* POST get response from bot. */

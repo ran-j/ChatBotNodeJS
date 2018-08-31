@@ -42,9 +42,9 @@
                                             </a>
                                         </td>
                                         <td>
-                                            <button class="btn btn-sm btn-danger">
+                                            <button class="btn btn-sm btn-danger" onclick="Delete('<%= customer.tag %>')">
                                                 <i class="fas fa-trash"></i>
-                                            </button> &nbsp;
+                                            </button> &nbsp; 
                                             <button class="btn btn-sm btn-success" onclick="window.location.href='/admin/training/<%= customer.tag %>'">
                                                 <i class="fas fa-graduation-cap"></i>
                                             </button>
@@ -104,6 +104,38 @@
                     });
                 });
         };
+
+
+        function Delete(v){
+            swal({
+                title: "Are you sure to delete ?",
+                text: "You will not be able to recover this Intent !!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes, delete it !!",
+                closeOnConfirm: false
+            },
+            function(){
+                $.ajax({
+                    type: "POST",
+                    url: "/intent/delete",
+                    data: {                    
+                        tag: v                                         
+                    },
+                    success: function(msg){                             
+                        swal("Success !!", msg, "success");
+                        setTimeout(function(){
+                            location.reload();
+                        },1000)
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        sweetAlert("Oops...", XMLHttpRequest.responseText, "error");
+                    }
+                }); 
+                swal("Deleted !!", "Intent deleted", "success");
+            });
+        }
 
     </script>
 

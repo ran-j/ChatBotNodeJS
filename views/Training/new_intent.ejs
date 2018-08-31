@@ -118,6 +118,9 @@
                         },
                         success: function(msg){                             
                             swal("Success !!", msg, "success");
+                            setTimeout(function(){
+                                location.reload();
+                            },1000)
                         },
                         error: function(XMLHttpRequest, textStatus, errorThrown) {
                             sweetAlert("Oops...", XMLHttpRequest.responseText, "error");
