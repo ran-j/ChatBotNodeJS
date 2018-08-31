@@ -36,7 +36,7 @@ var isAgentBuilding = false;
 var context = [];
 
 //init modules and training
-// BuildAgent();
+BuildAgent(false);
 
 /* GET home page. */
 router.get('/', async (req, res, next) => {
@@ -47,7 +47,7 @@ router.post('/build', async (req, res, next) => {
   if(isAgentBuilding == false){
     try {
       //init modules and training
-      await BuildAgent();
+      await BuildAgent(true);
       //responde
       res.status(200).end('Agent built');
     } catch (error) {
@@ -219,7 +219,7 @@ function setContext(userid,contextText){
   }
 }
 
-async function BuildAgent(){ 
+async function BuildAgent(fullbuild){ 
     isAgentBuilding = true;
     await intentsModels.find({},async (err,inte) =>{
       intents =  inte.length > 0 ?  inte : require('../Libs/intents');
@@ -258,12 +258,19 @@ async function BuildAgent(){
     classes = arr.sort(classes);  
 
     console.log(' ');
-    console.log('Words prepared.')
-    console.log(' ');
-    console.log('Training...'); 
-
-    await TrainBuilder();      
-    
+    console.log('Words list builded.')
+ 
+    if(fullbuild){
+      console.log(' ');
+      console.log('Training...'); 
+      await TrainBuilder();  
+    }else{
+      console.log(' ');
+      console.log("documents "+ documents.length);
+      console.log("classes "+classes.length);
+      console.log("unique stemmed words "+ words.length);
+    }       
+  
     isAgentBuilding = false;
 
     console.log(' ');
