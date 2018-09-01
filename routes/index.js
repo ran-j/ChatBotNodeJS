@@ -51,6 +51,7 @@ router.post('/build', async (req, res, next) => {
       //responde
       res.status(200).end('Agent built');
     } catch (error) {
+      console.error(error);
       res.status(500).end('Erro on build agent');
     }    
   }else{

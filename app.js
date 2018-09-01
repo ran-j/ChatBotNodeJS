@@ -11,11 +11,12 @@ var app = express();
 
 var indexRouter =  require('./routes/index');
 var intentsRouter = require('./routes/intents');
-
+ 
 mongoose
-  .connect(BotConfig.DB)
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.log(err));
+  .connect(BotConfig.DB,{ useNewUrlParser: true })
+  .then(() => {
+    console.log('MongoDB Connected')
+  }).catch(err => console.log(err)); 
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -64,4 +65,3 @@ app.use((err, req, res, next) => {
 });
 
 module.exports = app;
-

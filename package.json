@@ -9,7 +9,6 @@
     "@tensorflow/tfjs": "^0.12.4",
     "@tensorflow/tfjs-core": "^0.12.12",
     "@tensorflow/tfjs-node": "^0.1.11",
-    "array-contains": "0.0.1",
     "connect-mongo": "^2.0.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
@@ -17,12 +16,10 @@
     "express": "~4.16.0",
     "express-session": "^1.15.6",
     "http-errors": "~1.6.2",
-    "mongoose": "^5.2.9",
+    "mongoose": "^5.2.10",
     "morgan": "~1.9.0",
     "natural": "^0.6.1",
     "numjs": "^0.16.0",
-    "pickle": "^0.2.0",
-    "scikit-learn": "^0.1.0",
     "shuffle-array": "^1.0.1",
     "static-eval": "^2.0.0"
   }
