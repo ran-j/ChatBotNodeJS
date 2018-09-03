@@ -221,16 +221,16 @@ function setContext(userid,contextText){
 }
 
 async function BuildAgent(fullbuild){ 
-    isAgentBuilding = true;
-     
-    intentsModels.find({},async (err,inte) =>{
+    isAgentBuilding = true;     
+    await intentsModels.find({},async (err,inte) =>{
       intents =  inte.length > 0 ?  inte : require('../Libs/intents');
       var wwd = [];
       words = [];
       documents = [];
       classes = [];
+      training = new Array();
 
-      intents.forEach( (intent, ii) =>{
+      intents.forEach((intent, ii) =>{
         intent.patterns.forEach((pattern, i) =>{  
           //stem and tokenize each word in the sentence     
           var tokenizer = new natural.WordTokenizer();
@@ -343,8 +343,7 @@ async function TrainBuilder(){
     });
   } catch (error) {
     console.error(error)
-  }
-  
+  }  
 }
 
 async function GetFallBack(){ 

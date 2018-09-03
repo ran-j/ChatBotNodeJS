@@ -51,12 +51,7 @@ var intents =  [
    "responses": ["For rentals today please call 1-800-MYMOPED", "Same-day rentals please call 1-800-MYMOPED"],
    "title": "Rentals Todays",
    "context_filter": "rentalday"
-  },
-  {"tag": "ranieri",
-  "patterns": ["who is ranieri"],
-  "responses": ["Is the big boss"],
-  "title": "Who is ranieri",
- }
+  }
 ];
 
 module.exports = intents;
