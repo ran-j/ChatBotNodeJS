@@ -264,7 +264,7 @@ async function BuildAgent(fullbuild){
     if(fullbuild){
       console.log(' ');
       console.log('Training...'); 
-      await TrainBuilder();  
+      await TrainBuilder().catch(console.error);  
     }else{
       console.log(' ');
       console.log("documents "+ documents.length);
@@ -309,36 +309,40 @@ async function TrainBuilder(){
   //create train arrays
   var train_x = arr.pick(training,0);
   var train_y = arr.pick(training,1);
- 
-  // Build neural network:
-  const model = tf.sequential();
-  model.add(tf.layers.dense({units: training.length, activation: 'relu', inputShape: [train_x[0].length]}));
-  model.add(tf.layers.dense({units: train_y[0].length, activation: 'linear'}));
-  model.compile({optimizer: 'sgd', loss: 'meanSquaredError'});
+  try {
+    // Build neural network:
+    const model = tf.sequential();
+    model.add(tf.layers.dense({units: training.length, activation: 'relu', inputShape: [train_x[0].length]}));
+    model.add(tf.layers.dense({units: train_y[0].length, activation: 'linear'}));
+    model.compile({optimizer: 'sgd', loss: 'meanSquaredError'});
 
-  const xs = tf.tensor(train_x);
-  const ys = tf.tensor(train_y);
+    const xs = tf.tensor(train_x);
+    const ys = tf.tensor(train_y);
 
-  //train model
-  await model.fit(xs, ys, {
-    epochs: 1000,
-    batchSize: 8,
-    callbacks: {
-      onEpochEnd: async (epoch, log) => {
-        console.log(`Epoch ${epoch}: loss = ${log.loss}`);        
+    //train model
+    await model.fit(xs, ys, {
+      epochs: 1000,
+      batchSize: 8,
+      callbacks: {
+        onEpochEnd: async (epoch, log) => {
+          console.log(`Epoch ${epoch}: loss = ${log.loss}`);        
+        }
       }
-    }
-  }).then(async () => {
-      console.log('Saving model....'); 
-      await model.save('file://'+modelpath).then(async ()=>{
-        console.log(' ');
-        console.log('Model Saved.');     
-        console.log(' ');
-        console.log("documents "+ documents.length);
-        console.log("classes "+classes.length);
-        console.log("unique stemmed words "+ words.length);
-      });    
-  });
+    }).then(async () => {
+        console.log('Saving model....'); 
+        await model.save('file://'+modelpath).then(async ()=>{
+          console.log(' ');
+          console.log('Model Saved.');     
+          console.log(' ');
+          console.log("documents "+ documents.length);
+          console.log("classes "+classes.length);
+          console.log("unique stemmed words "+ words.length);
+        });    
+    });
+  } catch (error) {
+    console.error(error)
+  }
+  
 }
 
 async function GetFallBack(){ 
