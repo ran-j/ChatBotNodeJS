@@ -39,7 +39,7 @@ var context = [];
 BuildAgent(false);
 
 /* GET home page. */
-router.get('/', async (req, res, next) => {
+router.get('/', (req, res, next) => {
   res.render('chat', { title: 'Tensorflow JS' }); 
 });
 
@@ -59,7 +59,7 @@ router.post('/build', async (req, res, next) => {
   }  
 });
 
-router.post('/intent/new', async (req, res, next) => { 
+router.post('/intent/new', (req, res, next) => { 
   if(req.body.tag && req.body.title){
     intentsModels.find({tag: req.body.tag},function(err,Inte){
       if(err){
@@ -86,7 +86,7 @@ router.post('/intent/new', async (req, res, next) => {
   }
 });
 
-router.post('/intent/delete', function(req, res) { 
+router.post('/intent/delete', (req, res) => { 
   intentsModels.remove({tag: req.body.tag}, function(err) {
     if (!err) {
       res.status(200).end('Intent deleted');
@@ -222,64 +222,66 @@ function setContext(userid,contextText){
 
 async function BuildAgent(fullbuild){ 
     isAgentBuilding = true;
-    await intentsModels.find({},async (err,inte) =>{
+     
+    intentsModels.find({},async (err,inte) =>{
       intents =  inte.length > 0 ?  inte : require('../Libs/intents');
-    });
-    
-    var wwd = [];
-    documents = [];
-    classes = [];
+      var wwd = [];
+      words = [];
+      documents = [];
+      classes = [];
 
-    intents.forEach(async (intent, ii) =>{
-      intent.patterns.forEach(async (pattern, i) =>{  
-        //stem and tokenize each word in the sentence     
-        var tokenizer = new natural.WordTokenizer();
-        var wd = tokenizer.tokenize(pattern);      
-        //add to words list     
-        wwd.push(wd);
-        //add to documents in corpus
-        documents.push([wd,intent.tag]);       
-        //add the tag to classes list 
-        if(!arr.ContainsinArray(classes,intent.tag)){
-          classes.push(intent.tag);
-        }
+      intents.forEach( (intent, ii) =>{
+        intent.patterns.forEach((pattern, i) =>{  
+          //stem and tokenize each word in the sentence     
+          var tokenizer = new natural.WordTokenizer();
+          var wd = tokenizer.tokenize(pattern);      
+          //add to words list     
+          wwd.push(wd);
+          //add to documents in corpus
+          documents.push([wd,intent.tag]);       
+          //add the tag to classes list 
+          if(!arr.ContainsinArray(classes,intent.tag)){
+            classes.push(intent.tag);
+          }
+        });
       });
-    });
-    //stem and lower each word
-    words = wwd.map((iten, index, array) => {
-      return iten.map((w, i, a) => {
-        natural.LancasterStemmer.attach();
-        w = w.toLowerCase().stem();
-        return w;
-      }); 
-    })     
-    //stem and lower each word and remove duplicates 
-    words = arr.ignore_wordsFilter(arr.sort(arr.toOneArray(words)),ignore_words);
-    //lower each word and remove duplicates
-    classes = arr.sort(classes);  
+      //stem and lower each word
+      words = wwd.map((iten, index, array) => {
+        return iten.map((w, i, a) => {
+          natural.LancasterStemmer.attach();
+          w = w.toLowerCase().stem();
+          return w;
+        }); 
+      })     
+      //stem and lower each word and remove duplicates 
+      words = arr.ignore_wordsFilter(arr.sort(arr.toOneArray(words)),ignore_words);
+      //lower each word and remove duplicates
+      classes = arr.sort(classes);  
 
-    console.log(' ');
-    console.log('Words list builded.')
- 
-    if(fullbuild){
       console.log(' ');
-      console.log('Training...'); 
-      await TrainBuilder().catch(console.error);  
-    }else{
-      console.log(' ');
-      console.log("documents "+ documents.length);
-      console.log("classes "+classes.length);
-      console.log("unique stemmed words "+ words.length);
-    }       
+      console.log('Wors list builded.')
   
-    isAgentBuilding = false;
+      if(fullbuild){
+        console.log(' ');
+        console.log('Training...'); 
+        await TrainBuilder().catch(console.error);  
+      }else{
+        console.log(' ');
+        console.log("documents "+ documents.length);
+        console.log("classes "+classes.length);
+        console.log("unique stemmed words "+ words.length);
+      }       
+    
+      isAgentBuilding = false;
 
-    console.log(' ');
-    console.log('Training finished'); 
+      console.log(' ');
+      console.log('Training finished'); 
+    }); 
+    
 }
 
 async function TrainBuilder(){ 
-  documents.forEach(async (doc, i) =>{
+  documents.forEach((doc, i) =>{
     //initialize bag of words
     var bag = [];
     //list of tokenized words for the pattern and stem each word
@@ -289,7 +291,7 @@ async function TrainBuilder(){
       return it;
     });    
     //create bag of words array
-    words.forEach(async (word, ii) =>{
+    words.forEach((word, ii) =>{
       if(!arr.NotcontainsinArray(pattern_words,word)){
         bag.push(1);
       }else{
