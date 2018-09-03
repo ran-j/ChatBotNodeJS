@@ -6,9 +6,9 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "@tensorflow/tfjs": "^0.12.4",
-    "@tensorflow/tfjs-core": "^0.12.12",
-    "@tensorflow/tfjs-node": "^0.1.11",
+    "@tensorflow/tfjs": "^0.12.6",
+    "@tensorflow/tfjs-core": "^0.12.15",
+    "@tensorflow/tfjs-node": "^0.1.14",
     "connect-mongo": "^2.0.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
@@ -19,7 +19,6 @@
     "mongoose": "^5.2.10",
     "morgan": "~1.9.0",
     "natural": "^0.6.1",
-    "numjs": "^0.16.0",
     "shuffle-array": "^1.0.1",
     "static-eval": "^2.0.0"
   }

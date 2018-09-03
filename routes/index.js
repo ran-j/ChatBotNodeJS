@@ -315,7 +315,7 @@ async function TrainBuilder(){
     // Build neural network:
     const model = tf.sequential();
     model.add(tf.layers.dense({units: training.length, activation: 'relu', inputShape: [train_x[0].length]}));
-    model.add(tf.layers.dense({units: train_y[0].length, activation: 'linear'}));
+    model.add(tf.layers.dense({units: train_y[0].length, activation: 'softmax'}));
     model.compile({optimizer: 'sgd', loss: 'meanSquaredError'});
 
     const xs = tf.tensor(train_x);
