@@ -203,9 +203,7 @@ async function response(sentence, userID, show_details) {
           if (!arr.inArray('context_filter', s) || arr.UserFilter(context, userID) && arr.inArray('context_filter', s) && s['context_filter'] == context[context.findIndex(x => x.uID == userID)].ctx) {
             if (show_details) {
               console.log('tag: ' + s['tag']);
-            }
-            //remove user context
-            context.slice(context.slice(x => x.uID == userID),1)
+            }             
             //a random response from the intent             
             reply = replaceAll(arr.randomchoice(s['responses']),'{botname}',BotName);
           }else{
