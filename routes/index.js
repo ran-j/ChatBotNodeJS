@@ -204,6 +204,8 @@ async function response(sentence, userID, show_details) {
             if (show_details) {
               console.log('tag: ' + s['tag']);
             }             
+            //remove user context
+            context.slice(context.slice(x => x.uID == userID),1)
             //a random response from the intent             
             reply = replaceAll(arr.randomchoice(s['responses']),'{botname}',BotName);
           }else{
@@ -330,7 +332,7 @@ async function TrainBuilder() {
   const model = tf.sequential();
   model.add(tf.layers.dense({ units: training.length, activation: 'softmax', inputShape: [train_x[0].length] }));
   model.add(tf.layers.dense({ units: train_y[0].length, activation: 'linear' }));
-  model.compile({ optimizer: 'adam', loss: 'meanSquaredError' });
+  model.compile({ optimizer: 'adam', loss: tf.losses.meanSquaredError });
 
   const xs = tf.tensor(train_x);
   const ys = tf.tensor(train_y);
