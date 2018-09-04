@@ -1,6 +1,17 @@
 module.exports = new class SysFunctions {
     constructor() {       
     }
+
+    async zeroTest(myArray) {
+        var flag = false;
+        for(var i = 0; i < myArray.length; ++i) {
+            if(myArray[i] !== 0) {
+                flag = true;
+                break;
+            }
+        } 
+        return flag
+    }
   
     randomchoice(A){
        return A[Math.floor(Math.random()*A.length)]

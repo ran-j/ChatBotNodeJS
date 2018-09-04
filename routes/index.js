@@ -154,23 +154,30 @@ async function classify(sentence) {
   var model = await tf.loadModel('file://' + modelpath + '/model.json');
   //bow sentence
   const bowData = await bow(sentence, true);
-  //converter to tensor array
-  var data = await tf.tensor2d(bowData, [1, bowData.length]);
-  //generate probabilities from the model
-  var predictions = await model.predict(data).dataSync();
-  //filter out predictions below a threshold    
-  var results = [];
-  predictions.map((prediction, index, array) => {
-    if (prediction > CONFIDENCE) {
-      results.push([index, prediction]);
-    }
-  });
-  //sort by strength of probability    
-  results.sort(function (a, b) { return a - b }).reverse();
+  //test if the BowData is a array of zeros
+  var NotallZeros = await arr.zeroTest(bowData);
+  //Output array
   var return_list = [];
-  results.forEach(function (r, i) {
-    return_list.push([classes[r[0]], r[1]]);
-  });
+  if(NotallZeros){
+    //converter to tensor array
+    var data = await tf.tensor2d(bowData, [1, bowData.length]);
+    //generate probabilities from the model
+    var predictions = await model.predict(data).dataSync();
+    //filter out predictions below a threshold    
+    var results = [];
+    predictions.map((prediction, index, array) => {
+      if (prediction > CONFIDENCE) {
+        results.push([index, prediction]);
+      }
+    });
+    //sort by strength of probability    
+    results.sort(function (a, b) { return b[1] - a[1] });
+    //build array with responses    
+    results.forEach(function (r, i) {
+      return_list.push([classes[r[0]], r[1]]);
+    });
+    console.log(return_list)    
+  } 
   //return tuple of intent and probability
   return return_list
 }
@@ -197,8 +204,13 @@ async function response(sentence, userID, show_details) {
             if (show_details) {
               console.log('tag: ' + s['tag']);
             }
+            //remove user context
+            context.slice(context.slice(x => x.uID == userID),1)
             //a random response from the intent             
-            reply = arr.randomchoice(s['responses']);
+            reply = replaceAll(arr.randomchoice(s['responses']),'{botname}',BotName);
+          }else{
+            //a random response from the intent             
+            reply = replaceAll(arr.randomchoice(s['responses']),'{botname}',BotName);            
           }
         }
       });
@@ -264,10 +276,10 @@ async function BuildAgent(fullbuild, res) {
 
       await TrainBuilder().then(() => {
         isAgentBuilding = false;
-        //responde
         res.status(200).end('Agent built');
       }).catch((error) => {
         console.log(error);
+        isAgentBuilding = false;
         res.status(500).end('Erro on built');
       });
 
@@ -355,6 +367,10 @@ async function GetFallBack() {
     }
   })
   return rt;
+}
+
+function replaceAll(str, needle, replacement) {
+  return str.split(needle).join(replacement);
 }
 
 module.exports = router;

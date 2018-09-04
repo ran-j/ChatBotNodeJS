@@ -51,6 +51,11 @@ var intents =  [
    "responses": ["For rentals today please call 1-800-MYMOPED", "Same-day rentals please call 1-800-MYMOPED"],
    "title": "Rentals Todays",
    "context_filter": "rentalday"
+  },
+  {"tag": "myname",
+   "patterns": ["whats your name ?","who are you"],
+   "responses": ["my name is {botname}", "You cam call me {botname}"],
+   "title": "Bot name",
   }
 ];
 
