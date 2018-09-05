@@ -158,7 +158,7 @@ async function classify(sentence) {
   var NotallZeros = await arr.zeroTest(bowData);
   //Output array
   var return_list = [];
-  if(NotallZeros){
+  if(NotallZeros || CONFIDENCE == BotConfig.BotConfidence.low){
     //converter to tensor array
     var data = await tf.tensor2d(bowData, [1, bowData.length]);
     //generate probabilities from the model
@@ -330,8 +330,8 @@ async function TrainBuilder() {
 
   // Build neural network:
   const model = tf.sequential();
-  model.add(tf.layers.dense({ units: training.length, activation: 'softmax', inputShape: [train_x[0].length] }));
-  model.add(tf.layers.dense({ units: train_y[0].length, activation: 'linear' }));
+  model.add(tf.layers.dense({ units: training.length, activation: 'relu', inputShape: [train_x[0].length] }));
+  model.add(tf.layers.dense({ units: train_y[0].length, activation: 'softmax' }));
   model.compile({ optimizer: 'adam', loss: tf.losses.meanSquaredError });
 
   const xs = tf.tensor(train_x);
