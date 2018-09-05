@@ -151,7 +151,7 @@ async function bow(sentence, show_details) {
 
 async function classify(sentence) {
   //load model
-  var model = await tf.loadModel('file://' + modelpath + '/model.json');
+  var model = await tf.loadModel('file://' + modelpath + '/model.json'); 
   //bow sentence
   const bowData = await bow(sentence, true);
   //test if the BowData is a array of zeros
@@ -330,9 +330,12 @@ async function TrainBuilder() {
 
   // Build neural network:
   const model = tf.sequential();
-  model.add(tf.layers.dense({ units: training.length, activation: 'relu', inputShape: [train_x[0].length] }));
+  model.add(tf.layers.dense({ units: 256, activation: 'relu', inputShape: [train_x[0].length] }));
+  model.add(tf.layers.dropout({rate: 0.25}));
+  model.add(tf.layers.dense({ units: 128, activation: 'relu' }));
+  model.add(tf.layers.dropout({rate: 0.25}));
   model.add(tf.layers.dense({ units: train_y[0].length, activation: 'softmax' }));
-  model.compile({ optimizer: 'adam', loss: tf.losses.meanSquaredError });
+  model.compile({ optimizer: 'adam', loss: tf.losses.meanSquaredError, metrics: ['accuracy'] });
 
   const xs = tf.tensor(train_x);
   const ys = tf.tensor(train_y);
@@ -341,13 +344,17 @@ async function TrainBuilder() {
   await model.fit(xs, ys, {
     epochs: 1000,
     batchSize: 8,
+    shuffle: true,
+    // verbose: 1,
     callbacks: {
       onEpochEnd: async (epoch, log) => {
         console.log(`Epoch ${epoch}: loss = ${log.loss}`);
       }
     }
   }).then(async () => {
-    console.log('Saving model....');
+    console.log('Saving model....');    
+     //Print a text summary of the model's layers.
+    model.summary();
     await model.save('file://' + modelpath).then(async () => {
       console.log(' ');
       console.log('Model Saved.');
