@@ -335,7 +335,7 @@ async function TrainBuilder() {
   model.add(tf.layers.dense({ units: 128, activation: 'relu' }));
   model.add(tf.layers.dropout({rate: 0.25}));
   model.add(tf.layers.dense({ units: train_y[0].length, activation: 'softmax' }));
-  model.compile({ optimizer: 'adam', loss: tf.losses.meanSquaredError, metrics: ['accuracy'] });
+  model.compile({ optimizer: 'adam', loss: tf.losses.softmaxCrossEntropy, metrics: ['accuracy'] });
 
   const xs = tf.tensor(train_x);
   const ys = tf.tensor(train_y);
