@@ -1,5 +1,6 @@
 var express = require('express');
 var natural = require('natural');
+var classifier = new natural.BayesClassifier();
 var shuffle = require('shuffle-array');
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
@@ -116,17 +117,16 @@ async function clean_up_sentence(sentence) {
   });
 
   //if exist a synonym for the words in the list they will be replaced with their synonym
-  await sentence_words.forEach(function (word, i) {
+  await sentence_words.forEach(function (word, i) {    
     synonyms.forEach(function (syn) {
       syn.synonyms.forEach(function (syns) {
         natural.LancasterStemmer.attach();
         if (syns.toLowerCase() == word.toLowerCase()) {
-          sentence_words[i] = word.replace(word, syn.keyWord).toLowerCase().stem();
-        } else {
-          sentence_words[i] = sentence_words[i].toLowerCase().stem();
+          sentence_words[i] = word.replace(word, syn.keyWord).toLowerCase().stem();        
         }
       })
     })
+    sentence_words[i] = sentence_words[i].toLowerCase().stem();
   })
   //return wordslist
   return sentence_words;
@@ -175,10 +175,10 @@ async function classify(sentence) {
     //build array with responses    
     results.forEach(function (r, i) {
       return_list.push([classes[r[0]], r[1]]);
-    });
-    console.log(return_list)    
+    });      
   } 
   //return tuple of intent and probability
+  console.log(return_list)  
   return return_list
 }
 
@@ -187,7 +187,7 @@ async function response(sentence, userID, show_details) {
   var i = 0;
   var results = await classify(sentence);
   //if we have a classification then find the matching intent tag
-  if (results) {
+  if (results && results.length > 0) {
     //loop as long as there are matches to process
     while (results[i]) {
       intents.forEach(function (s, i) {
@@ -217,6 +217,19 @@ async function response(sentence, userID, show_details) {
       results.shift();
       i++;
     }
+  }else{
+    //natural classify
+    var naturalpredict = classifier.getClassifications(sentence);
+    if(show_details){
+      console.log(naturalpredict);
+    }    
+    if(naturalpredict[0].value > 0.3 && naturalpredict[0].value < 0.42 || CONFIDENCE == BotConfig.BotConfidence.low){
+      intents.forEach((intent) => {
+        if (intent.tag == naturalpredict[0].label) {
+          reply = arr.randomchoice(intent.responses);
+        }
+      })
+    } 
   }
   return reply;
 }
@@ -245,9 +258,11 @@ async function BuildAgent(fullbuild, res) {
         var tokenizer = new natural.WordTokenizer();
         var wd = tokenizer.tokenize(pattern);
         //add to words list     
-        wwd.push(wd);
+        wwd.push(wd);        
+        //add to natural classifier
+        classifier.addDocument(wd, intent.tag);
         //add to documents in corpus
-        documents.push([wd, intent.tag]);
+        documents.push([wd, intent.tag]);        
         //add the tag to classes list 
         if (!arr.ContainsinArray(classes, intent.tag)) {
           classes.push(intent.tag);
@@ -258,10 +273,12 @@ async function BuildAgent(fullbuild, res) {
     words = wwd.map((iten, index, array) => {
       return iten.map((w, i, a) => {
         natural.LancasterStemmer.attach();
-        w = w.toLowerCase().stem();
+        w = w.toLowerCase().stem();       
         return w;
       });
     })
+    //train classifier model
+    classifier.train();
     //stem and lower each word and remove duplicates 
     words = arr.ignore_wordsFilter(arr.sort(arr.toOneArray(words)), ignore_words);
     //lower each word and remove duplicates
@@ -308,7 +325,7 @@ async function TrainBuilder() {
     });
     //create bag of words array
     words.forEach((word, ii) => {
-      if (!arr.NotcontainsinArray(pattern_words, word)) {
+      if (arr.WordContainsInPatterns(pattern_words, word)) {
         bag.push(1);
       } else {
         bag.push(0);

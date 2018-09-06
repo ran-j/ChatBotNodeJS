@@ -32,8 +32,8 @@ module.exports = new class SysFunctions {
         return A.length;
     }
 
-    NotcontainsinArray(A,value) {
-        return A.indexOf(value) < 0;
+    WordContainsInPatterns(A,value) {        
+        return A.indexOf(value) > -1;
     }
 
     sort(A){
