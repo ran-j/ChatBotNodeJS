@@ -158,24 +158,27 @@ async function classify(sentence) {
   var NotallZeros = await arr.zeroTest(bowData);
   //Output array
   var return_list = [];
-  if(NotallZeros || CONFIDENCE == BotConfig.BotConfidence.low){
-    //converter to tensor array
-    var data = await tf.tensor2d(bowData, [1, bowData.length]);
-    //generate probabilities from the model
-    var predictions = await model.predict(data).dataSync();
-    //filter out predictions below a threshold    
-    var results = [];
-    predictions.map((prediction, index, array) => {
-      if (prediction > CONFIDENCE) {
-        results.push([index, prediction]);
-      }
-    });
-    //sort by strength of probability    
-    results.sort(function (a, b) { return b[1] - a[1] });
-    //build array with responses    
-    results.forEach(function (r, i) {
-      return_list.push([classes[r[0]], r[1]]);
-    });      
+  if(NotallZeros || CONFIDENCE == BotConfig.BotConfidence.low){    
+    //to prevente memory leak
+    await tf.tidy(()=>{
+      //converter to tensor array
+      var data = tf.tensor2d(bowData, [1, bowData.length]);
+      //generate probabilities from the model
+      var predictions = model.predict(data).dataSync();
+      //filter out predictions below a threshold    
+      var results = [];
+      predictions.map((prediction, index, array) => {
+        if (prediction > CONFIDENCE) {
+          results.push([index, prediction]);
+        }
+      });
+      //sort by strength of probability    
+      results.sort(function (a, b) { return b[1] - a[1] });
+      //build array with responses    
+      results.forEach(function (r, i) {
+        return_list.push([classes[r[0]], r[1]]);
+      });  
+    })        
   } 
   //return tuple of intent and probability
   console.log(return_list)  
@@ -372,13 +375,17 @@ async function TrainBuilder() {
     console.log('Saving model....');    
      //Print a text summary of the model's layers.
     model.summary();
-    await model.save('file://' + modelpath).then(async () => {
+    await model.save('file://' + modelpath).then(() => {
       console.log(' ');
       console.log('Model Saved.');
-      console.log(' ');
+      console.log(' ');     
       console.log("documents " + documents.length);
       console.log("classes " + classes.length);
       console.log("unique stemmed words " + words.length);
+      //release memory
+      xs.dispose();
+      ys.dispose();
+      model.dispose();
     });
   });
 }
