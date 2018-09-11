@@ -23,29 +23,33 @@
                                </div><!-- /.box-header -->
                                <!-- form start -->
                                <form role="form">
+                                    <input type="hidden" id="idIntent" value="<%= synonym.id %>">
                                    <div class="box-body">
                                        <div class="form-group">
                                            <label for="exampleInputEmail1">Key Word</label>
                                            <input type="text" class="form-control" readonly="readonly" value="<%= synonym.keyWord %>">
                                        </div>
-                                       <div class="form-group">                                           
-                                           <table class="table table-bordered">                                                
-                                            <table class="table table-bordered"> 
+                                       <div class="form-group">                                                            
+                                            <table class="table table-bordered" id="tableI"> 
                                                 <tr>
                                                     <th style="width: 90%">Synonyms</th>
                                                     <th>Action</th>                                                       
                                                 </tr>          
-                                                <% synonym.synonyms.forEach(function(customer){ %>
-                                                    <tr>
+                                                <% synonym.synonyms.forEach(function(customer,i){ %>
+                                                    <tr id="R<%= i %>">
                                                         <td><%= customer %></td>
-                                                        <td><button class="btn btn-sm btn-danger">Delete <i class="fas fa-trash"></i></button></td>   
+                                                        <td><button class="btn btn-sm btn-danger" type="button" onclick="deletelist('R<%= i %>','<%= customer %>')">Delete <i class="fas fa-trash"></i></button></td>   
                                                     </tr>                                                            
-                                                <% }) %>                                                                           
+                                                <% }) %>  
+                                                <tr id="textB">
+                                                    <td><input type="text" class="form-control newresponse" placeholder='Type new response'></td>
+                                                    <td><button class="btn btn-sm btn-success appendB" type="button" onclick="BTNadd()">Add <i class="fas fa-save"></i></button></td>  
+                                                </tr>                                                                         
                                             </table>
                                        </div>
                                    </div>
                                    <div class="box-footer text-center">
-                                        <button type="submit" class="btn btn-primary btn-lg">Save</button>
+                                        <button type="button" class="btn btn-primary btn-lg" onclick="save()">Save</button>
                                     </div>
                                </form>
                            </div>
@@ -57,7 +61,61 @@
         </div><!-- ./wrapper -->
 
 
-        <% include ../Fixed/footer.ejs %>       
+        <% include ../Fixed/footer.ejs %>     
+        
+        <script>
+            var deleteList = [];
+            var appendlist = [];
+
+            function BTNadd() {
+                var textinp = $( '.newresponse' ).val();
+                if(textinp.trim().length > 0){                  
+                    var tr = $('#textB');
+                    tr.css("background-color","#FF3700");
+                    tr.fadeOut(400, function(){
+                        tr.remove();
+                    });
+                    appendlist.push(textinp);
+                    $( "#tableI" ).append('<tr id="'+appendlist.length+'"><td>'+textinp+'</td><td><button class="btn btn-sm btn-danger" type="button" onclick="deletefromlist('+appendlist.length+')">Delete <i class="fas fa-trash"></i></button></td></tr>')
+                    $( "#tableI" ).append( '<tr id="textB"><td><input type="text" class="form-control newresponse" placeholder="Type new response"></td><td><button class="btn btn-sm btn-success" onclick="BTNadd()" type="button">Add <i class="fas fa-save"></i></button></td></tr>' );
+                }             
+            }
+
+            function deletelist(el,v){
+                document.getElementById(el).remove();  
+                deleteList.push(v);
+            }
+
+            function deletefromlist(v){
+                appendlist.splice(v - 1,1);               
+                document.getElementById(v).remove(); 
+            }
+
+            function save(){
+                if(deleteList.length > 0 || appendlist.length > 0){
+                    $.ajax({
+                        type: "POST",
+                        url: "/synonym/update",
+                        data: {                   
+                            id: $('#idIntent').val(),
+                            delete: JSON.stringify(deleteList),
+                            add: JSON.stringify(appendlist)                    
+                        },
+                        success: function(msg){                             
+                            swal("Success !!", msg, "success");
+                            setTimeout(function(){
+                                location.reload();
+                            },1000)
+                        },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                            sweetAlert("Oops...", XMLHttpRequest.responseText, "error");
+                        }
+                    });       
+                }else{
+                    sweetAlert("Oops...", 'Nothing to update', "error");                    
+                }          
+            }
+        </script>
             
     </body>
 </html>

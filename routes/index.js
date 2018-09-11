@@ -87,7 +87,7 @@ router.post('/intent/new', (req, res, next) => {
 
 router.post('/synonym/new', (req, res, next) => {
   if (req.body.wd && req.body.title) {
-    synonymModel.find({ tag: req.body.wd }, function (err, Inte) {
+    synonymModel.find({ keyWord: req.body.wd }, function (err, Inte) {
       if (err) {
         console.error(err);
         res.status(500).end('Error');
@@ -109,6 +109,50 @@ router.post('/synonym/new', (req, res, next) => {
       }
     })
   }
+});
+
+router.post('/synonym/update', (req, res) => {
+  var id = req.body.id;
+  var toDelete = JSON.parse(req.body.delete);
+  var toAdd = JSON.parse(req.body.add);
+  if(id){
+    synonymModel.findById(id,(err,sysn)=>{
+      var newPattern = [];
+      if(!err && sysn != undefined || sysn.length != 0){
+        //create a array to delete
+        if(toDelete.length > 0){
+          sysn.synonyms.forEach((el)=>{
+            if(!arr.ContainsStringInArray(toDelete,el)){
+              newPattern.push(el);
+            }
+          })
+        }else{
+          newPattern = sysn.synonyms;
+        }
+        if(toAdd.length > 0){
+          newPattern = newPattern.concat(toAdd);
+        }
+        sysn.synonyms = newPattern;
+        sysn.save().then(()=>{
+          res.status(200).end('Update successfully')
+        });
+      }     
+    })
+  }else{
+    res.status(403).end('Nothing to update')
+  }
+});
+
+router.post('/synonym/delete', (req, res) => {
+  synonymModel.deleteOne({ keyWord: req.body.tag }, function (err) {
+    if (!err) {
+      res.status(200).end('Synonym deleted');
+    }
+    else {
+      console.error(err)
+      res.status(500).end('Error');
+    }
+  });
 });
 
 router.post('/intent/delete', (req, res) => {
@@ -133,8 +177,8 @@ router.post('/intent/update/patterns', (req, res) => {
       if(!err && Inte != undefined || Inte.length != 0){
         //create a array to delete
         if(toDelete.length > 0){
-          toDelete.forEach((el)=>{
-            if(!arr.ContainsStringInArray(Inte.patterns,el)){
+          Inte.patterns.forEach((el)=>{
+            if(!arr.ContainsStringInArray(toDelete,el)){
               newPattern.push(el);
             }
           })
@@ -165,8 +209,8 @@ router.post('/intent/update/response', (req, res) => {
       if(!err && Inte != undefined || Inte.length != 0){
         //create a array to delete
         if(toDelete.length > 0){
-          toDelete.forEach((el)=>{
-            if(!arr.ContainsStringInArray(Inte.responses,el)){
+          Inte.responses.forEach((el)=>{
+            if(!arr.ContainsStringInArray(toDelete,el)){
               newPattern.push(el);
             }
           })

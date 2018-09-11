@@ -17,6 +17,6 @@ var synonymSchema = new mongoose.Schema({
   }, 
 });
 
-var synonyms = mongoose.model('synonymsSchema', synonymSchema);
+var synonyms = mongoose.model('Synonym', synonymSchema);
 
 module.exports = synonyms;

@@ -30,7 +30,7 @@
                                     <tr>                
                                         <td> <%= customer.title %> </td>                      
                                         <td> <a href="/admin/editkey/<%= customer.keyWord %>"><%= customer.keyWord %> </a> </td>                                        
-                                        <td> <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></td>
+                                        <td> <button class="btn btn-sm btn-danger" onclick="Delete('<%= customer.keyWord %>')"><i class="fas fa-trash"></i></button></td>
                                     </tr>
                                 <% }) %> 
                                  
@@ -43,6 +43,40 @@
 
 
         <% include ../Fixed/footer.ejs %>
+
+        <script>
+            function Delete(v){
+                swal({
+                    title: "Are you sure to delete ?",
+                    text: "You will not be able to recover this synonym !!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, delete it !!",
+                    closeOnConfirm: false
+                },
+                function(){
+                    $.ajax({
+                        type: "POST",
+                        url: "/synonym/delete",
+                        data: {                    
+                            tag: v                                         
+                        },
+                        success: function(msg){                             
+                            swal("Success !!", msg, "success");
+                            setTimeout(function(){
+                                location.reload();
+                            },1000)
+                        },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                            sweetAlert("Oops...", XMLHttpRequest.responseText, "error");
+                        }
+                    }); 
+                    swal("Deleted !!", "Intent deleted", "success");
+                });
+            }
+
+        </script>
             
     </body>
 </html>

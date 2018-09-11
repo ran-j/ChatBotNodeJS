@@ -81,28 +81,28 @@
                 closeOnConfirm: false,
                 showLoaderOnConfirm: true,
             },
-                function () {
-                    $.ajax({
-                        url: "/build",
-                        type: "POST",
-                        data: {},
-                        dataType: "text xml",
-                        success: function (xml, textStatus, xhr) {
-                            if (xhr.status != 200) {
-                                sweetAlert("Oops...", xhr.responseText, "error");
-                            } else {
-                                swal("Success !!", xhr.responseText, "success");
-                            }
-                        },
-                        complete: function (xhr, textStatus) {
-                            if (xhr.status != 200) {
-                                sweetAlert("Oops...", xhr.responseText, "error");
-                            } else {
-                                swal("Success !!", xhr.responseText, "success");
-                            }
+            function () {
+                $.ajax({
+                    url: "/build",
+                    type: "POST",
+                    data: {},
+                    dataType: "text xml",
+                    success: function (xml, textStatus, xhr) {
+                        if (xhr.status != 200) {
+                            sweetAlert("Oops...", xhr.responseText, "error");
+                        } else {
+                            swal("Success !!", xhr.responseText, "success");
                         }
-                    });
+                    },
+                    complete: function (xhr, textStatus) {
+                        if (xhr.status != 200) {
+                            sweetAlert("Oops...", xhr.responseText, "error");
+                        } else {
+                            swal("Success !!", xhr.responseText, "success");
+                        }
+                    }
                 });
+            });
         };
 
 
