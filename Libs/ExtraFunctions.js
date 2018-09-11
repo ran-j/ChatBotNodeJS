@@ -32,7 +32,7 @@ module.exports = new class SysFunctions {
         return A.length;
     }
 
-    WordContainsInPatterns(A,value) {        
+    ContainsStringInArray(A,value) {        
         return A.indexOf(value) > -1;
     }
 
@@ -41,11 +41,7 @@ module.exports = new class SysFunctions {
             return A.indexOf(item) == pos;
         });
         return uniqueNames;
-    }    
-
-    isNotInArray(value, array) {
-        return !array.indexOf(value) > -1;
-    }
+    }        
 
     NotcontainsinPattern_words(A,B) {
        var otp = false;

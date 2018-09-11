@@ -23,6 +23,7 @@
                                </div><!-- /.box-header -->
                                <!-- form start -->
                                <form role="form">
+                                    <input type="hidden" id="idIntent" value="<%= intent.id %>">
                                    <div class="box-body">
                                        <div class="form-group">
                                            <label for="exampleInputEmail1">Tag</label>
@@ -35,10 +36,10 @@
                                                     <th style="width: 90%">Patterns</th>
                                                     <th>Action</th>                                                       
                                                 </tr>          
-                                                <% intent.patterns.forEach(function(customer){ %>
-                                                    <tr>
+                                                <% intent.patterns.forEach(function(customer,i){ %>
+                                                    <tr id="R<%= i %>">
                                                         <td><%= customer %></td>
-                                                        <td><button class="btn btn-sm btn-danger">Delete <i class="fas fa-trash"></i></button></td>    
+                                                        <td><button class="btn btn-sm btn-danger" type="button" onclick="deletelist('R<%= i %>','<%= customer %>')">Delete <i class="fas fa-trash"></i></button></td>    
                                                     </tr>                                                            
                                                 <% }) %>   
                                                 <tr id="textC">
@@ -49,7 +50,7 @@
                                        </div>
                                    </div>
                                    <div class="box-footer text-center">
-                                        <button type="submit" class="btn btn-primary btn-lg">Save</button>
+                                        <button type="button" class="btn btn-primary btn-lg" onclick="save()">Save</button>
                                     </div>
                                </form>
                            </div>
@@ -64,6 +65,8 @@
         <% include ../Fixed/footer.ejs %>     
         
         <script>
+            var deleteList = [];
+            var appendlist = [];
        
             function Btnadd() {
                 var textinp = $( '.newpattern' ).val();
@@ -73,9 +76,45 @@
                     tr.fadeOut(400, function(){
                         tr.remove();
                     });
-                    $( "#tableIP" ).append('<tr><td>'+textinp+'</td><td><button class="btn btn-sm btn-danger">Delete <i class="fas fa-trash"></i></button></td></tr>')
+                    appendlist.push(textinp)
+                    $( "#tableIP" ).append('<tr id="'+appendlist.length+'"><td>'+textinp+'</td><td><button class="btn btn-sm btn-danger" type="button" onclick="deletefromlist('+appendlist.length+')">Delete <i class="fas fa-trash"></i></button></td></tr>')
                     $( "#tableIP" ).append( '<tr id="textC"><td><input type="text" class="form-control newpattern" placeholder="Type new pattern"></td><td><button class="btn btn-sm btn-success" onclick="Btnadd()" type="button">Add <i class="fas fa-save"></i></button></td></tr>' );
                 }             
+            }
+
+            function deletelist(el,v){
+                document.getElementById(el).remove();  
+                deleteList.push(v);
+            }
+
+            function deletefromlist(v){
+                appendlist.splice(v - 1,1);               
+                document.getElementById(v).remove(); 
+            }
+
+            function save(){
+                if(deleteList.length > 0 || appendlist.length > 0){
+                    $.ajax({
+                        type: "POST",
+                        url: "/intent/update/patterns",
+                        data: {                   
+                            id: $('#idIntent').val(),
+                            delete: JSON.stringify(deleteList),
+                            add: JSON.stringify(appendlist)                    
+                        },
+                        success: function(msg){                             
+                            swal("Success !!", msg, "success");
+                            setTimeout(function(){
+                                location.reload();
+                            },1000)
+                        },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                            sweetAlert("Oops...", XMLHttpRequest.responseText, "error");
+                        }
+                    });       
+                }else{
+                    alert('Nothing to update')
+                }          
             }
             
         </script>

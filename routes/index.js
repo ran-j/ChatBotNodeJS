@@ -97,6 +97,70 @@ router.post('/intent/delete', (req, res) => {
   });
 });
 
+router.post('/intent/update/patterns', (req, res) => {
+  var id = req.body.id;
+  var toDelete = JSON.parse(req.body.delete);
+  var toAdd = JSON.parse(req.body.add);
+  if(id){
+    intentsModels.findById(id,(err,Inte)=>{
+      var newPattern = [];
+      if(!err && Inte != undefined || Inte.length != 0){
+        //create a array to delete
+        if(toDelete.length > 0){
+          toDelete.forEach((el)=>{
+            if(!arr.ContainsStringInArray(Inte.patterns,el)){
+              newPattern.push(el);
+            }
+          })
+        }else{
+          newPattern = Inte.patterns;
+        }
+        if(toAdd.length > 0){
+          newPattern = newPattern.concat(toAdd);
+        }
+        Inte.patterns = newPattern;
+        Inte.save().then(()=>{
+          res.status(200).end('Update successfully')
+        });
+      }     
+    })
+  }else{
+    res.status(403).end('Nothing to update')
+  }
+});
+
+router.post('/intent/update/response', (req, res) => {
+  var id = req.body.id;
+  var toDelete = JSON.parse(req.body.delete);
+  var toAdd = JSON.parse(req.body.add);
+  if(id){
+    intentsModels.findById(id,(err,Inte)=>{
+      var newPattern = [];
+      if(!err && Inte != undefined || Inte.length != 0){
+        //create a array to delete
+        if(toDelete.length > 0){
+          toDelete.forEach((el)=>{
+            if(!arr.ContainsStringInArray(Inte.responses,el)){
+              newPattern.push(el);
+            }
+          })
+        }else{
+          newPattern = Inte.responses;
+        }
+        if(toAdd.length > 0){
+          newPattern = newPattern.concat(toAdd);
+        }
+        Inte.responses = newPattern;
+        Inte.save().then(()=>{
+          res.status(200).end('Update successfully')
+        });
+      }     
+    })
+  }else{
+    res.status(403).end('Nothing to update')
+  }
+});
+
 /* POST get response from bot. */
 router.post('/ask', async (req, res, next) => {
   try {
@@ -328,7 +392,7 @@ async function TrainBuilder() {
     });
     //create bag of words array
     words.forEach((word, ii) => {
-      if (arr.WordContainsInPatterns(pattern_words, word)) {
+      if (arr.ContainsStringInArray(pattern_words, word)) {
         bag.push(1);
       } else {
         bag.push(0);
@@ -355,7 +419,7 @@ async function TrainBuilder() {
   model.add(tf.layers.dense({ units: 128, activation: 'relu' }));
   model.add(tf.layers.dropout({rate: 0.25}));
   model.add(tf.layers.dense({ units: train_y[0].length, activation: 'softmax' }));
-  model.compile({ optimizer: 'adam', loss: tf.losses.softmaxCrossEntropy, metrics: ['accuracy'] });
+  model.compile({ optimizer: 'adam', loss: 'categoricalCrossentropy', metrics: ['accuracy'] });
 
   const xs = tf.tensor(train_x);
   const ys = tf.tensor(train_y);
