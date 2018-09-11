@@ -333,14 +333,14 @@ async function classify(sentence) {
 }
 
 async function response(sentence, userID, show_details) {
-  var reply = arr.randomchoice(await GetFallBack());
+  var reply = arr.random(await GetFallBack());
   var i = 0;
   var results = await classify(sentence);
   //if we have a classification then find the matching intent tag
   if (results && results.length > 0) {
     //loop as long as there are matches to process
     while (results[i]) {
-      intents.forEach(function (s, i) {
+      intents.forEach(async (s, i) => {
         //set context for this intent if necessary
         if (s.tag == results[0][0]) {
           if (arr.inArray('context_set', s)) {
@@ -357,16 +357,16 @@ async function response(sentence, userID, show_details) {
             //remove user context
             context.slice(context.slice(x => x.uID == userID),1)
             //a random response from the intent             
-            reply = replaceAll(arr.randomchoice(s['responses']),'{botname}',BotName);
+            reply = ConfigResponse(s['responses']);
           }else{
             //a random response from the intent             
-            reply = replaceAll(arr.randomchoice(s['responses']),'{botname}',BotName);            
+            reply = ConfigResponse(s['responses']);            
           }
         }
       });
       results.shift();
       i++;
-    }
+    }  
   }else{
     //natural classify
     var naturalpredict = classifier.getClassifications(sentence);
@@ -376,7 +376,7 @@ async function response(sentence, userID, show_details) {
     if(naturalpredict[0].value > 0.3 && naturalpredict[0].value < 0.42 || CONFIDENCE == BotConfig.BotConfidence.low){
       intents.forEach((intent) => {
         if (intent.tag == naturalpredict[0].label) {
-          reply = arr.randomchoice(intent.responses);
+          reply = arr.random(intent.responses);
         }
       })
     } 
@@ -525,6 +525,12 @@ async function TrainBuilder() {
       model.dispose();
     });
   });
+}
+
+function ConfigResponse(sentence){
+  var resp = replaceAll(arr.random(sentence),'{botname}',BotName);
+  resp =  replaceAll(resp,'{botversion}','1.0.0');
+  return resp;
 }
 
 async function GetFallBack() {

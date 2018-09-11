@@ -54,7 +54,7 @@ var intents =  [
   },
   {"tag": "myname",
    "patterns": ["whats your name ?","who are you"],
-   "responses": ["my name is {botname}", "You cam call me {botname}"],
+   "responses": ["my name is {botname}, and my version is {botversion}", "You cam call me {botname}"],
    "title": "Bot name",
   }
 ];

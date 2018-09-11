@@ -13,7 +13,7 @@ module.exports = new class SysFunctions {
         return flag
     }
   
-    randomchoice(A){
+    random(A){
        return A[Math.floor(Math.random()*A.length)]
     }
 
