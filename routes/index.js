@@ -85,6 +85,32 @@ router.post('/intent/new', (req, res, next) => {
   }
 });
 
+router.post('/synonym/new', (req, res, next) => {
+  if (req.body.wd && req.body.title) {
+    synonymModel.find({ tag: req.body.wd }, function (err, Inte) {
+      if (err) {
+        console.error(err);
+        res.status(500).end('Error');
+      }
+      if (Inte === undefined || Inte.length == 0) {
+        var newSynonym = {
+          title: req.body.title,
+          keyWord: req.body.wd,
+          synonyms: JSON.parse(req.body.synonyms),
+        }
+        synonymModel.create(newSynonym).then(() => {
+          res.status(200).end('Synonym created');
+        }).catch((e) => {
+          console.error(e);
+          res.status(500).end('Internal error');
+        })
+      } else {
+        res.status(403).end('Synonym already exist.');
+      }
+    })
+  }
+});
+
 router.post('/intent/delete', (req, res) => {
   intentsModels.remove({ tag: req.body.tag }, function (err) {
     if (!err) {
@@ -175,23 +201,23 @@ async function clean_up_sentence(sentence) {
   var tokenizer = new natural.WordTokenizer();
   //stem and tokenize the pattern
   sentence_words = await tokenizer.tokenize(sentence);
-
-  await synonymModel.find({}, function (err, synonym) {
+  //fix words
+  await synonymModel.find({},(err, synonym) => {
     synonyms = synonym.length > 0 ? synonym : require('../Libs/synonyms');
-  });
-
-  //if exist a synonym for the words in the list they will be replaced with their synonym
-  await sentence_words.forEach(function (word, i) {    
-    synonyms.forEach(function (syn) {
-      syn.synonyms.forEach(function (syns) {
-        natural.LancasterStemmer.attach();
-        if (syns.toLowerCase() == word.toLowerCase()) {
-          sentence_words[i] = word.replace(word, syn.keyWord).toLowerCase().stem();        
-        }
+    //if exist a synonym for the words in the list they will be replaced with their synonym
+    sentence_words.forEach(function (word, i) {    
+      synonyms.forEach(function (syn) {
+        syn.synonyms.forEach(function (syns) {        
+          if (syns.toLowerCase() == word.toLowerCase()) {
+            natural.LancasterStemmer.attach();
+            sentence_words[i] = word.replace(word, syn.keyWord);        
+          }
+        })
       })
+      natural.LancasterStemmer.attach();
+      sentence_words[i] = sentence_words[i].toLowerCase().stem();
     })
-    sentence_words[i] = sentence_words[i].toLowerCase().stem();
-  })
+  });  
   //return wordslist
   return sentence_words;
 }
@@ -299,14 +325,6 @@ async function response(sentence, userID, show_details) {
     } 
   }
   return reply;
-}
-
-function setContext(userid, contextText) {
-  if (!arr.UserFilter(context, userid)) {
-    context.push({ uID: userid, ctx: contextText })
-  } else {
-    context[context.findIndex(x => x.uID == userid)].context = contextText;
-  }
 }
 
 async function BuildAgent(fullbuild, res) {
@@ -466,6 +484,14 @@ async function GetFallBack() {
 
 function replaceAll(str, needle, replacement) {
   return str.split(needle).join(replacement);
+}
+
+function setContext(userid, contextText) {
+  if (!arr.UserFilter(context, userid)) {
+    context.push({ uID: userid, ctx: contextText })
+  } else {
+    context[context.findIndex(x => x.uID == userid)].context = contextText;
+  }
 }
 
 module.exports = router;

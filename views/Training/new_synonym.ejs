@@ -26,28 +26,28 @@
                                    <div class="box-body">
                                        <div class="form-group">
                                            <label for="exampleInputEmail1">Key Word</label>
-                                           <input type="text" class="form-control">
+                                           <input type="text" id="kword" class="form-control">
                                        </div>
                                        <div class="form-group">
                                             <label for="exampleInputEmail1">Title</label>
-                                            <input type="text" class="form-control">
+                                            <input type="text" id="title" class="form-control">
                                         </div>
                                        <div class="form-group">                                           
                                            <table class="table table-bordered">                                                
-                                            <table class="table table-bordered"> 
+                                            <table class="table table-bordered" id="tableIR"> 
                                                 <tr>
                                                     <th style="width: 90%">Synonyms</th>
                                                     <th>Action</th>                                                       
                                                 </tr>          
-                                                <tr>
-                                                    <td><input type="text" class="form-control" placeholder='Type new Synonyms'></td>
-                                                    <td><button class="btn btn-sm btn-success">Add <i class="fas fa-save"></i></button></td>  
+                                                <tr id="textC">
+                                                    <td><input type="text" class="form-control newpattern" placeholder='Type new Synonyms'></td>
+                                                    <td><button class="btn btn-sm btn-success appendB" type="button" onclick="BtnaddA()">Add <i class="fas fa-save"></i></button></td>  
                                                 </tr>                                                                           
                                             </table>
                                        </div>
                                    </div>
                                    <div class="box-footer text-center">
-                                        <button type="submit" class="btn btn-primary btn-lg">Save</button>
+                                        <button type="button" class="btn btn-primary btn-lg" onclick="Save()">Save</button>
                                     </div>
                                </form>
                            </div>
@@ -59,7 +59,57 @@
         </div><!-- ./wrapper -->
 
 
-        <% include ../Fixed/footer.ejs %>       
+        <% include ../Fixed/footer.ejs %>    
+        
+        <script>
+            var pattern = [];
+
+            function BtnaddA() {
+                var textinp = $( '.newpattern' ).val();
+                if(textinp.trim().length > 0){                  
+                    var tr = $('#textC');
+                    tr.css("background-color","#FF3700");
+                    pattern.push(textinp);
+                    tr.fadeOut(400, function(){
+                        tr.remove();
+                    });
+                    $( "#tableIR" ).append('<tr id="'+pattern.length+'"><td>'+textinp+'</td><td><button class="btn btn-sm btn-danger"type="button" value="'+pattern.length+'" onclick="DeletePattern(this)">Delete <i class="fas fa-trash"></i></button></td></tr>')
+                    $( "#tableIR" ).append( '<tr id="textC"><td><input type="text" class="form-control newpattern" placeholder="Type new Synonyms"></td><td><button class="btn btn-sm btn-success" onclick="BtnaddA()" type="button">Add <i class="fas fa-save"></i></button></td></tr>' );
+                }             
+            }
+
+            function DeletePattern(v){                
+                document.getElementById(v.value).remove();   
+                pattern.splice(parseInt(v.value -1), 1);            
+            }
+
+            function Save(){
+                var kword = $('#kword').val();
+                var title = $('#title').val();
+                if(kword.trim().length > 0 && title.trim().length > 0 && pattern.length > 0){
+                    $.ajax({
+                        type: "POST",
+                        url: "/synonym/new",
+                        data: {                    
+                            wd: kword,
+                            synonyms: JSON.stringify(pattern),
+                            title: title                                        
+                        },
+                        success: function(msg){                             
+                            swal("Success !!", msg, "success");
+                            setTimeout(function(){
+                                location.reload();
+                            },1000)
+                        },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                            sweetAlert("Oops...", XMLHttpRequest.responseText, "error");
+                        }
+                    });     
+                }else{
+                    sweetAlert("Oops...", 'Required fields Tag and Title and Synonyms.', "error");
+                }
+            }        
+        </script>
             
     </body>
 </html>
