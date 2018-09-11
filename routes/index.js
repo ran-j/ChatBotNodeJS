@@ -22,6 +22,8 @@ var CONFIDENCE = BotConfig.BotConfidence.medium;
 //load bot name
 var BotName = BotConfig.BotName;
 
+var Language = BotConfig.Language.EN;
+
 //path to model already save
 var modelpath = __dirname.replace('routes', 'models/training-models');
 
@@ -35,6 +37,19 @@ var isAgentBuilding = false;
 
 //context for intents
 var context = [];
+
+//set the language
+if(Language == BotConfig.Language.PT){
+  natural.PorterStemmerPt.attach();
+}else if(Language == BotConfig.Language.JP){
+  natural.StemmerJa.attach();
+}else if(Language == BotConfig.Language.FR){
+  natural.PorterStemmerFr.attach();
+}else if(Language == BotConfig.Language.IT){
+  natural.PorterStemmerIt.attach();
+}else{
+  natural.LancasterStemmer.attach();
+}
 
 //init modules and training
 BuildAgent(false);
@@ -252,13 +267,11 @@ async function clean_up_sentence(sentence) {
     sentence_words.forEach(function (word, i) {    
       synonyms.forEach(function (syn) {
         syn.synonyms.forEach(function (syns) {        
-          if (syns.toLowerCase() == word.toLowerCase()) {
-            natural.LancasterStemmer.attach();
+          if (syns.toLowerCase() == word.toLowerCase()) {            
             sentence_words[i] = word.replace(word, syn.keyWord);        
           }
         })
-      })
-      natural.LancasterStemmer.attach();
+      })      
       sentence_words[i] = sentence_words[i].toLowerCase().stem();
     })
   });  
@@ -400,8 +413,7 @@ async function BuildAgent(fullbuild, res) {
     });
     //stem and lower each word
     words = wwd.map((iten, index, array) => {
-      return iten.map((w, i, a) => {
-        natural.LancasterStemmer.attach();
+      return iten.map((w, i, a) => {    
         w = w.toLowerCase().stem();       
         return w;
       });
@@ -447,8 +459,7 @@ async function TrainBuilder() {
     //initialize bag of words
     var bag = [];
     //list of tokenized words for the pattern and stem each word
-    var pattern_words = doc[0].map((it, i, A) => {
-      natural.LancasterStemmer.attach();
+    var pattern_words = doc[0].map((it, i, A) => {      
       it = it.toLowerCase().stem();
       return it;
     });
@@ -489,7 +500,7 @@ async function TrainBuilder() {
   //train model
   await model.fit(xs, ys, {
     epochs: 1000,
-    batchSize: 8,
+    batchSize: 32,
     shuffle: true,
     // verbose: 1,
     callbacks: {
