@@ -18,7 +18,7 @@ module.exports = new class SysFunctions {
     }
 
     UserFilter(arr1, toFind) {
-        return arr1.find(val => Array.isArray(val) ? findRecursive(val, toFind) : val.uID === toFind) !== undefined;
+        return arr1.find(val => Array.isArray(val) ? UserFilter(val, toFind) : val.uID === toFind) !== undefined;
     }
 
     inArray(key,A){
