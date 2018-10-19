@@ -500,7 +500,7 @@ async function TrainBuilder() {
   //train model
   await model.fit(xs, ys, {
     epochs: 1000,
-    batchSize: 32,
+    batchSize: 8,
     shuffle: true,
     // verbose: 1,
     callbacks: {
