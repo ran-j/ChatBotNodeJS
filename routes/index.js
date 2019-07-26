@@ -39,15 +39,15 @@ var isAgentBuilding = false;
 var context = [];
 
 //set the language
-if(Language == BotConfig.Language.PT){
+if (Language == BotConfig.Language.PT) {
   natural.PorterStemmerPt.attach();
-}else if(Language == BotConfig.Language.JP){
+} else if (Language == BotConfig.Language.JP) {
   natural.StemmerJa.attach();
-}else if(Language == BotConfig.Language.FR){
+} else if (Language == BotConfig.Language.FR) {
   natural.PorterStemmerFr.attach();
-}else if(Language == BotConfig.Language.IT){
+} else if (Language == BotConfig.Language.IT) {
   natural.PorterStemmerIt.attach();
-}else{
+} else {
   natural.LancasterStemmer.attach();
 }
 
@@ -130,30 +130,30 @@ router.post('/synonym/update', (req, res) => {
   var id = req.body.id;
   var toDelete = JSON.parse(req.body.delete);
   var toAdd = JSON.parse(req.body.add);
-  if(id){
-    synonymModel.findById(id,(err,sysn)=>{
+  if (id) {
+    synonymModel.findById(id, (err, sysn) => {
       var newPattern = [];
-      if(!err && sysn != undefined || sysn.length != 0){
+      if (!err && sysn != undefined || sysn.length != 0) {
         //create a array to delete
-        if(toDelete.length > 0){
-          sysn.synonyms.forEach((el)=>{
-            if(!arr.ContainsStringInArray(toDelete,el)){
+        if (toDelete.length > 0) {
+          sysn.synonyms.forEach((el) => {
+            if (!arr.ContainsStringInArray(toDelete, el)) {
               newPattern.push(el);
             }
           })
-        }else{
+        } else {
           newPattern = sysn.synonyms;
         }
-        if(toAdd.length > 0){
+        if (toAdd.length > 0) {
           newPattern = newPattern.concat(toAdd);
         }
         sysn.synonyms = newPattern;
-        sysn.save().then(()=>{
+        sysn.save().then(() => {
           res.status(200).end('Update successfully')
         });
-      }     
+      }
     })
-  }else{
+  } else {
     res.status(403).end('Nothing to update')
   }
 });
@@ -186,30 +186,30 @@ router.post('/intent/update/patterns', (req, res) => {
   var id = req.body.id;
   var toDelete = JSON.parse(req.body.delete);
   var toAdd = JSON.parse(req.body.add);
-  if(id){
-    intentsModels.findById(id,(err,Inte)=>{
+  if (id) {
+    intentsModels.findById(id, (err, Inte) => {
       var newPattern = [];
-      if(!err && Inte != undefined || Inte.length != 0){
+      if (!err && Inte != undefined || Inte.length != 0) {
         //create a array to delete
-        if(toDelete.length > 0){
-          Inte.patterns.forEach((el)=>{
-            if(!arr.ContainsStringInArray(toDelete,el)){
+        if (toDelete.length > 0) {
+          Inte.patterns.forEach((el) => {
+            if (!arr.ContainsStringInArray(toDelete, el)) {
               newPattern.push(el);
             }
           })
-        }else{
+        } else {
           newPattern = Inte.patterns;
         }
-        if(toAdd.length > 0){
+        if (toAdd.length > 0) {
           newPattern = newPattern.concat(toAdd);
         }
         Inte.patterns = newPattern;
-        Inte.save().then(()=>{
+        Inte.save().then(() => {
           res.status(200).end('Update successfully')
         });
-      }     
+      }
     })
-  }else{
+  } else {
     res.status(403).end('Nothing to update')
   }
 });
@@ -218,30 +218,30 @@ router.post('/intent/update/response', (req, res) => {
   var id = req.body.id;
   var toDelete = JSON.parse(req.body.delete);
   var toAdd = JSON.parse(req.body.add);
-  if(id){
-    intentsModels.findById(id,(err,Inte)=>{
+  if (id) {
+    intentsModels.findById(id, (err, Inte) => {
       var newPattern = [];
-      if(!err && Inte != undefined || Inte.length != 0){
+      if (!err && Inte != undefined || Inte.length != 0) {
         //create a array to delete
-        if(toDelete.length > 0){
-          Inte.responses.forEach((el)=>{
-            if(!arr.ContainsStringInArray(toDelete,el)){
+        if (toDelete.length > 0) {
+          Inte.responses.forEach((el) => {
+            if (!arr.ContainsStringInArray(toDelete, el)) {
               newPattern.push(el);
             }
           })
-        }else{
+        } else {
           newPattern = Inte.responses;
         }
-        if(toAdd.length > 0){
+        if (toAdd.length > 0) {
           newPattern = newPattern.concat(toAdd);
         }
         Inte.responses = newPattern;
-        Inte.save().then(()=>{
+        Inte.save().then(() => {
           res.status(200).end('Update successfully')
         });
-      }     
+      }
     })
-  }else{
+  } else {
     res.status(403).end('Nothing to update')
   }
 });
@@ -261,20 +261,20 @@ async function clean_up_sentence(sentence) {
   //stem and tokenize the pattern
   sentence_words = await tokenizer.tokenize(sentence);
   //fix words
-  await synonymModel.find({},(err, synonym) => {
+  await synonymModel.find({}, (err, synonym) => {
     synonyms = synonym.length > 0 ? synonym : require('../Libs/synonyms');
     //if exist a synonym for the words in the list they will be replaced with their synonym
-    sentence_words.forEach(function (word, i) {    
+    sentence_words.forEach(function (word, i) {
       synonyms.forEach(function (syn) {
-        syn.synonyms.forEach(function (syns) {        
-          if (syns.toLowerCase() == word.toLowerCase()) {            
-            sentence_words[i] = word.replace(word, syn.keyWord);        
+        syn.synonyms.forEach(function (syns) {
+          if (syns.toLowerCase() == word.toLowerCase()) {
+            sentence_words[i] = word.replace(word, syn.keyWord);
           }
         })
-      })      
+      })
       sentence_words[i] = sentence_words[i].toLowerCase().stem();
     })
-  });  
+  });
   //return wordslist
   return sentence_words;
 }
@@ -298,16 +298,16 @@ async function bow(sentence, show_details) {
 
 async function classify(sentence) {
   //load model
-  var model = await tf.loadModel('file://' + modelpath + '/model.json'); 
+  var model = await tf.loadModel('file://' + modelpath + '/model.json');
   //bow sentence
   const bowData = await bow(sentence, true);
   //test if the BowData is a array of zeros
   var NotallZeros = await arr.zeroTest(bowData);
   //Output array
   var return_list = [];
-  if(NotallZeros || CONFIDENCE == BotConfig.BotConfidence.low){    
+  if (NotallZeros || CONFIDENCE == BotConfig.BotConfidence.low) {
     //to prevente memory leak
-    await tf.tidy(()=>{
+    await tf.tidy(() => {
       //converter to tensor array
       var data = tf.tensor2d(bowData, [1, bowData.length]);
       //generate probabilities from the model
@@ -324,11 +324,11 @@ async function classify(sentence) {
       //build array with responses    
       results.forEach(function (r, i) {
         return_list.push([classes[r[0]], r[1]]);
-      });  
-    })        
-  } 
+      });
+    })
+  }
   //return tuple of intent and probability
-  console.log(return_list)  
+  console.log(return_list)
   return return_list
 }
 
@@ -353,33 +353,33 @@ async function response(sentence, userID, show_details) {
           if (!arr.inArray('context_filter', s) || arr.UserFilter(context, userID) && arr.inArray('context_filter', s) && s['context_filter'] == context[context.findIndex(x => x.uID == userID)].ctx) {
             if (show_details) {
               console.log('tag: ' + s['tag']);
-            }             
+            }
             //remove user context
-            context.slice(context.slice(x => x.uID == userID),1)
+            context.slice(context.slice(x => x.uID == userID), 1)
             //a random response from the intent             
             reply = ConfigResponse(s['responses']);
-          }else{
+          } else {
             //a random response from the intent             
-            reply = ConfigResponse(s['responses']);            
+            reply = ConfigResponse(s['responses']);
           }
         }
       });
       results.shift();
       i++;
-    }  
-  }else{
+    }
+  } else {
     //natural classify
     var naturalpredict = classifier.getClassifications(sentence);
-    if(show_details){
+    if (show_details) {
       console.log(naturalpredict);
-    }    
-    if(naturalpredict[0].value > 0.3 && naturalpredict[0].value < 0.42 || CONFIDENCE == BotConfig.BotConfidence.low){
+    }
+    if (naturalpredict[0].value > 0.3 && naturalpredict[0].value < 0.42 || CONFIDENCE == BotConfig.BotConfidence.low) {
       intents.forEach((intent) => {
         if (intent.tag == naturalpredict[0].label) {
           reply = arr.random(intent.responses);
         }
       })
-    } 
+    }
   }
   return reply;
 }
@@ -400,11 +400,11 @@ async function BuildAgent(fullbuild, res) {
         var tokenizer = new natural.WordTokenizer();
         var wd = tokenizer.tokenize(pattern);
         //add to words list     
-        wwd.push(wd);        
+        wwd.push(wd);
         //add to natural classifier
         classifier.addDocument(wd, intent.tag);
         //add to documents in corpus
-        documents.push([wd, intent.tag]);        
+        documents.push([wd, intent.tag]);
         //add the tag to classes list 
         if (!arr.ContainsinArray(classes, intent.tag)) {
           classes.push(intent.tag);
@@ -413,8 +413,8 @@ async function BuildAgent(fullbuild, res) {
     });
     //stem and lower each word
     words = wwd.map((iten, index, array) => {
-      return iten.map((w, i, a) => {    
-        w = w.toLowerCase().stem();       
+      return iten.map((w, i, a) => {
+        w = w.toLowerCase().stem();
         return w;
       });
     })
@@ -459,7 +459,7 @@ async function TrainBuilder() {
     //initialize bag of words
     var bag = [];
     //list of tokenized words for the pattern and stem each word
-    var pattern_words = doc[0].map((it, i, A) => {      
+    var pattern_words = doc[0].map((it, i, A) => {
       it = it.toLowerCase().stem();
       return it;
     });
@@ -488,9 +488,9 @@ async function TrainBuilder() {
   // Build neural network:
   const model = tf.sequential();
   model.add(tf.layers.dense({ units: 256, activation: 'relu', inputShape: [train_x[0].length] }));
-  model.add(tf.layers.dropout({rate: 0.25}));
+  model.add(tf.layers.dropout({ rate: 0.25 }));
   model.add(tf.layers.dense({ units: 128, activation: 'relu' }));
-  model.add(tf.layers.dropout({rate: 0.25}));
+  model.add(tf.layers.dropout({ rate: 0.25 }));
   model.add(tf.layers.dense({ units: train_y[0].length, activation: 'softmax' }));
   model.compile({ optimizer: 'adam', loss: 'categoricalCrossentropy', metrics: ['accuracy'] });
 
@@ -509,13 +509,13 @@ async function TrainBuilder() {
       }
     }
   }).then(async () => {
-    console.log('Saving model....');    
-     //Print a text summary of the model's layers.
+    console.log('Saving model....');
+    //Print a text summary of the model's layers.
     model.summary();
     await model.save('file://' + modelpath).then(() => {
       console.log(' ');
       console.log('Model Saved.');
-      console.log(' ');     
+      console.log(' ');
       console.log("documents " + documents.length);
       console.log("classes " + classes.length);
       console.log("unique stemmed words " + words.length);
@@ -527,9 +527,9 @@ async function TrainBuilder() {
   });
 }
 
-function ConfigResponse(sentence){
-  var resp = replaceAll(arr.random(sentence),'{botname}',BotName);
-  resp =  replaceAll(resp,'{botversion}','1.0.0');
+function ConfigResponse(sentence) {
+  var resp = replaceAll(arr.random(sentence), '{botname}', BotName);
+  resp = replaceAll(resp, '{botversion}', '1.0.0');
   return resp;
 }
 
