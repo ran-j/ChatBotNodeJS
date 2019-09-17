@@ -12,7 +12,6 @@
 
                 <!-- Right side column. Contains the navbar and content of the page -->
                 <aside class="right-side">
-
                     <!-- Main content -->
                     <section class="content">
                         <div class="table-responsive">
@@ -25,38 +24,44 @@
                             <br>
                             <br>
                             <!-- .table - Uses sparkline charts-->
-                            <table class="table table-striped">
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Tag</th>
-                                    <th>Action</th>
-                                </tr>
-                                <% intents.forEach(function(customer){ %>
-                                    <tr>
-                                        <td>
-                                            <%= customer.title %>
-                                        </td>
-                                        <td>
-                                            <a href="/admin/edit/<%= customer.tag %>">
-                                                <%= customer.tag %>
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-danger" onclick="Delete('<%= customer.tag %>')">
-                                                <i class="fas fa-trash"></i>
-                                            </button> &nbsp; 
-                                            <button class="btn btn-sm btn-success" onclick="window.location.href='/admin/training/<%= customer.tag %>'">
-                                                <i class="fas fa-graduation-cap"></i>
-                                            </button>
-                                            &nbsp;
-                                            <button class="btn btn-sm btn-primary" onclick="window.location.href='/admin/link/<%= customer.tag %>'">
-                                                <i class="fas fa-bezier-curve"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <% }) %>
+                            <div class="col-sm-12">                                
+                                <table class="table table-striped text-center" id="intets">
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Tag</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% intents.forEach(function(customer){ %>
+                                            <tr>
+                                                <td>
+                                                    <%= customer.title %>
+                                                </td>
+                                                <td>
+                                                    <a href="/admin/edit/<%= customer.tag %>">
+                                                        <%= customer.tag %>
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-danger" onclick="Delete('<%= customer.tag %>')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button> &nbsp; 
+                                                    <button class="btn btn-sm btn-success" onclick="window.location.href='/admin/training/<%= customer.tag %>'">
+                                                        <i class="fas fa-graduation-cap"></i>
+                                                    </button>
+                                                    &nbsp;
+                                                    <button class="btn btn-sm btn-primary" onclick="window.location.href='/admin/link/<%= customer.tag %>'">
+                                                        <i class="fas fa-bezier-curve"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        <% }) %>
+                                    </tbody>
 
-                            </table>
+                                </table>
+                            </div>
                             <!-- /.table -->
                         </div>
                     </section>
@@ -72,38 +77,7 @@
 
     </body>
     <script>
-        document.querySelector('.buildA').onclick = function () {
-            swal({
-                title: "Build Agent !",
-                text: "are you sure ?",
-                type: "info",
-                showCancelButton: true,
-                closeOnConfirm: false,
-                showLoaderOnConfirm: true,
-            },
-            function () {
-                $.ajax({
-                    url: "/build",
-                    type: "POST",
-                    data: {},
-                    dataType: "text xml",
-                    success: function (xml, textStatus, xhr) {
-                        if (xhr.status != 200) {
-                            sweetAlert("Oops...", xhr.responseText, "error");
-                        } else {
-                            swal("Success !!", xhr.responseText, "success");
-                        }
-                    },
-                    complete: function (xhr, textStatus) {
-                        if (xhr.status != 200) {
-                            sweetAlert("Oops...", xhr.responseText, "error");
-                        } else {
-                            swal("Success !!", xhr.responseText, "success");
-                        }
-                    }
-                });
-            });
-        };
+        
 
 
         function Delete(v){
@@ -137,6 +111,50 @@
             });
         }
 
+        $( document ).ready(function() {
+            console.log( "ready!" );
+            document.querySelector('.buildA').onclick = function () {
+                swal({
+                    title: "Build Agent !",
+                    text: "are you sure ?",
+                    type: "info",
+                    showCancelButton: true,
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true,
+                },
+                function () {
+                    $.ajax({
+                        url: "/build",
+                        type: "POST",
+                        data: {},
+                        dataType: "text xml",
+                        success: function (xml, textStatus, xhr) {
+                            if (xhr.status != 200) {
+                                sweetAlert("Oops...", xhr.responseText, "error");
+                            } else {
+                                swal("Success !!", xhr.responseText, "success");
+                            }
+                        },
+                        complete: function (xhr, textStatus) {
+                            if (xhr.status != 200) {
+                                sweetAlert("Oops...", xhr.responseText, "error");
+                            } else {
+                                swal("Success !!", xhr.responseText, "success");
+                            }
+                        }
+                    });
+                });
+            };
+
+            $('#intets').DataTable({
+                "bPaginate": true,
+                "bLengthChange": false,
+                "bFilter": true,
+                "bInfo": false,
+                "bAutoWidth": false
+            });
+        });
+        
     </script>
 
 </html>
