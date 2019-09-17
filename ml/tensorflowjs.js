@@ -19,10 +19,13 @@ class Agent {
             this.tokenizer = new natural.AggressiveTokenizerPt();
         } else if (Language == 'js') {
             natural.StemmerJa.attach();
+            this.tokenizer = new natural.WordTokenizer();
         } else if (Language == 'fr') {
             natural.PorterStemmerFr.attach();
+            this.tokenizer = new natural.WordTokenizer();
         } else if (Language == 'it') {
             natural.PorterStemmerIt.attach();
+            this.tokenizer = new natural.WordTokenizer();
         } else if (Language == 'en') {
             natural.LancasterStemmer.attach();
             this.tokenizer = new natural.WordTokenizer();
