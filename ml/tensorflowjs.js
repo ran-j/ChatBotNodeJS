@@ -282,10 +282,10 @@ class Agent {
                 const jMax = synonym.length;
                 for (; j < jMax; j++) { //synonym
                     var x = 0;
-                    const xMax = synonym[i].synonyms.length;
+                    const xMax = synonym[j].synonyms.length;
                     for (; x < xMax; x++) { //synonym list
-                        if (synonym[i].synonyms[x].toLowerCase() == sentence_words[i].toLowerCase()) {
-                            sentence_words[i] = sentence_words[i].replace(sentence_words[i], synonym[i].keyWord);
+                        if (synonym[j].synonyms[x].toLowerCase() == sentence_words[i].toLowerCase()) {
+                            sentence_words[i] = sentence_words[i].replace(sentence_words[i], synonym[j].keyWord);
                         }
                     }
                 }
