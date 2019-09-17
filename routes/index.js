@@ -252,7 +252,8 @@ router.post('/ask', async (req, res, next) => {
     var resp = await response(req.body.say, req.body.uID, true);
     res.status(200).end(resp);
   } catch (error) {
-    res.status(500).end(error);
+    console.log(error)
+    res.status(500).end('internal error, sorry');
   }
 });
 
@@ -298,7 +299,7 @@ async function bow(sentence, show_details) {
 
 async function classify(sentence) {
   //load model
-  var model = await tf.loadModel('file://' + modelpath + '/model.json'); 
+  var model = await tf.loadLayersModel('file://' + modelpath + '/model.json'); 
   //bow sentence
   const bowData = await bow(sentence, true);
   //test if the BowData is a array of zeros
