@@ -20,10 +20,7 @@ mongoose
     console.log('MongoDB Connected')
     console.log('Starting build agent')
     await Agent.BuildAgent()
-    setTimeout(async () => {
-      console.log(await Agent.response('hi', 'u1234', true))
-
-    }, 5000)
+    console.log("Agent ready")    
   }).catch(err => console.log(err)); 
 
 // view engine setup
