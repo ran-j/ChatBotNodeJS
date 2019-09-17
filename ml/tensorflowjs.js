@@ -154,7 +154,7 @@ class Agent {
 
                 //train model
                 model.fit(xs, ys, {
-                    epochs: 1000,
+                    epochs: 300,
                     batchSize: 8,
                     shuffle: true,
                     // verbose: 1,
