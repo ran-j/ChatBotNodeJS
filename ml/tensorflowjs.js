@@ -278,10 +278,10 @@ class Agent {
                 const jMax = synonym.length;
                 for (; j < jMax; j++) { //synonym
                     var x = 0;
-                    const xMax = synonym.synonyms.length;
+                    const xMax = synonym[i].synonyms.length;
                     for (; x < xMax; x++) { //synonym list
-                        if (syns.toLowerCase() == word.toLowerCase()) {
-                            sentence_words[i] = word.replace(word, syn.keyWord);
+                        if (synonym[i].synonyms[x].toLowerCase() == sentence_words[i].toLowerCase()) {
+                            sentence_words[i] = sentence_words[i].replace(sentence_words[i], synonym[i].keyWord);
                         }
                     }
                 }
