@@ -5,7 +5,7 @@ var shuffle = require('shuffle-array');
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
 const arr = require('../Libs/ExtraFunctions');
-const BotConfig = require('../Libs/BotConfig');
+const conf = require('../Libs/BotConfig');
 var synonymModel = require('../models/synonyms');
 var intentsModels = require('../models/intents');
 
@@ -18,11 +18,11 @@ var intents = [];
 var synonyms = [];
 
 //confidence to respond
-var CONFIDENCE = BotConfig.BotConfidence.medium;
+var CONFIDENCE = conf.BotConfidence.medium;
 //load bot name
-var BotName = BotConfig.BotName;
+var BotName = conf.BotName;
 
-var Language = BotConfig.Language.EN;
+var Language = conf.Language.EN;
 
 //path to model already save
 var modelpath = __dirname.replace('routes', 'models/training-models');
@@ -39,13 +39,13 @@ var isAgentBuilding = false;
 var context = [];
 
 //set the language
-if (Language == BotConfig.Language.PT) {
+if (Language == conf.Language.PT) {
   natural.PorterStemmerPt.attach();
-} else if (Language == BotConfig.Language.JP) {
+} else if (Language == conf.Language.JP) {
   natural.StemmerJa.attach();
-} else if (Language == BotConfig.Language.FR) {
+} else if (Language == conf.Language.FR) {
   natural.PorterStemmerFr.attach();
-} else if (Language == BotConfig.Language.IT) {
+} else if (Language == conf.Language.IT) {
   natural.PorterStemmerIt.attach();
 } else {
   natural.LancasterStemmer.attach();
@@ -305,7 +305,7 @@ async function classify(sentence) {
   var NotallZeros = await arr.zeroTest(bowData);
   //Output array
   var return_list = [];
-  if (NotallZeros || CONFIDENCE == BotConfig.BotConfidence.low) {
+  if (NotallZeros || CONFIDENCE == conf.BotConfidence.low) {
     //to prevente memory leak
     await tf.tidy(() => {
       //converter to tensor array
@@ -373,7 +373,7 @@ async function response(sentence, userID, show_details) {
     if (show_details) {
       console.log(naturalpredict);
     }
-    if (naturalpredict[0].value > 0.3 && naturalpredict[0].value < 0.42 || CONFIDENCE == BotConfig.BotConfidence.low) {
+    if (naturalpredict[0].value > 0.3 && naturalpredict[0].value < 0.42 || CONFIDENCE == conf.BotConfidence.low) {
       intents.forEach((intent) => {
         if (intent.tag == naturalpredict[0].label) {
           reply = arr.random(intent.responses);
