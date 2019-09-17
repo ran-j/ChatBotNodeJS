@@ -345,7 +345,7 @@ class Agent {
                 results.sort((a, b) => b[1] - a[1]);
                 //build array with responses 
                 results.forEach((r, i) => {
-                    return_list.push([classes[r[0]], r[1]]);
+                    return_list.push([this.classes[r[0]], r[1]]);
                 });
             })
             //return tuple of intent and probability
@@ -368,25 +368,25 @@ class Agent {
                     for (; j < jMax; j++) {
                         //set context for this intent if necessary
                         if (this.intents[j].tag == results[0][0]) {
-                            if (arr.inArray('context_set', s)) {
+                            if (arr.inArray('context_set', this.intents[j])) {
                                 //set context
-                                this._setContext(userID, s['context_set']);
+                                this._setContext(userID, this.intents[j]['context_set']);
                                 if (show_details) {
-                                    console.log('context: ' + s['context_set'])
+                                    console.log('context: ' + this.intents[j]['context_set'])
                                 }
                             }
                             //check if this intent is contextual and applies to this user's conversation
-                            if (!arr.inArray('context_filter', s) || arr.UserFilter(this.context, userID) && arr.inArray('context_filter', s) && s['context_filter'] == this.context[this.context.findIndex(x => x.uID == userID)].ctx) {
+                            if (!arr.inArray('context_filter', s) || arr.UserFilter(this.context, userID) && arr.inArray('context_filter', s) && this.intents[j]['context_filter'] == this.context[this.context.findIndex(x => x.uID == userID)].ctx) {
                                 if (show_details) {
-                                    console.log('tag: ' + s['tag']);
+                                    console.log('tag: ' + this.intents[j]['tag']);
                                 }
                                 //remove user context
                                 this.context.slice(this.context.findIndex(x => x.uID == userID), 1)
                                 //a random response from the intent             
-                                reply = this._configResponse(s['responses']);
+                                reply = this._configResponse(this.intents[j]['responses']);
                             } else {
                                 //a random response from the intent             
-                                reply = this._configResponse(s['responses']);
+                                reply = this._configResponse(this.intents[j]['responses']);
                             }
                         }
                     }

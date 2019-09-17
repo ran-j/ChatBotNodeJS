@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "seed" : "node ./seed/index"
   },
   "dependencies": {
     "@tensorflow/tfjs-node": "^1.2.4",
