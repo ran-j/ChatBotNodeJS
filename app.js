@@ -12,7 +12,7 @@ var app = express();
 
 var indexRouter =  require('./routes/index');
 var intentsRouter = require('./routes/intents');
-var Agent = new mlAgent('pt')
+global.Agent = new mlAgent('pt')
  
 mongoose
   .connect(config.DB,{ useNewUrlParser: true })
