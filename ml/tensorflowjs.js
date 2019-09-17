@@ -116,7 +116,7 @@ class Agent {
                     var bag = new Array(jMax).fill(0);
                     //create bag of words array
                     for (; j < jMax; j++) {
-                        if (pattern_words.indexOf(this.words[j])) {
+                        if (pattern_words.indexOf(this.words[j]) > -1) {
                             bag.push(1);
                         }
                     }
