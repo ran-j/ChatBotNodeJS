@@ -11,6 +11,8 @@ const intentsModels = require('../models/intents');
 const arr = require('../Libs/ExtraFunctions');
 const BotConfig = require('../Libs/BotConfig');
 
+const BotName = BotConfig.BotName
+
 class Agent {
     constructor(Language, debug = false) {
         this.isAgentBuilding = false;
@@ -93,7 +95,7 @@ class Agent {
 
     _configResponse(sentence) {
         var resp = this._replaceAll(arr.random(sentence), '{botname}', BotName);
-        resp = this._replaceAll(resp, '{botversion}', '1.0.0');
+        resp = this._replaceAll(resp, '{botversion}', '2.5.3');
         return resp;
     }
 
@@ -196,9 +198,9 @@ class Agent {
             this.isAgentBuilding = true;
             intentsModels.find({}).lean().exec((err, intentsList) => {
                 if (err) throw err
-
                 var i = 0;
                 const iMax = intentsList.length
+                this.intents = intentsList
                 for (; i < iMax; i++) {
                     var j = 0;
                     const jMax = intentsList[i].patterns.length
@@ -354,51 +356,57 @@ class Agent {
         }
     }
 
-    async response(sentence, userID, show_details) {
-        try {
-            var i = 0;
-            var reply = arr.random(await this._getFallBack());
-            var results = await this.classify(sentence);
-            //if we have a classification then find the matching intent tag
-            if (results && results.length > 0) {
-                //loop as long as there are matches to process
-                while (results[i]) {
-                    var j = 0;
-                    const jMax = this.intents.length;
-                    for (; j < jMax; j++) {
-                        //set context for this intent if necessary
-                        if (this.intents[j].tag == results[0][0]) {
-                            if (arr.inArray('context_set', this.intents[j])) {
-                                //set context
-                                this._setContext(userID, this.intents[j]['context_set']);
-                                if (show_details) {
-                                    console.log('context: ' + this.intents[j]['context_set'])
+    response(sentence, userID, show_details) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                var i = 0;                 
+                var results = await this.classify(sentence);
+                //if we have a classification then find the matching intent tag
+                if (results && results.length > 0) {
+                    //loop as long as there are matches to process
+                    while (results[i]) {
+                        var j = 0;
+                        const jMax = this.intents.length;
+                        for (; j < jMax; j++) {
+                            //set context for this intent if necessary
+                            if (this.intents[j].tag == results[0][0]) {
+                                if (arr.inArray('context_set', this.intents[j])) {
+                                    //set context
+                                    this._setContext(userID, this.intents[j]['context_set']);
+                                    if (show_details) {
+                                        console.log('context: ' + this.intents[j]['context_set'])
+                                    }
                                 }
-                            }
-                            //check if this intent is contextual and applies to this user's conversation
-                            if (!arr.inArray('context_filter', s) || arr.UserFilter(this.context, userID) && arr.inArray('context_filter', s) && this.intents[j]['context_filter'] == this.context[this.context.findIndex(x => x.uID == userID)].ctx) {
-                                if (show_details) {
-                                    console.log('tag: ' + this.intents[j]['tag']);
+                                //check if this intent is contextual and applies to this user's conversation
+                                if (!arr.inArray('context_filter', this.intents[j]) 
+                                        || arr.UserFilter(this.context, userID) 
+                                        && arr.inArray('context_filter', this.intents[j]) 
+                                        && this.intents[j]['context_filter'] == this.context[this.context.findIndex(x => x.uID == userID)].ctx) {
+                                    if (show_details) {
+                                        console.log('tag: ' + this.intents[j]['tag']);
+                                    }
+                                    //remove user context
+                                    this.context.slice(this.context.findIndex(x => x.uID == userID), 1)
+                                    //a random response from the intent             
+                                    return resolve(this._configResponse(this.intents[j]['responses']));
+                                } else {
+                                    //a random response from the intent             
+                                    return resolve(this._configResponse(this.intents[j]['responses']));
                                 }
-                                //remove user context
-                                this.context.slice(this.context.findIndex(x => x.uID == userID), 1)
-                                //a random response from the intent             
-                                reply = this._configResponse(this.intents[j]['responses']);
-                            } else {
-                                //a random response from the intent             
-                                reply = this._configResponse(this.intents[j]['responses']);
                             }
                         }
+                        results.shift();
+                        i++;
                     }
-                    results.shift();
-                    i++;
                 }
-            }
-            return reply;
-        } catch (error) {
-            console.log(error)
-            return "Internal error >X("
-        }
+                resolve(arr.random(await this._getFallBack()))
+            } catch (error) {
+                console.log(error)
+                resolve("Internal error >X(")
+            }           
+        })
+
+        
     }
 }
 
