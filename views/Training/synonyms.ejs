@@ -20,21 +20,26 @@
                             </div>
                             <br> <br>  
                             <!-- .table - Uses sparkline charts-->
-                            <table class="table table-striped">
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Key Word</th>                                    
-                                    <th>Action</th>
-                                </tr>
-                                <% synonyms.forEach(function(customer){ %>
-                                    <tr>                
-                                        <td> <%= customer.title %> </td>                      
-                                        <td> <a href="/admin/editkey/<%= customer.keyWord %>"><%= customer.keyWord %> </a> </td>                                        
-                                        <td> <button class="btn btn-sm btn-danger" onclick="Delete('<%= customer.keyWord %>')"><i class="fas fa-trash"></i></button></td>
-                                    </tr>
-                                <% }) %> 
-                                 
-                            </table><!-- /.table -->
+                            <div class="col-sm-12">                                
+                                <table class="table table-striped text-center" id="synons">   
+                                    <thead>                         
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Key Word</th>                                    
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% synonyms.forEach(function(customer){ %>
+                                            <tr>                
+                                                <td> <%= customer.title %> </td>                      
+                                                <td> <a href="/admin/editkey/<%= customer.keyWord %>"><%= customer.keyWord %> </a> </td>                                        
+                                                <td> <button class="btn btn-sm btn-danger" onclick="Delete('<%= customer.keyWord %>')"><i class="fas fa-trash"></i></button></td>
+                                            </tr>
+                                        <% }) %> 
+                                    </tbody>                                    
+                                </table><!-- /.table -->
+                            </div>
                         </div>
                 </section><!-- /.content -->
                 
@@ -75,6 +80,16 @@
                     swal("Deleted !!", "Intent deleted", "success");
                 });
             }
+
+            $( document ).ready(function() {
+                $('#synons').DataTable({
+                    "bPaginate": true,
+                    "bLengthChange": false,
+                    "bFilter": true,
+                    "bInfo": false,
+                    "bAutoWidth": false
+                });
+            })
 
         </script>
             

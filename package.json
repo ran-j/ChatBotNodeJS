@@ -1,14 +1,13 @@
 {
   "name": "chatbottensorflow",
-  "version": "1.0.0",
+  "version": "2.2.1",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "seed" : "node ./seed/index"
   },
   "dependencies": {
-    "@tensorflow/tfjs": "0.12.7",
-    "@tensorflow/tfjs-core": "0.13.2",
-    "@tensorflow/tfjs-node": "0.1.17",
+    "@tensorflow/tfjs-node": "^1.2.4",
     "connect-mongo": "^2.0.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",

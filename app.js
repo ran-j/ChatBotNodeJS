@@ -5,18 +5,23 @@ var logger = require('morgan');
 var mongoose = require('mongoose');
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
-const BotConfig = require('./Libs/BotConfig');
+const mlAgent = require("./ml/tensorflowjs")
+const config = require('./Libs/BotConfig');
 
 var app = express();
 
-var indexRouter =  require('./routes/index');
+var indexRouter = require('./routes/index');
 var intentsRouter = require('./routes/intents');
- 
+global.Agent = new mlAgent(config.Language)
+
 mongoose
-  .connect(BotConfig.DB,{ useNewUrlParser: true })
-  .then(() => {
+  .connect(config.DB, { useNewUrlParser: true })
+  .then(async () => {
     console.log('MongoDB Connected')
-  }).catch(err => console.log(err)); 
+    console.log('Starting build agent')
+    await Agent.BuildAgent(false)
+    console.log("Agent ready")
+  }).catch(err => console.log(err));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -46,7 +51,7 @@ app.use('/admin', intentsRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
-  res.render('404'); 
+  res.render('404');
 });
 
 // error handler
@@ -54,14 +59,14 @@ app.use((err, req, res, next) => {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-  if(req.app.get('env') == 'development'){
+  if (req.app.get('env') == 'development') {
     // render the error page
     res.status(err.status || 500);
     res.render('error');
-  }else{
+  } else {
     console.error(err);
     res.render('500');
-  }  
+  }
 });
 
 module.exports = app;
