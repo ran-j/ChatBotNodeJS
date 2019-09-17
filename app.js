@@ -12,15 +12,18 @@ var app = express();
 
 var indexRouter =  require('./routes/index');
 var intentsRouter = require('./routes/intents');
-global.Agent = new mlAgent('pt')
+var Agent = new mlAgent('pt')
  
 mongoose
   .connect(config.DB,{ useNewUrlParser: true })
   .then(async () => {
     console.log('MongoDB Connected')
     console.log('Starting build agent')
-    let resp = await global.Agent.BuildAgent()
-    console.log(resp)
+    await Agent.BuildAgent()
+    setTimeout(async () => {
+      console.log(await Agent.response('hi', 'u1234', true))
+
+    }, 5000)
   }).catch(err => console.log(err)); 
 
 // view engine setup

@@ -74,72 +74,32 @@ class Agent {
         return result
     }
 
-    async BuildAgent(fullbuild) {
-        if (this.isAgentBuilding) return { error: true, msg: "Agent is buinding" }
-        try {
-            this.isAgentBuilding = true;
-            intentsModels.find({}).lean().exec((err, intentsList) => {
-                if (err) throw err
+    _replaceAll(str, needle, replacement) {
+        return str.split(needle).join(replacement);
+    }
 
-                var i = 0;
-                const iMax = intentsList.length
-                for (; i < iMax; i++) {
-                    var j = 0;
-                    const jMax = intentsList[i].patterns.length
-                    for (; j < jMax; j++) {
-                        //stem and tokenize each word in the sentence
-                        var wd = this.tokenizer.tokenize(intentsList[i].patterns[j]);
-                        var x = 0;
-                        const xMax = wd.length
-                        //remove ignored words
-                        for (; x < xMax; x++) {
-                            if (this.ignore_words.indexOf(wd[x]) > -1) {
-                                wd.splice(x, 1)
-                            }
-                        }
-                        //stem and lower each word
-                        var steamWords = wd.map(word => word.toLowerCase().stem())
-                        //add to words list the steam words
-                        Array.prototype.push.apply(this.words, steamWords)
-                        //add to documents in corpus
-                        documents.push([steamWords, intentsList[i].resposta]);
-                        //add the tag to classes list 
-                        if (!this._containsInArray(this.classes, intentsList[i].tag)) {
-                            this.classes.push(intentsList[i].tag);
-                        }
-                    }
-                }
-                //sort and remove duplicates
-                this.words = arr.removeDups(this._sort(this.words));
-                //sort classes
-                this.classes = this._sort(this.classes);
-
-                if (this._debug) {
-                    console.log("documents:", this.documents.length);
-                    console.log("classes:", this.classes.length);
-                    console.log("unique stemmed words:", this.words.length);
-                }
-
-                if (fullbuild) {
-                    if (this._debug) {
-                        console.log();
-                        console.log('Training...');
-                    }
-                    this.TrainBuilder().then(() => {
-                        this.isAgentBuilding = false;
-                        return { error: false, msg: "Building successful" }
-                    }).catch((error) => {
-                        if (this._debug) console.log(error);
-                        this.isAgentBuilding = false;
-                        return { error: true, msg: "Core error" }
-                    });
-                }
-            })
-        } catch (error) {
-            this.isAgentBuilding = false;
-            if (this._debug) console.log(error);
-            throw error
+    _setContext(userid, contextText) {
+        if (!arr.UserFilter(context, userid)) {
+            this.context.push({ uID: userid, ctx: contextText })
+        } else {
+            this.context[context.findIndex(x => x.uID == userid)].context = contextText;
         }
+    }
+
+    _configResponse(sentence) {
+        var resp = this._replaceAll(arr.random(sentence), '{botname}', BotName);
+        resp = this._replaceAll(resp, '{botversion}', '1.0.0');
+        return resp;
+    }
+
+    _getFallBack() {
+        let rt = ["What did you mean ?", "I'm not understanding you"];
+        this.intents.forEach((intent) => {
+            if (intent.tag == 'fallback') {
+                rt = intent.responses
+            }
+        })
+        return rt;
     }
 
     TrainBuilder() {
@@ -223,6 +183,212 @@ class Agent {
                 reject(error)
             }
         })
+    }
+
+    async BuildAgent(fullbuild) {
+        if (this.isAgentBuilding) return { error: true, msg: "Agent is buinding" }
+        try {
+            this.isAgentBuilding = true;
+            intentsModels.find({}).lean().exec((err, intentsList) => {
+                if (err) throw err
+
+                var i = 0;
+                const iMax = intentsList.length
+                for (; i < iMax; i++) {
+                    var j = 0;
+                    const jMax = intentsList[i].patterns.length
+                    for (; j < jMax; j++) {
+                        //stem and tokenize each word in the sentence
+                        var wd = this.tokenizer.tokenize(intentsList[i].patterns[j]);
+                        var x = 0;
+                        const xMax = wd.length
+                        //remove ignored words
+                        for (; x < xMax; x++) {
+                            if (this.ignore_words.indexOf(wd[x]) > -1) {
+                                wd.splice(x, 1)
+                            }
+                        }
+                        //stem and lower each word
+                        var steamWords = wd.map(word => word.toLowerCase().stem())
+                        //add to words list the steam words
+                        Array.prototype.push.apply(this.words, steamWords)
+                        //add to documents in corpus
+                        this.documents.push([steamWords, intentsList[i].resposta]);
+                        //add the tag to classes list 
+                        if (!this._containsInArray(this.classes, intentsList[i].tag)) {
+                            this.classes.push(intentsList[i].tag);
+                        }
+                    }
+                }
+                //sort and remove duplicates
+                this.words = arr.removeDups(this._sort(this.words));
+                //sort classes
+                this.classes = this._sort(this.classes);
+
+                if (this._debug) {
+                    console.log("documents:", this.documents.length);
+                    console.log("classes:", this.classes.length);
+                    console.log("unique stemmed words:", this.words.length);
+                }
+
+                if (fullbuild) {
+                    if (this._debug) {
+                        console.log();
+                        console.log('Training...');
+                    }
+                    this.TrainBuilder().then(() => {
+                        this.isAgentBuilding = false;
+                        return { error: false, msg: "Building successful" }
+                    }).catch((error) => {
+                        if (this._debug) console.log(error);
+                        this.isAgentBuilding = false;
+                        return { error: true, msg: "Core error" }
+                    });
+                } else {
+                    this.isAgentBuilding = false;
+                    if (this._debug) {
+                        console.log();
+                        console.log("documents:", this.documents.length);
+                        console.log("classes:", this.classes.length);
+                        console.log("unique stemmed words:", this.words.length);
+                    }
+                    return { error: false, msg: "Building successful" }
+                }
+            })
+        } catch (error) {
+            this.isAgentBuilding = false;
+            if (this._debug) console.log(error);
+            throw error
+        }
+    }
+
+    async clean_up_sentence(sentence) {
+        //stem and tokenize the pattern
+        var sentence_words = await this.tokenizer.tokenize(sentence);
+        //@depreced
+        //fix words
+        await synonymModel.find({}).lean().exec((err, synonym) => {
+            var i = 0;
+            const iMax = sentence_words.length;
+            for (; i < iMax; i++) { //sentence_words
+                var j = 0;
+                const jMax = synonym.length;
+                for (; j < jMax; j++) { //synonym
+                    var x = 0;
+                    const xMax = synonym.synonyms.length;
+                    for (; x < xMax; x++) { //synonym list
+                        if (syns.toLowerCase() == word.toLowerCase()) {
+                            sentence_words[i] = word.replace(word, syn.keyWord);
+                        }
+                    }
+                }
+                sentence_words[i] = sentence_words[i].toLowerCase().stem();
+            }
+        })
+
+        return sentence_words;
+    }
+
+    async bow(sentence, show_details) {
+        //tokenize the pattern
+        var sentence_words = await this.clean_up_sentence(sentence);
+        //bag of words
+        var bag = new Array(this.words.length).fill(0)
+
+        var i = 0;
+        const iMax = sentence_words.length;
+        for (; i < iMax; i++) {
+            var j = 0;
+            const jMax = this.words.length;
+            for (; j < jMax; j++) {
+                if (sentence_words[i] == this.words[j]) {
+                    //set 1 if found the match word and 0 for the others
+                    bag[j] = 1;
+                    if (show_details) { console.log("found in bag: " + v) }
+                }
+            }
+        }
+
+        return bag;
+    }
+
+    async classify(sentence) {
+        //load model
+        if (!this.model) this.model = await tf.loadLayersModel('file://' + this.modelpath + '/model.json');
+        //bow sentence
+        const bowData = await this.bow(sentence, this._debug);
+        //test if the BowData is a array of zeros
+        var NotallZeros = await arr.zeroTest(bowData);
+        //Output array
+        var return_list = [];
+        // teste if the result isn't all zeros
+        if (NotallZeros) {
+            //to prevente memory leak
+            await tf.tidy(() => {
+                //converter to tensor array
+                var data = tf.tensor2d(bowData, [1, bowData.length]);
+                //generate probabilities from the model
+                var predictions = this.model.predict(data).dataSync();
+                //filter out predictions below a threshold    
+                var results = [];
+                predictions.map((prediction, index) => {
+                    if (prediction > this.CONFIDENCE) {
+                        results.push([index, prediction]);
+                    }
+                });
+                //sort by strength of probability    
+                results.sort((a, b) => b[1] - a[1]);
+                //build array with responses 
+                results.forEach((r, i) => {
+                    return_list.push([classes[r[0]], r[1]]);
+                });
+            })
+            //return tuple of intent and probability
+            if (this._debug) console.log(return_list)
+            return return_list
+        }
+    }
+
+    async response(sentence, userID, show_details) {
+        var i = 0;
+        var reply = arr.random(await this._getFallBack());
+        var results = await this.classify(sentence);
+        //if we have a classification then find the matching intent tag
+        if (results && results.length > 0) {
+            //loop as long as there are matches to process
+            while (results[i]) {
+                var j = 0;
+                const jMax = this.intents.length;
+                for (; j < jMax; j++) {
+                    //set context for this intent if necessary
+                    if (this.intents[j].tag == results[0][0]) {
+                        if (arr.inArray('context_set', s)) {
+                            //set context
+                            this._setContext(userID, s['context_set']);
+                            if (show_details) {
+                                console.log('context: ' + s['context_set'])
+                            }
+                        }
+                        //check if this intent is contextual and applies to this user's conversation
+                        if (!arr.inArray('context_filter', s) || arr.UserFilter(this.context, userID) && arr.inArray('context_filter', s) && s['context_filter'] == this.context[this.context.findIndex(x => x.uID == userID)].ctx) {
+                            if (show_details) {
+                                console.log('tag: ' + s['tag']);
+                            }
+                            //remove user context
+                            this.context.slice(this.context.findIndex(x => x.uID == userID), 1)
+                            //a random response from the intent             
+                            reply = this._configResponse(s['responses']);
+                        } else {
+                            //a random response from the intent             
+                            reply = this._configResponse(s['responses']);
+                        }
+                    }
+                }
+                results.shift();
+                i++;
+            }
+        }
+        return reply;
     }
 }
 
