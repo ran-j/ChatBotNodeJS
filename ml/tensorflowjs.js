@@ -12,8 +12,10 @@ const arr = require('../Libs/ExtraFunctions');
 const BotConfig = require('../Libs/BotConfig');
 
 class Agent {
-    constructor(Language) {
+    constructor(Language, debug = false) {
         this.isAgentBuilding = false;
+        // this._debug = true
+        this._debug = debug
         if (Language == 'pt') {
             natural.PorterStemmerPt.attach();
             this.tokenizer = new natural.AggressiveTokenizerPt();
