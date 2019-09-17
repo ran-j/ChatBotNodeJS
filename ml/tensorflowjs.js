@@ -353,45 +353,50 @@ class Agent {
     }
 
     async response(sentence, userID, show_details) {
-        var i = 0;
-        var reply = arr.random(await this._getFallBack());
-        var results = await this.classify(sentence);
-        //if we have a classification then find the matching intent tag
-        if (results && results.length > 0) {
-            //loop as long as there are matches to process
-            while (results[i]) {
-                var j = 0;
-                const jMax = this.intents.length;
-                for (; j < jMax; j++) {
-                    //set context for this intent if necessary
-                    if (this.intents[j].tag == results[0][0]) {
-                        if (arr.inArray('context_set', s)) {
-                            //set context
-                            this._setContext(userID, s['context_set']);
-                            if (show_details) {
-                                console.log('context: ' + s['context_set'])
+        try {
+            var i = 0;
+            var reply = arr.random(await this._getFallBack());
+            var results = await this.classify(sentence);
+            //if we have a classification then find the matching intent tag
+            if (results && results.length > 0) {
+                //loop as long as there are matches to process
+                while (results[i]) {
+                    var j = 0;
+                    const jMax = this.intents.length;
+                    for (; j < jMax; j++) {
+                        //set context for this intent if necessary
+                        if (this.intents[j].tag == results[0][0]) {
+                            if (arr.inArray('context_set', s)) {
+                                //set context
+                                this._setContext(userID, s['context_set']);
+                                if (show_details) {
+                                    console.log('context: ' + s['context_set'])
+                                }
                             }
-                        }
-                        //check if this intent is contextual and applies to this user's conversation
-                        if (!arr.inArray('context_filter', s) || arr.UserFilter(this.context, userID) && arr.inArray('context_filter', s) && s['context_filter'] == this.context[this.context.findIndex(x => x.uID == userID)].ctx) {
-                            if (show_details) {
-                                console.log('tag: ' + s['tag']);
+                            //check if this intent is contextual and applies to this user's conversation
+                            if (!arr.inArray('context_filter', s) || arr.UserFilter(this.context, userID) && arr.inArray('context_filter', s) && s['context_filter'] == this.context[this.context.findIndex(x => x.uID == userID)].ctx) {
+                                if (show_details) {
+                                    console.log('tag: ' + s['tag']);
+                                }
+                                //remove user context
+                                this.context.slice(this.context.findIndex(x => x.uID == userID), 1)
+                                //a random response from the intent             
+                                reply = this._configResponse(s['responses']);
+                            } else {
+                                //a random response from the intent             
+                                reply = this._configResponse(s['responses']);
                             }
-                            //remove user context
-                            this.context.slice(this.context.findIndex(x => x.uID == userID), 1)
-                            //a random response from the intent             
-                            reply = this._configResponse(s['responses']);
-                        } else {
-                            //a random response from the intent             
-                            reply = this._configResponse(s['responses']);
                         }
                     }
+                    results.shift();
+                    i++;
                 }
-                results.shift();
-                i++;
             }
+            return reply;
+        } catch (error) {
+            console.log(error)
+            return "Internal error >X("
         }
-        return reply;
     }
 }
 

@@ -6,7 +6,7 @@ const attendence = (req, res, next) => {
 const buildAgent = async (req, res, next) => {
     if (Agent.isAgentBuilding) return res.status(403).end('Agent are building');
     try {
-        await Agent.BuildAgent()
+        await Agent.BuildAgent(true)
         res.end("done")
     } catch (error) {
         console.error(error)
@@ -16,7 +16,7 @@ const buildAgent = async (req, res, next) => {
 
 const ask = async (req, res, next) => {
     try {
-        Agent.response(req.body.say, req.body.uID, true)
+        res.end(Agent.response(req.body.say, req.body.uID, true))
     } catch (error) {
         res.end("Ops, internal error X(")
     }
