@@ -122,7 +122,7 @@ class Agent {
                     //create bag of words array
                     for (; j < jMax; j++) {
                         if (pattern_words.indexOf(this.words[j]) > -1) {
-                            bag.push(1);
+                            bag[j] = 1;
                         }
                     }
                     //create an empty array for output
@@ -218,7 +218,7 @@ class Agent {
                         //add to words list the steam words
                         Array.prototype.push.apply(this.words, steamWords)
                         //add to documents in corpus
-                        this.documents.push([steamWords, intentsList[i].resposta]);
+                        this.documents.push([steamWords, intentsList[i].tag]);
                         //add the tag to classes list 
                         if (!this._containsInArray(this.classes, intentsList[i].tag)) {
                             this.classes.push(intentsList[i].tag);
@@ -226,7 +226,7 @@ class Agent {
                     }
                 }
                 //sort and remove duplicates
-                this.words = arr.removeDups(this._sort(this.words));
+                this.words = this._sort(arr.removeDups(this.words));
                 //sort classes
                 this.classes = this._sort(this.classes);
 

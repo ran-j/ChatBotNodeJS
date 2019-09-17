@@ -19,7 +19,7 @@ mongoose
   .then(async () => {
     console.log('MongoDB Connected')
     console.log('Starting build agent')
-    await Agent.BuildAgent()
+    await Agent.BuildAgent(false)
     console.log("Agent ready")
   }).catch(err => console.log(err));
 
