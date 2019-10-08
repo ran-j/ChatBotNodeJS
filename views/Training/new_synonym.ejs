@@ -1,115 +1,119 @@
 <!DOCTYPE html>
 <html>
-    <% include ../Fixed/Header.ejs %>
-    
-    <body class="skin-black">
-        <% include ../Fixed/HeaderLogo.ejs %>
+<% include ../Fixed/Header.ejs %>
+
+<body class="skin-black">
+    <% include ../Fixed/HeaderLogo.ejs %>
 
 
-        <div class="wrapper row-offcanvas row-offcanvas-left">
-            <% include ../Fixed/NavBar.ejs %>
+    <div class="wrapper row-offcanvas row-offcanvas-left">
+        <% include ../Fixed/NavBar.ejs %>
 
-            <!-- Right side column. Contains the navbar and content of the page -->
-            <aside class="right-side">    
-                
-                 <!-- Main content -->
-                 <section class="content">                        
-                    <div class="row">
-                       <div class="col-md-12">
-                           <!-- general form elements -->
-                           <div class="box box-primary">
-                               <div class="box-header">
-                                   <h3 class="box-title">Edit Intent</h3>
-                               </div><!-- /.box-header -->
-                               <!-- form start -->
-                               <form role="form">
-                                   <div class="box-body">
-                                       <div class="form-group">
-                                           <label for="exampleInputEmail1">Key Word</label>
-                                           <input type="text" id="kword" class="form-control">
-                                       </div>
-                                       <div class="form-group">
-                                            <label for="exampleInputEmail1">Title</label>
-                                            <input type="text" id="title" class="form-control">
-                                        </div>
-                                       <div class="form-group">                                           
-                                           <table class="table table-bordered">                                                
-                                            <table class="table table-bordered" id="tableIR"> 
+        <!-- Right side column. Contains the navbar and content of the page -->
+        <aside class="right-side">
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="row">
+                    <div class="col-md-12">
+                        <!-- general form elements -->
+                        <div class="box box-primary">
+                            <div class="box-header">
+                                <h3 class="box-title">Edit Intent</h3>
+                            </div><!-- /.box-header -->
+                            <!-- form start -->
+                            <form role="form">
+                                <div class="box-body">
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">Title</label>
+                                        <input type="text" id="title" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <table class="table table-bordered">
+                                            <table class="table table-bordered" id="tableIR">
                                                 <tr>
                                                     <th style="width: 90%">Synonyms</th>
-                                                    <th>Action</th>                                                       
-                                                </tr>          
+                                                    <th>Action</th>
+                                                </tr>
                                                 <tr id="textC">
-                                                    <td><input type="text" class="form-control newpattern" placeholder='Type new Synonyms'></td>
-                                                    <td><button class="btn btn-sm btn-success appendB" type="button" onclick="BtnaddA()">Add <i class="fas fa-save"></i></button></td>  
-                                                </tr>                                                                           
+                                                    <td><input type="text" class="form-control newpattern"
+                                                            placeholder='Type new Synonyms'></td>
+                                                    <td><button class="btn btn-sm btn-success appendB" type="button"
+                                                            onclick="BtnaddA()">Add <i class="fas fa-save"></i></button>
+                                                    </td>
+                                                </tr>
                                             </table>
-                                       </div>
-                                   </div>
-                                   <div class="box-footer text-center">
-                                        <button type="button" class="btn btn-primary btn-lg" onclick="Save()">Save</button>
                                     </div>
-                               </form>
-                           </div>
-                       </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">Key Word</label>
+                                        <input type="text" id="kword" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="box-footer text-center">
+                                    <button type="button" class="btn btn-primary btn-lg" onclick="Save()">Save</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
+                </div>
             </section><!-- /.content -->
-             
-            </aside><!-- /.right-side -->
-        </div><!-- ./wrapper -->
+
+        </aside><!-- /.right-side -->
+    </div><!-- ./wrapper -->
 
 
-        <% include ../Fixed/footer.ejs %>    
-        
-        <script>
-            var pattern = [];
+    <% include ../Fixed/footer.ejs %>
 
-            function BtnaddA() {
-                var textinp = $( '.newpattern' ).val();
-                if(textinp.trim().length > 0){                  
-                    var tr = $('#textC');
-                    tr.css("background-color","#FF3700");
-                    pattern.push(textinp);
-                    tr.fadeOut(400, function(){
-                        tr.remove();
-                    });
-                    $( "#tableIR" ).append('<tr id="'+pattern.length+'"><td>'+textinp+'</td><td><button class="btn btn-sm btn-danger"type="button" value="'+pattern.length+'" onclick="DeletePattern(this)">Delete <i class="fas fa-trash"></i></button></td></tr>')
-                    $( "#tableIR" ).append( '<tr id="textC"><td><input type="text" class="form-control newpattern" placeholder="Type new Synonyms"></td><td><button class="btn btn-sm btn-success" onclick="BtnaddA()" type="button">Add <i class="fas fa-save"></i></button></td></tr>' );
-                }             
+    <script>
+        var pattern = [];
+
+        function BtnaddA() {
+            var textinp = $('.newpattern').val();
+            if (textinp.trim().length > 0) {
+                var tr = $('#textC');
+                tr.css("background-color", "#FF3700");
+                pattern.push(textinp);
+                tr.fadeOut(400, function () {
+                    tr.remove();
+                });
+                $("#tableIR").append('<tr id="' + pattern.length + '"><td>' + textinp + '</td><td><button class="btn btn-sm btn-danger"type="button" value="' + pattern.length + '" onclick="DeletePattern(this)">Delete <i class="fas fa-trash"></i></button></td></tr>')
+                $("#tableIR").append('<tr id="textC"><td><input type="text" class="form-control newpattern" placeholder="Type new Synonyms"></td><td><button class="btn btn-sm btn-success" onclick="BtnaddA()" type="button">Add <i class="fas fa-save"></i></button></td></tr>');
             }
+        }
 
-            function DeletePattern(v){                
-                document.getElementById(v.value).remove();   
-                pattern.splice(parseInt(v.value -1), 1);            
+        function DeletePattern(v) {
+            document.getElementById(v.value).remove();
+            pattern.splice(parseInt(v.value - 1), 1);
+        }
+
+        function Save() {
+            var kword = $('#kword').val();
+            var title = $('#title').val();
+            if (kword.trim().length > 0 && title.trim().length > 0 && pattern.length > 0) {
+                $.ajax({
+                    type: "POST",
+                    url: "/synonym/new",
+                    data: {
+                        wd: kword,
+                        synonyms: JSON.stringify(pattern),
+                        title: title
+                    },
+                    success: function (msg) {
+                        swal("Success !!", msg, "success");
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1000)
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        sweetAlert("Oops...", XMLHttpRequest.responseText, "error");
+                    }
+                });
+            } else {
+                sweetAlert("Oops...", 'Required fields Tag and Title and Synonyms.', "error");
             }
+        }        
+    </script>
 
-            function Save(){
-                var kword = $('#kword').val();
-                var title = $('#title').val();
-                if(kword.trim().length > 0 && title.trim().length > 0 && pattern.length > 0){
-                    $.ajax({
-                        type: "POST",
-                        url: "/synonym/new",
-                        data: {                    
-                            wd: kword,
-                            synonyms: JSON.stringify(pattern),
-                            title: title                                        
-                        },
-                        success: function(msg){                             
-                            swal("Success !!", msg, "success");
-                            setTimeout(function(){
-                                location.reload();
-                            },1000)
-                        },
-                        error: function(XMLHttpRequest, textStatus, errorThrown) {
-                            sweetAlert("Oops...", XMLHttpRequest.responseText, "error");
-                        }
-                    });     
-                }else{
-                    sweetAlert("Oops...", 'Required fields Tag and Title and Synonyms.', "error");
-                }
-            }        
-        </script>
-            
-    </body>
+</body>
+
 </html>
