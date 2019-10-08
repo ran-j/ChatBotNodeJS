@@ -31,7 +31,7 @@ You can register your intents and the build agent.
 
 | Register      | Train      | Anwser      |
 |------------|-------------|-------------|
-| <img src="./images/trainlist.PNG" width="500"> | <img src="./images/build.PNG" width="500"> | | <img src="./images/chat.PNG" width="500"> |
+| <img src="./images/trainlist.PNG" width="500"> | <img src="./images/build.PNG" width="500"> | <img src="./images/chat.PNG" width="500"> |
 
 
 ### Todo List
