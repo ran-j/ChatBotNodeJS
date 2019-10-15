@@ -1,14 +1,18 @@
 var mongoose = require('mongoose');
 mongoose.set('useCreateIndex', true);
 
-var ConversationSchema = new mongoose.Schema({
-    userSentence: {
-        type: String,
-        required: true,
-    },
+var ConversationSchema = new mongoose.Schema({     
     userID: {
         type: String,
         required: true,
+    },
+    identify: {
+        type: String,
+        required: true,
+    },
+    historic: {
+        type: Array,
+        default : []
     },
     create_At: {
         type: Date,

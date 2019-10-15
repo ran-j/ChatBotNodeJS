@@ -26,8 +26,9 @@ mongoose
     console.log('Starting build agent')
     await Agent.BuildAgent(false)
     console.log("Agent ready")
-
+    //events
     Agent.on("fallback", mlLogs.logFallback)
+    Agent.on("conversation", mlLogs.logConversation)
   }).catch(err => console.log(err));
 
 // view engine setup

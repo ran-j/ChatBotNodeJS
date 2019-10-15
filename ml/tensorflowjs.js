@@ -399,6 +399,9 @@ class Agent extends EventEmitter {
                                         this._setContext(userID, this.intents[j]['context_set']);
                                         if (show_details) console.log('context: ' + this.intents[j]['context_set'])
                                     }
+                                    let userResponse = this._configResponse(this.intents[j]['responses'])
+                                    //save conversation
+                                    this.emit('conversation', [{ msg: sentence, is_bot: false, time: new Date().toLocaleString() }, { msg: userResponse, is_bot: true, time: new Date().toLocaleString(), intent: { tag: this.intents[j].tag, confidence: results[0][1] } }], userID);
                                     //check if this intent is contextual and applies to this user's conversation
                                     if (!arr.inArray('context_filter', this.intents[j])
                                         || arr.UserFilter(this.context, userID)
@@ -408,10 +411,10 @@ class Agent extends EventEmitter {
                                         //remove user context
                                         this.context.slice(this.context.findIndex(x => x.uID == userID), 1)
                                         //a random response from the intent             
-                                        return resolve(this._configResponse(this.intents[j]['responses']));
+                                        return resolve(userResponse);
                                     } else {
                                         //a random response from the intent             
-                                        return resolve(this._configResponse(this.intents[j]['responses']));
+                                        return resolve(userResponse);
                                     }
                                 }
                             }
@@ -419,10 +422,12 @@ class Agent extends EventEmitter {
                             i++;
                         }
                     } else {
+                        let fallbacMsg = arr.random(this._getFallBack())
                         if (show_details) console.log(`Registering fallback to user ${userID}`)
+                        this.emit('conversation', [{ msg: sentence, is_bot: false, time: new Date().toLocaleString() }, { msg: fallbacMsg, is_bot: true, time: new Date().toLocaleString(), intent: null }], userID);
                         this.emit('fallback', sentence, userID, response.guesses_list);
+                        resolve(fallbacMsg)
                     }
-                    resolve(arr.random(this._getFallBack()))
                 }).catch((err) => {
                     console.error(err)
                     resolve("Sorry, Internal error >X(")
