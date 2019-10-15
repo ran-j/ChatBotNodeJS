@@ -1,5 +1,6 @@
 const natural = require('natural');
 const shuffle = require('shuffle-array');
+const EventEmitter = require('events');
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
 
@@ -13,8 +14,9 @@ const BotConfig = require('../Libs/BotConfig');
 
 const BotName = BotConfig.BotName
 
-class Agent {
+class Agent extends EventEmitter {
     constructor(Language, debug = false) {
+        super();
         this.isAgentBuilding = false;
         // this._debug = true
         this._debug = debug
@@ -192,81 +194,83 @@ class Agent {
         })
     }
 
-    async BuildAgent(fullbuild) {
-        if (this.isAgentBuilding) return { error: true, msg: "Agent is buinding" }
-        try {
-            this.isAgentBuilding = true;
-            intentsModels.find({}).lean().exec((err, intentsList) => {
-                if (err) throw err
-                var i = 0;
-                const iMax = intentsList.length
-                this.intents = intentsList
-                for (; i < iMax; i++) {
-                    var j = 0;
-                    const jMax = intentsList[i].patterns.length
-                    for (; j < jMax; j++) {
-                        //stem and tokenize each word in the sentence
-                        var wd = this.tokenizer.tokenize(intentsList[i].patterns[j]);
-                        var x = 0;
-                        const xMax = wd.length
-                        //remove ignored words
-                        for (; x < xMax; x++) {
-                            if (this.ignore_words.indexOf(wd[x]) > -1) {
-                                wd.splice(x, 1)
+    BuildAgent(fullbuild) {
+        return new Promise((resolve, reject) => {
+            if (this.isAgentBuilding) return { error: true, msg: "Agent is buinding" }
+            try {
+                this.isAgentBuilding = true;
+                intentsModels.find({}).lean().exec((err, intentsList) => {
+                    if (err) throw err
+                    var i = 0;
+                    const iMax = intentsList.length
+                    this.intents = intentsList
+                    for (; i < iMax; i++) {
+                        var j = 0;
+                        const jMax = intentsList[i].patterns.length
+                        for (; j < jMax; j++) {
+                            //stem and tokenize each word in the sentence
+                            var wd = this.tokenizer.tokenize(intentsList[i].patterns[j]);
+                            var x = 0;
+                            const xMax = wd.length
+                            //remove ignored words
+                            for (; x < xMax; x++) {
+                                if (this.ignore_words.indexOf(wd[x]) > -1) {
+                                    wd.splice(x, 1)
+                                }
+                            }
+                            //stem and lower each word
+                            var steamWords = wd.map(word => word.toLowerCase().stem())
+                            //add to words list the steam words
+                            Array.prototype.push.apply(this.words, steamWords)
+                            //add to documents in corpus
+                            this.documents.push([steamWords, intentsList[i].tag]);
+                            //add the tag to classes list 
+                            if (!this._containsInArray(this.classes, intentsList[i].tag)) {
+                                this.classes.push(intentsList[i].tag);
                             }
                         }
-                        //stem and lower each word
-                        var steamWords = wd.map(word => word.toLowerCase().stem())
-                        //add to words list the steam words
-                        Array.prototype.push.apply(this.words, steamWords)
-                        //add to documents in corpus
-                        this.documents.push([steamWords, intentsList[i].tag]);
-                        //add the tag to classes list 
-                        if (!this._containsInArray(this.classes, intentsList[i].tag)) {
-                            this.classes.push(intentsList[i].tag);
-                        }
                     }
-                }
-                //sort and remove duplicates
-                this.words = this._sort(arr.removeDups(this.words));
-                //sort classes
-                this.classes = this._sort(this.classes);
+                    //sort and remove duplicates
+                    this.words = this._sort(arr.removeDups(this.words));
+                    //sort classes
+                    this.classes = this._sort(this.classes);
 
-                if (this._debug) {
-                    console.log("documents:", this.documents.length);
-                    console.log("classes:", this.classes.length);
-                    console.log("unique stemmed words:", this.words.length);
-                }
-
-                if (fullbuild) {
                     if (this._debug) {
-                        console.log();
-                        console.log('Training...');
-                    }
-                    this.TrainBuilder().then(() => {
-                        this.isAgentBuilding = false;
-                        return { error: false, msg: "Building successful" }
-                    }).catch((error) => {
-                        if (this._debug) console.log(error);
-                        this.isAgentBuilding = false;
-                        return { error: true, msg: "Core error" }
-                    });
-                } else {
-                    this.isAgentBuilding = false;
-                    if (this._debug) {
-                        console.log();
                         console.log("documents:", this.documents.length);
                         console.log("classes:", this.classes.length);
                         console.log("unique stemmed words:", this.words.length);
                     }
-                    return { error: false, msg: "Building successful" }
-                }
-            })
-        } catch (error) {
-            this.isAgentBuilding = false;
-            if (this._debug) console.log(error);
-            throw error
-        }
+
+                    if (fullbuild) {
+                        if (this._debug) {
+                            console.log();
+                            console.log('Training...');
+                        }
+                        this.TrainBuilder().then(() => {
+                            this.isAgentBuilding = false;
+                            return resolve({ error: false, msg: "Building successful" })
+                        }).catch((error) => {
+                            if (this._debug) console.log(error);
+                            this.isAgentBuilding = false;
+                            return resolve({ error: true, msg: "Core error" })
+                        });
+                    } else {
+                        this.isAgentBuilding = false;
+                        if (this._debug) {
+                            console.log();
+                            console.log("documents:", this.documents.length);
+                            console.log("classes:", this.classes.length);
+                            console.log("unique stemmed words:", this.words.length);
+                        }
+                        return resolve({ error: false, msg: "Building successful" })
+                    }
+                })
+            } catch (error) {
+                this.isAgentBuilding = false;
+                if (this._debug) console.log(error);
+                reject(error)
+            }
+        })
     }
 
     async clean_up_sentence(sentence) {
@@ -319,94 +323,115 @@ class Agent {
         return bag;
     }
 
-    async classify(sentence) {
-        //load model
-        if (!this.model) this.model = await tf.loadLayersModel('file://' + this.modelpath + '/model.json');
-        //bow sentence
-        const bowData = await this.bow(sentence, this._debug);
-        //test if the BowData is a array of zeros
-        var NotallZeros = await arr.zeroTest(bowData);
-        //Output array
-        var return_list = [];
-        // teste if the result isn't all zeros
-        if (NotallZeros) {
-            //to prevente memory leak
-            await tf.tidy(() => {
-                //converter to tensor array
-                var data = tf.tensor2d(bowData, [1, bowData.length]);
-                //generate probabilities from the model
-                var predictions = this.model.predict(data).dataSync();
-                //filter out predictions below a threshold    
-                var results = [];
-                predictions.map((prediction, index) => {
-                    if (prediction > this.CONFIDENCE) {
-                        results.push([index, prediction]);
+    classify(sentence, catchGuess = true) {
+        return new Promise(async (resolve, reject) => {
+            //load model
+            if (!this.model) this.model = await tf.loadLayersModel('file://' + this.modelpath + '/model.json');
+            //bow sentence
+            const bowData = await this.bow(sentence, this._debug);
+            //Output array
+            var return_list = [];
+            var guesses_list = [];
+            //test if the BowData is a array of zeros (If enable)
+            var NotallZeros = catchGuess ? true : await arr.zeroTest(bowData);
+            // teste if the result isn't all zeros
+            if (NotallZeros) {
+                //to prevente memory leak
+                await tf.tidy(() => {
+                    //converter to tensor array
+                    var data = tf.tensor2d(bowData, [1, bowData.length]);
+                    //generate probabilities from the model
+                    var predictions = this.model.predict(data).dataSync();
+                    //filter out predictions below a threshold    
+                    var results = [];
+                    var guesses = [];
+                    predictions.map((prediction, index) => {
+                        if (prediction > this.CONFIDENCE) {
+                            results.push([index, prediction]);
+                        } else {
+                            if (prediction > (this.CONFIDENCE / 2)) { //to be a guesses should be half of the current confidence
+                                guesses.push([index, prediction]);
+                            }
+                        }
+                    });
+                    if (results.length) {
+                        //sort by strength of probability    
+                        results.sort((a, b) => b[1] - a[1]);
+                        //build array with responses 
+                        results.forEach((r, i) => {
+                            return_list.push([this.classes[r[0]], r[1]]);
+                        });
+                    } else {
+                        //sort by strength of probability    
+                        guesses.sort((a, b) => b[1] - a[1]);
+                        //build array with responses 
+                        guesses.forEach((r, i) => {
+                            guesses_list.push([this.classes[r[0]], r[1]]);
+                        });
                     }
-                });
-                //sort by strength of probability    
-                results.sort((a, b) => b[1] - a[1]);
-                //build array with responses 
-                results.forEach((r, i) => {
-                    return_list.push([this.classes[r[0]], r[1]]);
-                });
-            })
-            //return tuple of intent and probability
-            if (this._debug) console.log(return_list)
-            return return_list
-        }
+                    //return tuple of intent and probability
+                    if (this._debug) console.log(return_list)
+                    resolve({ return_list, guesses_list })
+                })
+            } else {
+                resolve({ return_list, guesses_list })
+            }
+        })
     }
 
     response(sentence, userID, show_details) {
         return new Promise(async (resolve, reject) => {
             try {
-                var i = 0;                 
-                var results = await this.classify(sentence);
-                //if we have a classification then find the matching intent tag
-                if (results && results.length > 0) {
-                    //loop as long as there are matches to process
-                    while (results[i]) {
-                        var j = 0;
-                        const jMax = this.intents.length;
-                        for (; j < jMax; j++) {
-                            //set context for this intent if necessary
-                            if (this.intents[j].tag == results[0][0]) {
-                                if (arr.inArray('context_set', this.intents[j])) {
-                                    //set context
-                                    this._setContext(userID, this.intents[j]['context_set']);
-                                    if (show_details) {
-                                        console.log('context: ' + this.intents[j]['context_set'])
+                var i = 0;
+                this.classify(sentence).then((response) => {
+                    var results = response.return_list;
+                    //if we have a classification then find the matching intent tag
+                    if (results && results.length > 0) {
+                        //loop as long as there are matches to process
+                        while (results[i]) {
+                            var j = 0;
+                            const jMax = this.intents.length;
+                            for (; j < jMax; j++) {
+                                //set context for this intent if necessary
+                                if (this.intents[j].tag == results[0][0]) {
+                                    if (arr.inArray('context_set', this.intents[j])) {
+                                        //set context
+                                        this._setContext(userID, this.intents[j]['context_set']);
+                                        if (show_details) console.log('context: ' + this.intents[j]['context_set'])
                                     }
-                                }
-                                //check if this intent is contextual and applies to this user's conversation
-                                if (!arr.inArray('context_filter', this.intents[j]) 
-                                        || arr.UserFilter(this.context, userID) 
-                                        && arr.inArray('context_filter', this.intents[j]) 
+                                    //check if this intent is contextual and applies to this user's conversation
+                                    if (!arr.inArray('context_filter', this.intents[j])
+                                        || arr.UserFilter(this.context, userID)
+                                        && arr.inArray('context_filter', this.intents[j])
                                         && this.intents[j]['context_filter'] == this.context[this.context.findIndex(x => x.uID == userID)].ctx) {
-                                    if (show_details) {
-                                        console.log('tag: ' + this.intents[j]['tag']);
+                                        if (show_details) console.log('tag: ' + this.intents[j]['tag']);
+                                        //remove user context
+                                        this.context.slice(this.context.findIndex(x => x.uID == userID), 1)
+                                        //a random response from the intent             
+                                        return resolve(this._configResponse(this.intents[j]['responses']));
+                                    } else {
+                                        //a random response from the intent             
+                                        return resolve(this._configResponse(this.intents[j]['responses']));
                                     }
-                                    //remove user context
-                                    this.context.slice(this.context.findIndex(x => x.uID == userID), 1)
-                                    //a random response from the intent             
-                                    return resolve(this._configResponse(this.intents[j]['responses']));
-                                } else {
-                                    //a random response from the intent             
-                                    return resolve(this._configResponse(this.intents[j]['responses']));
                                 }
                             }
+                            results.shift();
+                            i++;
                         }
-                        results.shift();
-                        i++;
+                    } else {
+                        if (show_details) console.log(`Registering fallback to user ${userID}`)
+                        this.emit('fallback', sentence, userID, response.guesses_list);
                     }
-                }
-                resolve(arr.random(await this._getFallBack()))
+                    resolve(arr.random(this._getFallBack()))
+                }).catch((err) => {
+                    console.error(err)
+                    resolve("Sorry, Internal error >X(")
+                })
             } catch (error) {
                 console.log(error)
                 resolve("Internal error >X(")
-            }           
+            }
         })
-
-        
     }
 }
 
