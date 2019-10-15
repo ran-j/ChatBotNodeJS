@@ -1,4 +1,4 @@
-<p align="center"><a href="#" target="_blank" rel="noopener noreferrer"><img width="500" src="https://js.tensorflow.org/images/TF_JS_twitter.png" alt="Vue logo"></a></p>
+<p align="center"><a href="#" target="_blank" rel="noopener noreferrer"><img width="500" src="https://i.ytimg.com/vi/656l4IfhM10/maxresdefault.jpg" alt="ChatBot logo"></a></p>
 
 <p align="center">
 
@@ -6,17 +6,41 @@
 
 <h2 align="center">ChatBotJS</h2>
 
-Chatbot build with tensorflowJS and NodeJS
+A contextual Chatbot build with TensorflowJS and NodeJS
 
 Install dependencies and run.
 
 ```sh
 
 $ npm install
-$ npm start bin/www
+$ npm start
 
 ```
 
-In development
+Install dependencies and run with sample train.
 
-Based on https://chatbotsmagazine.com/contextual-chat-bots-with-tensorflow-4391749d0077 and https://medium.om/tensorflow/introducing-tensorflow-js-machine-learning-in-javascript-bf3eab376db and https://medium.com/tensorflow/a-gentle-introduction-to-tensorflow-js-dba2e5257702 and https://medium.com/tensorflow/getting-started-with-tensorflow-js-50f6783489b2
+```sh
+
+$ npm install
+$ npm run seed
+$ npm start
+
+```
+
+You can register your intents and the build agent.
+
+| Register      | Train      | Anwser      |
+|------------|-------------|-------------|
+| <img src="./images/trainlist.PNG" width="500"> | <img src="./images/build.PNG" width="500"> | <img src="./images/chat.PNG" width="500"> |
+
+
+### Todo List
+
+- [ ] Auth
+- [ ] User CRUD
+- [ ] Fallback dashboard
+- [ ] Token for requests
+- [ ] Metricis (Count request numbers ...)
+- [X] Update Tensorflow JS
+- [X] Data table for intents list
+- [X] Optimizations on train and answer
