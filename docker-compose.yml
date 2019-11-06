@@ -27,7 +27,7 @@ services:
 networks:
   backend:
     external:
-      name: backend-local
+      name: chatbotnodejs
   frontend:
     external:
-      name: frontend-local
+      name: chatbotnodejs
