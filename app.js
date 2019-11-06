@@ -5,22 +5,30 @@ var logger = require('morgan');
 var mongoose = require('mongoose');
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
+
 const mlAgent = require("./ml/tensorflowjs")
+const mlLogs = require("./Libs/AgentEvents")
+
 const config = require('./Libs/BotConfig');
 
 var app = express();
 
 var indexRouter = require('./routes/index');
 var intentsRouter = require('./routes/intents');
+
 global.Agent = new mlAgent(config.Language)
 
 mongoose
   .connect(config.DB, { useNewUrlParser: true })
   .then(async () => {
     console.log('MongoDB Connected')
+    //setup the agent
     console.log('Starting build agent')
     await Agent.BuildAgent(false)
     console.log("Agent ready")
+    //events
+    Agent.on("fallback", mlLogs.logFallback)
+    Agent.on("conversation", mlLogs.logConversation)
   }).catch(err => console.log(err));
 
 // view engine setup
