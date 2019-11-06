@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  mongo-chatbotnodejs:
+    image: mongo:latest
+    volumes:
+      - ./data/db/production:/data/db  
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 27018:27017
+    environment: 
+    networks:
+      - backend
+
+  chatbotnodejs:
+    image: chatbotnodejs
+    build: .
+    environment:
+      NODE_ENV: development
+    ports:
+      - 3007:3007
+      - 9229:9229
+    volume:
+      - .:/usr/src/app
+    command: node --inspect=0.0.0.0:9229 ./bin/www
+
+networks:
+  backend:
+    external:
+      name: backend-local
+  frontend:
+    external:
+      name: frontend-local

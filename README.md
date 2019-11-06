@@ -12,6 +12,7 @@ Install dependencies and run.
 
 ```sh
 
+$ npm cd ChatBotNodeJS
 $ npm install
 $ npm start
 
@@ -21,9 +22,20 @@ Install dependencies and run with sample train.
 
 ```sh
 
+$ npm cd ChatBotNodeJS
 $ npm install
 $ npm run seed
 $ npm start
+
+```
+
+With docker.
+
+```sh
+
+$ npm cd ChatBotNodeJS
+$ docker build -t nodeJSChatBot . 
+$ docker-compose up
 
 ```
 
@@ -41,6 +53,8 @@ You can register your intents and the build agent.
 - [ ] Fallback dashboard
 - [ ] Token for requests
 - [ ] Metricis (Count request numbers ...)
+- [X] Docker
 - [X] Update Tensorflow JS
+- [X] Log conversation and fallbacks
 - [X] Data table for intents list
 - [X] Optimizations on train and answer
