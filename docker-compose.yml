@@ -1,33 +1,56 @@
-version: '3'
+version: "3"
 
 services:
+  
   mongo-chatbotnodejs:
     image: mongo:latest
+    container_name: mongo_chatbotnodejs
     volumes:
-      - ./data/db/production:/data/db  
-      - /etc/localtime:/etc/localtime:ro
-    ports:
-      - 27018:27017
-    environment: 
+      - ./data/db/:/data/db
+      # - /etc/localtime:/etc/localtime:ro
     networks:
-      - backend
+      - backend-bot
+    ports:
+      - 27017:27017
+    deploy:
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+      replicas: 1
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
 
   chatbotnodejs:
-    image: chatbotnodejs
     build: .
-    environment:
-      NODE_ENV: development
+    depends_on:
+      - mongo-chatbotnodejs
+    links:
+      - mongo-chatbotnodejs
+    networks:
+      - backend-bot
+      - frontend-bot
     ports:
-      - 3007:3007
-      - 9229:9229
-    volume:
-      - .:/usr/src/app
-    command: node --inspect=0.0.0.0:9229 ./bin/www
+      - 8080:3000
+    deploy:
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+      replicas: 1
+      resources:
+        limits:
+          cpus: "8"
+          memory: 4G
 
 networks:
-  backend:
+  backend-bot:
     external:
-      name: chatbotnodejs
-  frontend:
+      name: backend-bot
+  frontend-bot:
     external:
-      name: chatbotnodejs
+      name: frontend-bot

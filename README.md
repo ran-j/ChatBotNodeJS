@@ -34,8 +34,9 @@ With docker.
 ```sh
 
 $ npm cd ChatBotNodeJS
-$ docker build -t nodeJSChatBot . 
-$ docker-compose up
+$ docker network create backend-bot
+$ docker network create frontend-bot
+$ docker-compose up --build
 
 ```
 
