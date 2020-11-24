@@ -29,7 +29,7 @@ $ npm start
 
 ```
 
-With docker.
+# Build with docker.
 
 ```sh
 
@@ -37,6 +37,15 @@ $ npm cd ChatBotNodeJS
 $ docker network create backend-bot
 $ docker network create frontend-bot
 $ docker-compose up --build
+
+```
+
+# Use respository.
+
+```sh
+
+$ docker pull docker.pkg.github.com/ran-j/chatbotnodejs/chatbotnodejs:latest
+$ docker run --publish 3000:3000 --detach --name chatbotnodejs chatbotnodejs:latest
 
 ```
 
