@@ -19,7 +19,12 @@ var intentsRouter = require('./routes/intents');
 global.Agent = new mlAgent(config.Language)
 
 mongoose
-  .connect(config.DB, { useNewUrlParser: true })
+  .connect(config.DB, { 
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+   })
   .then(async () => {
     console.log('MongoDB Connected')
     //setup the agent

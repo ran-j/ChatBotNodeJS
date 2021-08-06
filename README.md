@@ -49,6 +49,16 @@ $ docker run --publish 3000:3000 --detach --name chatbotnodejs chatbotnodejs:lat
 
 ```
 
+# Configuration
+
+Change mongoURI in `./Libs/BotConfig.js`
+
+# Routes
+
+* To interact with bot: [http://localhost:3007/](http://localhost:3007/)
+* To train bot intents: [http://localhost:3007/admin/intents](http://localhost:3007/admin/intents)
+* To train bot synonyms: [http://localhost:3007/admin/synonyms](http://localhost:3007/admin/synonyms)
+
 You can register your intents and the build agent.
 
 | Register      | Train      | Anwser      |
@@ -56,7 +66,7 @@ You can register your intents and the build agent.
 | <img src="./images/trainlist.PNG" width="500"> | <img src="./images/build.PNG" width="500"> | <img src="./images/chat.PNG" width="500"> |
 
 
-### Todo List
+# Todo List
 
 - [ ] Auth
 - [ ] User CRUD

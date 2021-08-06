@@ -2,7 +2,13 @@ const natural = require('natural');
 const shuffle = require('shuffle-array');
 const EventEmitter = require('events');
 const tf = require('@tensorflow/tfjs');
+var tfNodeLoaded = false
+try {
 require('@tensorflow/tfjs-node');
+tfNodeLoaded = true  
+} catch (error) {
+    console.warn('@tensorflow/tfjs-node not loaded')
+}
 
 //models
 const synonymModel = require('../models/synonyms');
@@ -114,6 +120,7 @@ class Agent extends EventEmitter {
     TrainBuilder() {
         return new Promise((resolve, reject) => {
             try {
+                this.model = null
                 var i = 0;
                 const iMax = this.documents.length
                 for (; i < iMax; i++) {
@@ -168,6 +175,7 @@ class Agent extends EventEmitter {
                         }
                     }
                 }).then(() => {
+                    this.model = model;
                     if (this._debug) console.log('Saving model....');
                     //Print a text summary of the model's layers.
                     model.summary();
@@ -184,7 +192,6 @@ class Agent extends EventEmitter {
                         xs.dispose();
                         ys.dispose();
                         // model.dispose();
-                        this.model = model;
                         resolve(true);
                     }).catch(reject)
                 }).catch(reject)
@@ -194,7 +201,7 @@ class Agent extends EventEmitter {
         })
     }
 
-    BuildAgent(fullbuild) {
+    BuildAgent(fullBuild) {
         return new Promise((resolve, reject) => {
             if (this.isAgentBuilding) return { error: true, msg: "Agent is buinding" }
             try {
@@ -241,7 +248,7 @@ class Agent extends EventEmitter {
                         console.log("unique stemmed words:", this.words.length);
                     }
 
-                    if (fullbuild) {
+                    if (fullBuild) {
                         if (this._debug) {
                             console.log();
                             console.log('Training...');
@@ -323,7 +330,11 @@ class Agent extends EventEmitter {
         return bag;
     }
 
-    classify(sentence, catchGuess = true) {
+    onlyOneTrainSample() {
+        return this.intents.length === 1
+    }
+
+    classify(sentence, catchGuess = false) {
         return new Promise(async (resolve, reject) => {
             //load model
             if (!this.model) this.model = await tf.loadLayersModel('file://' + this.modelpath + '/model.json');
@@ -333,11 +344,15 @@ class Agent extends EventEmitter {
             var return_list = [];
             var guesses_list = [];
             //test if the BowData is a array of zeros (If enable)
-            var NotallZeros = catchGuess ? true : await arr.zeroTest(bowData);
-            // teste if the result isn't all zeros
-            if (NotallZeros) {
-                //to prevente memory leak
-                await tf.tidy(() => {
+            var NotAllZeros = catchGuess ? true : await arr.zeroTest(bowData);
+            // test if the result isn't all zeros
+            if (NotAllZeros) {
+                //to prevent memory leak
+                tf.tidy(() => {
+                    //to prevent dense input error shape
+                    if (this.onlyOneTrainSample()) {
+                        return resolve({ return_list: [[this.intents[0].tag, 1]], guesses_list: [] })
+                    }
                     //converter to tensor array
                     var data = tf.tensor2d(bowData, [1, bowData.length]);
                     //generate probabilities from the model
@@ -422,11 +437,11 @@ class Agent extends EventEmitter {
                             i++;
                         }
                     } else {
-                        let fallbacMsg = arr.random(this._getFallBack())
+                        let fallbackMsg = arr.random(this._getFallBack())
                         if (show_details) console.log(`Registering fallback to user ${userID}`)
                         this.emit('conversation', [{ msg: sentence, is_bot: false, time: new Date().toLocaleString() }, { msg: fallbacMsg, is_bot: true, time: new Date().toLocaleString(), intent: null }], userID);
                         this.emit('fallback', sentence, userID, response.guesses_list);
-                        resolve(fallbacMsg)
+                        resolve(fallbackMsg)
                     }
                 }).catch((err) => {
                     console.error(err)
