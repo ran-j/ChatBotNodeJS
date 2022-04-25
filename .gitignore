@@ -2,3 +2,4 @@ node_modules
 npm-debug.log
 **/training-models/*
 data/
+.env
