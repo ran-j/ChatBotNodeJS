@@ -1,6 +1,6 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-var FallbackSchema = new mongoose.Schema({
+const FallbackSchema = new mongoose.Schema({
     sentence: {
         type: String,
         required: true,
@@ -11,14 +11,14 @@ var FallbackSchema = new mongoose.Schema({
     },
     guesses: {
         type: Array,
-        default : []
+        default: []
     },
     create_At: {
         type: Date,
-        default : Date.now()
+        default: Date.now()
     }
 });
 
-var Fallbacks = mongoose.model('Fallbacks', FallbackSchema);
+const Fallbacks = mongoose.model('Fallbacks', FallbackSchema);
 
 module.exports = Fallbacks;

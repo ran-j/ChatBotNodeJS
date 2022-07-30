@@ -16,7 +16,7 @@ const buildAgent = async (req, res, next) => {
 
 const ask = async (req, res, next) => {
     try {
-        let resp = await Agent.response(req.body.say, req.body.uID, true)
+        const resp = await Agent.response(req.body.say, req.body.uID, true)
         res.end(resp)
     } catch (error) {
         res.end("Ops, internal error X(")

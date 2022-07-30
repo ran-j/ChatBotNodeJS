@@ -1,21 +1,21 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-var synonymSchema = new mongoose.Schema({
+const synonymSchema = new mongoose.Schema({
   title: {
-    type : String ,
+    type: String,
     required: true,
-  }, 
+  },
   keyWord: {
-    type : String ,
+    type: String,
     required: true,
     lowercase: true,
-  }, 
+  },
   synonyms: {
     type: Array,
     required: true,
-  }, 
+  },
 });
 
-var synonyms = mongoose.model('Synonym', synonymSchema);
+const synonyms = mongoose.model('Synonym', synonymSchema);
 
 module.exports = synonyms;

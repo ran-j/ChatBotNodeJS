@@ -1,6 +1,5 @@
+// TODO OPTIMIZE THIS Class
 module.exports = new class SysFunctions {
-    constructor() {
-    }
 
     async zeroTest(myArray) {
         var flag = false;

@@ -1,6 +1,6 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-var ConversationSchema = new mongoose.Schema({     
+const ConversationSchema = new mongoose.Schema({
     userID: {
         type: String,
         required: true,
@@ -11,14 +11,14 @@ var ConversationSchema = new mongoose.Schema({
     },
     historic: {
         type: Array,
-        default : []
+        default: []
     },
     create_At: {
         type: Date,
-        default : Date.now()
+        default: Date.now()
     }
 });
 
-var Conversations = mongoose.model('Conversations', ConversationSchema);
+const Conversations = mongoose.model('Conversations', ConversationSchema);
 
 module.exports = Conversations;

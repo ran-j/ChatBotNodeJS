@@ -1,39 +1,37 @@
-// @ts-ignore
-require('dotenv').config();
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var mongoose = require('mongoose');
-var session = require('express-session');
-var MongoStore = require('connect-mongo');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const mongoose = require('mongoose');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 
-const mlAgent = require("./ml/tensorflowjs")
+const Agent = require("./Libs/tensorflowjs/agent")
 const mlLogs = require("./Libs/AgentEvents")
 
-const config = require('./Libs/BotConfig');
+const config = require('./bin/Config');
 
-var app = express();
+const app = express();
 
-var indexRouter = require('./routes/index');
-var intentsRouter = require('./routes/intents');
+const indexRouter = require('./routes/index');
+const intentsRouter = require('./routes/intents');
 
-global.Agent = new mlAgent(config.Language)
+global.AgentInstance = new Agent(config.Language)
 
 mongoose
-  .connect(config.DB, { 
+  .connect(config.DB, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-   })
+  })
   .then(async () => {
     console.log('MongoDB Connected')
     //setup the agent
     console.log('Starting build agent')
-    await Agent.BuildAgent(false)
+    await AgentInstance.BuildAgent(false)
     console.log("Agent ready")
     //events
-    Agent.on("fallback", mlLogs.logFallback)
-    Agent.on("conversation", mlLogs.logConversation)
+    AgentInstance.on("fallback", mlLogs.logFallback)
+    AgentInstance.on("conversation", mlLogs.logConversation)
   }).catch(err => console.log(err));
 
 // view engine setup
@@ -50,10 +48,12 @@ app.use('/required', express.static(path.join(__dirname, 'public')));
 console.log(process.env.MONGODB_URI);
 
 app.use(session({
-  secret: 'BotJs',
+  secret: config.BotName,
+  resave: false,
   store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/botjs',
-      })
+    mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/botjs',
+  }),
+  saveUninitialized: false,
 }));
 
 app.use('/', indexRouter);

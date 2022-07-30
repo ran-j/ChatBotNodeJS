@@ -1,4 +1,4 @@
-var intentsModels = require('../../models/intents');
+const intentsModels = require('../../models/intents');
 
 const intentsList = (req, res, next) => {
     intentsModels.find({}).lean().exec((err, intents) => {
@@ -18,7 +18,7 @@ const intentsCreate = (req, res, next) => {
 }
 
 const intentsTrainEdit = (req, res, next) => {
-    intentsModels.findOne({ tag : req.params.tag }).lean().exec((err, intent) => {
+    intentsModels.findOne({ tag: req.params.tag }).lean().exec((err, intent) => {
         if (!intent) { return res.render('404'); }
         res.render('Training/training', { intent, focus: 1 });
     })
@@ -52,13 +52,13 @@ const intentsDelete = (req, res, next) => {
 }
 
 const intentsUpdatePatterns = (req, res, next) => {
-    var id = req.body.id;
-    var toDelete = JSON.parse(req.body.delete);
-    var toAdd = JSON.parse(req.body.add);
+    const id = req.body.id;
+    const toDelete = JSON.parse(req.body.delete);
+    const toAdd = JSON.parse(req.body.add);
     if (!id) return res.status(400).end('Id not provided')
     intentsModels.findById(id).exec((err, intents) => {
         if (!intents) return res.status(400).end('Intent not found')
-        var newPattern = [];
+        let newPattern = [];
         if (toDelete.length > 0) {
             intents.patterns.forEach((el) => {
                 if (!toDelete.indexOf(el) > -1) {
@@ -82,13 +82,13 @@ const intentsUpdatePatterns = (req, res, next) => {
 }
 
 const intentsUpdateResponses = (req, res, next) => {
-    var id = req.body.id;
-    var toDelete = JSON.parse(req.body.delete);
-    var toAdd = JSON.parse(req.body.add);
+    const id = req.body.id;
+    const toDelete = JSON.parse(req.body.delete);
+    const toAdd = JSON.parse(req.body.add);
     if (!id) return res.status(400).end('Id not provided')
     intentsModels.findById(id).exec((err, intents) => {
         if (!intents) return res.status(400).end('Intent not found')
-        var newResponses = [];
+        let newResponses = [];
         if (toDelete.length > 0) {
             intents.patterns.forEach((el) => {
                 if (!toDelete.indexOf(el) > -1) {

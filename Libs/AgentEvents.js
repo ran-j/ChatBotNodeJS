@@ -15,15 +15,16 @@ const logFallback = (sentence, userID, guesses) => {
 }
 
 const logConversation = (sentence, userID) => {
-    let identify = userID + new Date().toLocaleDateString();
+    const getDate = () => new Date()
+    const identify = userID + getDate().toLocaleDateString();
     conversationLog.findOneAndUpdate({
         identify: identify
     }, {
         $set: {
             identify: identify,
-            userID : userID,
+            userID: userID,
         },
-        $push: { historic : sentence }
+        $push: { historic: sentence }
     }, {
         upsert: true, new: true, setDefaultsOnInsert: true
     }, (err, doc) => {

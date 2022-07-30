@@ -3,23 +3,23 @@ const shuffle = require('shuffle-array');
 const EventEmitter = require('events');
 const tf = require('@tensorflow/tfjs-node');
 
-var tfNodeLoaded = false
+let tfNodeLoaded = false
 try {
-require('@tensorflow/tfjs-node');
-tfNodeLoaded = true  
+    require('@tensorflow/tfjs-node');
+    tfNodeLoaded = true
 } catch (error) {
     console.warn('@tensorflow/tfjs-node not loaded')
 }
 
 //models
-const synonymModel = require('../models/synonyms');
-const intentsModels = require('../models/intents');
+const synonymModel = require('../../models/synonyms');
+const intentsModels = require('../../models/intents');
 
 //extras
-const arr = require('../Libs/ExtraFunctions');
-const BotConfig = require('../Libs/BotConfig');
+const arr = require('../ExtraFunctions');
+const Config = require('../../bin/config');
 
-const BotName = BotConfig.BotName
+const BotName = Config.BotName
 
 class Agent extends EventEmitter {
     constructor(Language, debug = false) {
@@ -60,16 +60,16 @@ class Agent extends EventEmitter {
         //synonyms array
         this.synonyms = [];
         //confidence to respond
-        this.CONFIDENCE = BotConfig.BotConfidence.medium;
+        this.CONFIDENCE = Config.BotConfidence.medium;
         //load bot name
-        this.BotName = BotConfig.BotName;
+        this.BotName = Config.BotName;
         // trained model
         this.model = null
     }
 
     _containsInArray(arr, check) {
-        var found = false;
-        for (var i = 0; i < check.length; i++) {
+        let found = false;
+        for (let i = 0; i < check.length; i++) {
             if (arr.indexOf(check[i]) > -1) {
                 found = true;
                 break;
@@ -103,7 +103,7 @@ class Agent extends EventEmitter {
     }
 
     _configResponse(sentence) {
-        var resp = this._replaceAll(arr.random(sentence), '{botname}', BotName);
+        let resp = this._replaceAll(arr.random(sentence), '{botname}', BotName);
         resp = this._replaceAll(resp, '{botversion}', '2.5.3');
         return resp;
     }
@@ -122,15 +122,15 @@ class Agent extends EventEmitter {
         return new Promise((resolve, reject) => {
             try {
                 this.model = null
-                var i = 0;
+                let i = 0;
                 const iMax = this.documents.length
                 for (; i < iMax; i++) {
                     //list of tokenized words for the pattern and stem words
-                    var pattern_words = this.documents[i][0]
-                    var j = 0;
+                    let pattern_words = this.documents[i][0]
+                    let j = 0;
                     const jMax = this.words.length;
                     //initialize bag of words
-                    var bag = new Array(jMax).fill(0);
+                    let bag = new Array(jMax).fill(0);
                     //create bag of words array
                     for (; j < jMax; j++) {
                         if (pattern_words.indexOf(this.words[j]) > -1) {
@@ -138,7 +138,7 @@ class Agent extends EventEmitter {
                         }
                     }
                     //create an empty array for output
-                    var output_row = new Array(this.classes.length).fill(0);
+                    let output_row = new Array(this.classes.length).fill(0);
                     // set '0' for each tag and '1' for current tag  
                     output_row[this.classes.findIndex(x => x == this.documents[i][1])] = 1;
                     //push on the arrays de values  
@@ -148,8 +148,8 @@ class Agent extends EventEmitter {
                 this.training = shuffle(this.training);
 
                 //create train arrays
-                var train_x = arr.pick(this.training, 0);
-                var train_y = arr.pick(this.training, 1);
+                let train_x = arr.pick(this.training, 0);
+                let train_y = arr.pick(this.training, 1);
 
                 // Build neural network:
                 const model = tf.sequential();
@@ -203,76 +203,75 @@ class Agent extends EventEmitter {
     }
 
     BuildAgent(fullBuild) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (this.isAgentBuilding) return { error: true, msg: "Agent is buinding" }
             try {
                 this.isAgentBuilding = true;
-                intentsModels.find({}).lean().exec((err, intentsList) => {
-                    if (err) throw err
-                    var i = 0;
-                    const iMax = intentsList.length
-                    this.intents = intentsList
-                    for (; i < iMax; i++) {
-                        var j = 0;
-                        const jMax = intentsList[i].patterns.length
-                        for (; j < jMax; j++) {
-                            //stem and tokenize each word in the sentence
-                            var wd = this.tokenizer.tokenize(intentsList[i].patterns[j]);
-                            var x = 0;
-                            const xMax = wd.length
-                            //remove ignored words
-                            for (; x < xMax; x++) {
-                                if (this.ignore_words.indexOf(wd[x]) > -1) {
-                                    wd.splice(x, 1)
-                                }
-                            }
-                            //stem and lower each word
-                            var steamWords = wd.map(word => word.toLowerCase().stem())
-                            //add to words list the steam words
-                            Array.prototype.push.apply(this.words, steamWords)
-                            //add to documents in corpus
-                            this.documents.push([steamWords, intentsList[i].tag]);
-                            //add the tag to classes list 
-                            if (!this._containsInArray(this.classes, intentsList[i].tag)) {
-                                this.classes.push(intentsList[i].tag);
+                const intentsList = await intentsModels.find({}).lean()                
+                let i = 0;
+                const iMax = intentsList.length
+                this.intents = intentsList
+                for (; i < iMax; i++) {
+                    let j = 0;
+                    const jMax = intentsList[i].patterns.length
+                    for (; j < jMax; j++) {
+                        //stem and tokenize each word in the sentence
+                        const wd = this.tokenizer.tokenize(intentsList[i].patterns[j]);
+                        let x = 0;
+                        const xMax = wd.length
+                        //remove ignored words
+                        for (; x < xMax; x++) {
+                            if (this.ignore_words.indexOf(wd[x]) > -1) {
+                                wd.splice(x, 1)
                             }
                         }
+                        //stem and lower each word
+                        let steamWords = wd.map(word => word.toLowerCase().stem())
+                        //add to words list the steam words
+                        Array.prototype.push.apply(this.words, steamWords)
+                        //add to documents in corpus
+                        this.documents.push([steamWords, intentsList[i].tag]);
+                        //add the tag to classes list 
+                        if (!this._containsInArray(this.classes, intentsList[i].tag)) {
+                            this.classes.push(intentsList[i].tag);
+                        }
                     }
-                    //sort and remove duplicates
-                    this.words = this._sort(arr.removeDups(this.words));
-                    //sort classes
-                    this.classes = this._sort(this.classes);
+                }
+                //sort and remove duplicates
+                this.words = this._sort(arr.removeDups(this.words));
+                //sort classes
+                this.classes = this._sort(this.classes);
 
+                if (this._debug) {
+                    console.log("documents:", this.documents.length);
+                    console.log("classes:", this.classes.length);
+                    console.log("unique stemmed words:", this.words.length);
+                }
+
+                if (fullBuild) {
                     if (this._debug) {
+                        console.log();
+                        console.log('Training...');
+                    }
+                    this.TrainBuilder().then(() => {
+                        this.isAgentBuilding = false;
+                        return resolve({ error: false, msg: "Building successful" })
+                    }).catch((error) => {
+                        if (this._debug) console.log(error);
+                        this.isAgentBuilding = false;
+                        return resolve({ error: true, msg: "Core error" })
+                    });
+                } else {
+                    this.isAgentBuilding = false;
+                    if (this._debug) {
+                        console.log();
                         console.log("documents:", this.documents.length);
                         console.log("classes:", this.classes.length);
                         console.log("unique stemmed words:", this.words.length);
                     }
+                    return resolve({ error: false, msg: "Building successful" })
+                }
 
-                    if (fullBuild) {
-                        if (this._debug) {
-                            console.log();
-                            console.log('Training...');
-                        }
-                        this.TrainBuilder().then(() => {
-                            this.isAgentBuilding = false;
-                            return resolve({ error: false, msg: "Building successful" })
-                        }).catch((error) => {
-                            if (this._debug) console.log(error);
-                            this.isAgentBuilding = false;
-                            return resolve({ error: true, msg: "Core error" })
-                        });
-                    } else {
-                        this.isAgentBuilding = false;
-                        if (this._debug) {
-                            console.log();
-                            console.log("documents:", this.documents.length);
-                            console.log("classes:", this.classes.length);
-                            console.log("unique stemmed words:", this.words.length);
-                        }
-                        return resolve({ error: false, msg: "Building successful" })
-                    }
-                })
             } catch (error) {
                 this.isAgentBuilding = false;
                 if (this._debug) console.log(error);
@@ -283,41 +282,38 @@ class Agent extends EventEmitter {
 
     async clean_up_sentence(sentence) {
         //stem and tokenize the pattern
-        var sentence_words = await this.tokenizer.tokenize(sentence);
-        //@depreced
+        let sentence_words = this.tokenizer.tokenize(sentence);
         //fix words
-        await synonymModel.find({}).lean().exec((err, synonym) => {
-            var i = 0;
-            const iMax = sentence_words.length;
-            for (; i < iMax; i++) { //sentence_words
-                var j = 0;
-                const jMax = synonym.length;
-                for (; j < jMax; j++) { //synonym
-                    var x = 0;
-                    const xMax = synonym[j].synonyms.length;
-                    for (; x < xMax; x++) { //synonym list
-                        if (synonym[j].synonyms[x].toLowerCase() == sentence_words[i].toLowerCase()) {
-                            sentence_words[i] = sentence_words[i].replace(sentence_words[i], synonym[j].keyWord);
-                        }
+        const synonym = await synonymModel.find({}).lean()
+        let i = 0;
+        const iMax = sentence_words.length;
+        for (; i < iMax; i++) { //sentence_words
+            let j = 0;
+            const jMax = synonym.length;
+            for (; j < jMax; j++) { //synonym
+                let x = 0;
+                const xMax = synonym[j].synonyms.length;
+                for (; x < xMax; x++) { //synonym list
+                    if (synonym[j].synonyms[x].toLowerCase() == sentence_words[i].toLowerCase()) {
+                        sentence_words[i] = sentence_words[i].replace(sentence_words[i], synonym[j].keyWord);
                     }
                 }
-                sentence_words[i] = sentence_words[i].toLowerCase().stem();
             }
-        })
-
+            sentence_words[i] = sentence_words[i].toLowerCase().stem();
+        }
         return sentence_words;
     }
 
     async bow(sentence, show_details) {
         //tokenize the pattern
-        var sentence_words = await this.clean_up_sentence(sentence);
+        let sentence_words = await this.clean_up_sentence(sentence);
         //bag of words
-        var bag = new Array(this.words.length).fill(0)
+        let bag = new Array(this.words.length).fill(0)
 
-        var i = 0;
+        let i = 0;
         const iMax = sentence_words.length;
         for (; i < iMax; i++) {
-            var j = 0;
+            let j = 0;
             const jMax = this.words.length;
             for (; j < jMax; j++) {
                 if (sentence_words[i] == this.words[j]) {
@@ -343,10 +339,10 @@ class Agent extends EventEmitter {
             //bow sentence
             const bowData = await this.bow(sentence, this._debug);
             //Output array
-            var return_list = [];
-            var guesses_list = [];
+            let return_list = [];
+            let guesses_list = [];
             //test if the BowData is a array of zeros (If enable)
-            var NotAllZeros = catchGuess ? true : await arr.zeroTest(bowData);
+            let NotAllZeros = catchGuess ? true : await arr.zeroTest(bowData);
             // test if the result isn't all zeros
             if (NotAllZeros) {
                 //to prevent memory leak
@@ -356,12 +352,12 @@ class Agent extends EventEmitter {
                         return resolve({ return_list: [[this.intents[0].tag, 1]], guesses_list: [] })
                     }
                     //converter to tensor array
-                    var data = tf.tensor2d(bowData, [1, bowData.length]);
+                    let data = tf.tensor2d(bowData, [1, bowData.length]);
                     //generate probabilities from the model
-                    var predictions = this.model.predict(data).dataSync();
+                    let predictions = this.model.predict(data).dataSync();
                     //filter out predictions below a threshold    
-                    var results = [];
-                    var guesses = [];
+                    let results = [];
+                    let guesses = [];
                     predictions.map((prediction, index) => {
                         if (prediction > this.CONFIDENCE) {
                             results.push([index, prediction]);
@@ -399,14 +395,14 @@ class Agent extends EventEmitter {
     response(sentence, userID, show_details) {
         return new Promise(async (resolve, reject) => {
             try {
-                var i = 0;
+                let i = 0;
                 this.classify(sentence).then((response) => {
-                    var results = response.return_list;
+                    let results = response.return_list;
                     //if we have a classification then find the matching intent tag
                     if (results && results.length > 0) {
                         //loop as long as there are matches to process
                         while (results[i]) {
-                            var j = 0;
+                            let j = 0;
                             const jMax = this.intents.length;
                             for (; j < jMax; j++) {
                                 //set context for this intent if necessary
