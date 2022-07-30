@@ -90,7 +90,7 @@
             function(){
                 $.ajax({
                     type: "POST",
-                    url: "/intent/delete",
+                    url: "/api/intent/delete",
                     data: {                    
                         tag: v                                         
                     },
@@ -121,7 +121,7 @@
                 },
                 function () {
                     $.ajax({
-                        url: "/build",
+                        url: "/api/build",
                         type: "POST",
                         data: {},
                         dataType: "text xml",

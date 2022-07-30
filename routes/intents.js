@@ -1,5 +1,5 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
 const adminController = require("./controllers/adminController")
 const intentsController = require("./controllers/intentsControllers")

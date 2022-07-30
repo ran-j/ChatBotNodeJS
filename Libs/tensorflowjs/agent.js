@@ -2,6 +2,7 @@ const natural = require('natural');
 const shuffle = require('shuffle-array');
 const EventEmitter = require('events');
 const tf = require('@tensorflow/tfjs-node');
+const path = require("path");
 
 let tfNodeLoaded = false
 try {
@@ -19,6 +20,8 @@ const intentsModels = require('../../models/intents');
 const arr = require('../ExtraFunctions');
 const Config = require('../../bin/config');
 
+const Global = require('../../Libs/global');
+
 const BotName = Config.BotName
 
 class Agent extends EventEmitter {
@@ -26,7 +29,7 @@ class Agent extends EventEmitter {
         super();
         this.isAgentBuilding = false;
         // this._debug = true
-        this._debug = debug
+        this._debug = true
         if (Language == 'pt') {
             natural.PorterStemmerPt.attach();
             this.tokenizer = new natural.AggressiveTokenizerPt();
@@ -47,13 +50,12 @@ class Agent extends EventEmitter {
         }
 
         //path to model already save
-        this.modelpath = __dirname.replace('ml', 'models/training-models');
+        this.modelpath = path.join(Global.RootPath, 'trained-models');
         //train arrays
         this.words = [];
         this.classes = [];
         this.documents = [];
         this.ignore_words = ['?'];
-        this.training = new Array();
         this.context = [];
         //intents array
         this.intents = [];
@@ -80,9 +82,8 @@ class Agent extends EventEmitter {
 
     _sort(A) {
         let result = []
-        let i = 0;
         const iMax = A.length;
-        for (; i < iMax; i++) {
+        for (let i = 0; i < iMax; i++) {
             if (result.indexOf(A[i]) < 0) {
                 result.push(A[i]);
             }
@@ -118,54 +119,68 @@ class Agent extends EventEmitter {
         return rt;
     }
 
-    TrainBuilder() {
-        return new Promise((resolve, reject) => {
-            try {
-                this.model = null
-                let i = 0;
-                const iMax = this.documents.length
-                for (; i < iMax; i++) {
-                    //list of tokenized words for the pattern and stem words
-                    let pattern_words = this.documents[i][0]
-                    let j = 0;
-                    const jMax = this.words.length;
-                    //initialize bag of words
-                    let bag = new Array(jMax).fill(0);
-                    //create bag of words array
-                    for (; j < jMax; j++) {
-                        if (pattern_words.indexOf(this.words[j]) > -1) {
-                            bag[j] = 1;
-                        }
-                    }
-                    //create an empty array for output
-                    let output_row = new Array(this.classes.length).fill(0);
-                    // set '0' for each tag and '1' for current tag  
-                    output_row[this.classes.findIndex(x => x == this.documents[i][1])] = 1;
-                    //push on the arrays de values  
-                    this.training.push([bag, output_row]);
+    _createModel(trainXSize, trainYSize) {
+        const model = tf.sequential();
+        model.add(tf.layers.dense({ units: 256, activation: 'relu', inputShape: [trainXSize] }));
+        model.add(tf.layers.dropout({ rate: 0.25 }));
+        model.add(tf.layers.dense({ units: 128, activation: 'relu' }));
+        model.add(tf.layers.dropout({ rate: 0.25 }));
+        model.add(tf.layers.dense({ units: trainYSize, activation: 'softmax' }));
+
+        model.compile({
+            optimizer: tf.train.adam(),
+            loss: tf.losses.softmaxCrossEntropy,
+            metrics: ['accuracy']
+        });
+
+        return model;
+    }
+
+    _createTrainingData() {
+        const iMax = this.documents.length;
+        let training = new Array(iMax);
+        for (let i = 0; i < iMax; i++) {
+            //list of tokenized words for the pattern and stem words
+            let pattern_words = this.documents[i][0]
+            const jMax = this.words.length;
+            //initialize bag of words
+            let bag = new Array(jMax).fill(0);
+            //create bag of words array
+            for (let j = 0; j < jMax; j++) {
+                if (pattern_words.indexOf(this.words[j]) > -1) {
+                    bag[j] = 1;
                 }
-                //shuffle features
-                this.training = shuffle(this.training);
+            }
+            //create an empty array for output
+            let output_row = new Array(this.classes.length).fill(0);
+            // set '0' for each tag and '1' for current tag  
+            output_row[this.classes.findIndex(x => x == this.documents[i][1])] = 1;
+            //push on the arrays de values  
+            training[i] = ([bag, output_row]);
+        }
+        //shuffle features
+        tf.util.shuffle(training)
+        return training
+    }
+
+    TrainBuilder() {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const trainingData = this._createTrainingData()
 
                 //create train arrays
-                let train_x = arr.pick(this.training, 0);
-                let train_y = arr.pick(this.training, 1);
+                let train_x = arr.pick(trainingData, 0);
+                let train_y = arr.pick(trainingData, 1);
 
                 // Build neural network:
-                const model = tf.sequential();
-                model.add(tf.layers.dense({ units: 256, activation: 'relu', inputShape: [train_x[0].length] }));
-                model.add(tf.layers.dropout({ rate: 0.25 }));
-                model.add(tf.layers.dense({ units: 128, activation: 'relu' }));
-                model.add(tf.layers.dropout({ rate: 0.25 }));
-                model.add(tf.layers.dense({ units: train_y[0].length, activation: 'softmax' }));
-                model.compile({ optimizer: 'adam', loss: 'categoricalCrossentropy', metrics: ['accuracy'] });
+                const model = this._createModel(train_x[0].length, train_y[0].length);
 
                 //create tensors
                 const xs = tf.tensor(train_x);
                 const ys = tf.tensor(train_y);
 
                 //train model
-                model.fit(xs, ys, {
+                this.model = await model.fit(xs, ys, {
                     epochs: 300,
                     batchSize: 8,
                     shuffle: true,
@@ -175,27 +190,28 @@ class Agent extends EventEmitter {
                             console.log(`Epoch ${epoch}: loss = ${log.loss}`);
                         }
                     }
-                }).then(() => {
-                    this.model = model;
-                    if (this._debug) console.log('Saving model....');
-                    //Print a text summary of the model's layers.
-                    model.summary();
-                    model.save('file://' + this.modelpath).then(() => {
-                        if (this._debug) {
-                            console.log(' ');
-                            console.log('Model Saved.');
-                            console.log(' ');
-                            console.log("documents " + this.documents.length);
-                            console.log("classes " + this.classes.length);
-                            console.log("unique stemmed words " + this.words.length);
-                        }
-                        //release memory
-                        xs.dispose();
-                        ys.dispose();
-                        // model.dispose();
-                        resolve(true);
-                    }).catch(reject)
-                }).catch(reject)
+                })
+
+                if (this._debug) console.log('Saving model....');
+                //Print a text summary of the model's layers.
+                model.summary();
+                console.log(this.modelpath)
+
+                await model.save('file://' + this.modelpath)
+
+                if (this._debug) {
+                    console.log(' ');
+                    console.log('Model Saved.');
+                    console.log(' ');
+                    console.log("documents " + this.documents.length);
+                    console.log("classes " + this.classes.length);
+                    console.log("unique stemmed words " + this.words.length);
+                }
+                //release memory
+                xs.dispose();
+                ys.dispose();
+                // model.dispose();
+                return resolve(true);
             } catch (error) {
                 reject(error)
             }
@@ -207,14 +223,12 @@ class Agent extends EventEmitter {
             if (this.isAgentBuilding) return { error: true, msg: "Agent is buinding" }
             try {
                 this.isAgentBuilding = true;
-                const intentsList = await intentsModels.find({}).lean()                
-                let i = 0;
+                const intentsList = await intentsModels.find({}).lean()
                 const iMax = intentsList.length
                 this.intents = intentsList
-                for (; i < iMax; i++) {
-                    let j = 0;
+                for (let i = 0; i < iMax; i++) {
                     const jMax = intentsList[i].patterns.length
-                    for (; j < jMax; j++) {
+                    for (let j = 0; j < jMax; j++) {
                         //stem and tokenize each word in the sentence
                         const wd = this.tokenizer.tokenize(intentsList[i].patterns[j]);
                         let x = 0;
@@ -285,15 +299,12 @@ class Agent extends EventEmitter {
         let sentence_words = this.tokenizer.tokenize(sentence);
         //fix words
         const synonym = await synonymModel.find({}).lean()
-        let i = 0;
         const iMax = sentence_words.length;
-        for (; i < iMax; i++) { //sentence_words
-            let j = 0;
+        for (let i = 0; i < iMax; i++) { //sentence_words         
             const jMax = synonym.length;
-            for (; j < jMax; j++) { //synonym
-                let x = 0;
+            for (let j = 0; j < jMax; j++) { //synonym
                 const xMax = synonym[j].synonyms.length;
-                for (; x < xMax; x++) { //synonym list
+                for (let x = 0; x < xMax; x++) { //synonym list
                     if (synonym[j].synonyms[x].toLowerCase() == sentence_words[i].toLowerCase()) {
                         sentence_words[i] = sentence_words[i].replace(sentence_words[i], synonym[j].keyWord);
                     }
@@ -310,16 +321,14 @@ class Agent extends EventEmitter {
         //bag of words
         let bag = new Array(this.words.length).fill(0)
 
-        let i = 0;
         const iMax = sentence_words.length;
-        for (; i < iMax; i++) {
-            let j = 0;
+        for (let i = 0; i < iMax; i++) {
             const jMax = this.words.length;
-            for (; j < jMax; j++) {
+            for (let j = 0; j < jMax; j++) {
                 if (sentence_words[i] == this.words[j]) {
                     //set 1 if found the match word and 0 for the others
                     bag[j] = 1;
-                    if (show_details) { console.log("found in bag: " + v) }
+                    if (show_details) { console.log("found in bag: " + j) }
                 }
             }
         }
@@ -402,19 +411,22 @@ class Agent extends EventEmitter {
                     if (results && results.length > 0) {
                         //loop as long as there are matches to process
                         while (results[i]) {
-                            let j = 0;
                             const jMax = this.intents.length;
-                            for (; j < jMax; j++) {
+                            for (let j = 0; j < jMax; j++) {
                                 //set context for this intent if necessary
                                 if (this.intents[j].tag == results[0][0]) {
+
                                     if (arr.inArray('context_set', this.intents[j])) {
                                         //set context
                                         this._setContext(userID, this.intents[j]['context_set']);
                                         if (show_details) console.log('context: ' + this.intents[j]['context_set'])
                                     }
+
                                     let userResponse = this._configResponse(this.intents[j]['responses'])
+
                                     //save conversation
                                     this.emit('conversation', [{ msg: sentence, is_bot: false, time: new Date().toLocaleString() }, { msg: userResponse, is_bot: true, time: new Date().toLocaleString(), intent: { tag: this.intents[j].tag, confidence: results[0][1] } }], userID);
+
                                     //check if this intent is contextual and applies to this user's conversation
                                     if (!arr.inArray('context_filter', this.intents[j])
                                         || arr.UserFilter(this.context, userID)
@@ -437,7 +449,19 @@ class Agent extends EventEmitter {
                     } else {
                         let fallbackMsg = arr.random(this._getFallBack())
                         if (show_details) console.log(`Registering fallback to user ${userID}`)
-                        this.emit('conversation', [{ msg: sentence, is_bot: false, time: new Date().toLocaleString() }, { msg: fallbackMsg, is_bot: true, time: new Date().toLocaleString(), intent: null }], userID);
+                        this.emit('conversation', [
+                            {
+                                msg: sentence,
+                                is_bot: false,
+                                time: new Date().toLocaleString()
+                            },
+                            {
+                                msg: fallbackMsg,
+                                is_bot: true,
+                                time: new Date().toLocaleString(),
+                                intent: null
+                            },
+                        ], userID);
                         this.emit('fallback', sentence, userID, response.guesses_list);
                         resolve(fallbackMsg)
                     }

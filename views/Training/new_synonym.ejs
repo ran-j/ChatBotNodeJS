@@ -92,7 +92,7 @@
             if (kword.trim().length > 0 && title.trim().length > 0 && pattern.length > 0) {
                 $.ajax({
                     type: "POST",
-                    url: "/synonym/new",
+                    url: "/api/synonym/new",
                     data: {
                         wd: kword,
                         synonyms: JSON.stringify(pattern),

@@ -11,12 +11,14 @@ const mlLogs = require("./Libs/AgentEvents")
 
 const config = require('./bin/Config');
 
+global.appRoot = path.resolve(__dirname);
+global.AgentInstance = new Agent(config.Language)
+
 const app = express();
 
 const indexRouter = require('./routes/index');
 const intentsRouter = require('./routes/intents');
-
-global.AgentInstance = new Agent(config.Language)
+const apisRouter = require('./routes/api');
 
 mongoose
   .connect(config.DB, {
@@ -51,12 +53,13 @@ app.use(session({
   secret: config.BotName,
   resave: false,
   store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/botjs',
+    mongoUrl: config.DB,
   }),
   saveUninitialized: false,
 }));
 
 app.use('/', indexRouter);
+app.use('/api', apisRouter);
 app.use('/admin', intentsRouter);
 
 // catch 404 and forward to error handler

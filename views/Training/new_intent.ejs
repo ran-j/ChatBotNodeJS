@@ -109,7 +109,7 @@
                 if($('#tag').val() && $('#title').val()){
                     $.ajax({
                         type: "POST",
-                        url: "/intent/new",
+                        url: "/api/intent/new",
                         data: {                    
                             tag: $('#tag').val(),
                             patterns: JSON.stringify(pattern),

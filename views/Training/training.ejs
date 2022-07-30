@@ -96,7 +96,7 @@
                 if(deleteList.length > 0 || appendlist.length > 0){
                     $.ajax({
                         type: "POST",
-                        url: "/intent/update/patterns",
+                        url: "/api/intent/update/patterns",
                         data: {                   
                             id: $('#idIntent').val(),
                             delete: JSON.stringify(deleteList),
