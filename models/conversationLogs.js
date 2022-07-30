@@ -1,5 +1,4 @@
 var mongoose = require('mongoose');
-mongoose.set('useCreateIndex', true);
 
 var ConversationSchema = new mongoose.Schema({     
     userID: {

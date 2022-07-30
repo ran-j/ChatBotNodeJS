@@ -5,18 +5,19 @@
   "scripts": {
     "start": "node --trace-warnings ./bin/www",
     "seed": "node ./seed/index",
-    "rebuild:tensroflow": "npm rebuild @tensorflow/tfjs-node --build-from-source"
+    "rebuild:tensroflow": "npm rebuild @tensorflow/tfjs --build-from-source"
   },
   "dependencies": {
-    "@tensorflow/tfjs-node": "^3.8.0",
-    "connect-mongo": "^2.0.1",
+    "@tensorflow/tfjs-node": "^3.16.0",
+    "connect-mongo": "^4.6.0",
     "cookie-parser": "~1.4.3",
-    "debug": "~2.6.9",
+    "debug": "^2.6.9",
+    "dotenv": "^16.0.0",
     "ejs": "~2.5.7",
-    "express": "~4.16.0",
-    "express-session": "^1.17.0",
+    "express": "^4.17.3",
+    "express-session": "^1.17.2",
     "http-errors": "~1.6.2",
-    "mongoose": "^5.7.8",
+    "mongoose": "^6.3.1",
     "morgan": "~1.9.0",
     "natural": "^0.6.1",
     "shuffle-array": "^1.0.1",

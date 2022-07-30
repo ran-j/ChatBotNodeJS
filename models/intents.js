@@ -1,5 +1,4 @@
 var mongoose = require('mongoose');
-mongoose.set('useCreateIndex', true);
 
 var IntentsSchema = new mongoose.Schema({
   tag: {

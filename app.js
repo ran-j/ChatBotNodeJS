@@ -1,10 +1,12 @@
+// @ts-ignore
+require('dotenv').config();
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 var session = require('express-session');
-var MongoStore = require('connect-mongo')(session);
+var MongoStore = require('connect-mongo');
 
 const mlAgent = require("./ml/tensorflowjs")
 const mlLogs = require("./Libs/AgentEvents")
@@ -22,8 +24,6 @@ mongoose
   .connect(config.DB, { 
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
    })
   .then(async () => {
     console.log('MongoDB Connected')
@@ -47,16 +47,13 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/required', express.static(path.join(__dirname, 'public')));
 
+console.log(process.env.MONGODB_URI);
+
 app.use(session({
-  name: 'BotJs',
-  secret: 'work ward',
-  resave: true,
-  saveUninitialized: false,
-  //cookie: { maxAge: 24 * 60 * 60 * 1000, secure: true, httpOnly: true },
-  // cookie: { maxAge: 24 * 60 * 60 * 1000 },
-  store: new MongoStore({
-    mongooseConnection: mongoose.connection
-  })
+  secret: 'BotJs',
+  store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/botjs',
+      })
 }));
 
 app.use('/', indexRouter);

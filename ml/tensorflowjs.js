@@ -1,7 +1,8 @@
 const natural = require('natural');
 const shuffle = require('shuffle-array');
 const EventEmitter = require('events');
-const tf = require('@tensorflow/tfjs');
+const tf = require('@tensorflow/tfjs-node');
+
 var tfNodeLoaded = false
 try {
 require('@tensorflow/tfjs-node');
@@ -335,6 +336,7 @@ class Agent extends EventEmitter {
     }
 
     classify(sentence, catchGuess = false) {
+        sentence = sentence.toLowerCase();
         return new Promise(async (resolve, reject) => {
             //load model
             if (!this.model) this.model = await tf.loadLayersModel('file://' + this.modelpath + '/model.json');
@@ -439,7 +441,7 @@ class Agent extends EventEmitter {
                     } else {
                         let fallbackMsg = arr.random(this._getFallBack())
                         if (show_details) console.log(`Registering fallback to user ${userID}`)
-                        this.emit('conversation', [{ msg: sentence, is_bot: false, time: new Date().toLocaleString() }, { msg: fallbacMsg, is_bot: true, time: new Date().toLocaleString(), intent: null }], userID);
+                        this.emit('conversation', [{ msg: sentence, is_bot: false, time: new Date().toLocaleString() }, { msg: fallbackMsg, is_bot: true, time: new Date().toLocaleString(), intent: null }], userID);
                         this.emit('fallback', sentence, userID, response.guesses_list);
                         resolve(fallbackMsg)
                     }
