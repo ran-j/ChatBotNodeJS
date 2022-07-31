@@ -1,13 +1,13 @@
-var synonymModel = require('../../models/synonyms');
+const SynonymModel = require('../../models/synonyms');
 
 const synonymList = (req, res, next) => {
-    synonymModel.find({}).exec((err, synonyms) => {      
+    SynonymModel.find({}).exec((err, synonyms) => {      
         res.render('Training/synonyms', { synonyms, focus: 2 });
     });
 }
 
 const synonymEdit = (req, res, next) => {
-    synonymModel.findOne({}).exec((err, synonym) => {
+    SynonymModel.findOne({}).exec((err, synonym) => {
         if (!synonym) { res.render('404'); }
         res.render('Training/synonymsEdit', { synonym, focus: 2 });
     });
@@ -19,7 +19,7 @@ const synonymCreate = (req, res, next) => {
 
 const synonymSave = (req, res, next) => {
     if (!req.body.wd && !req.body.title) return res.status(400).end("invalid data")
-    new synonymModel({
+    new SynonymModel({
         title: req.body.title,
         keyWord: req.body.wd,
         synonyms: JSON.parse(req.body.synonyms)
@@ -33,7 +33,7 @@ const synonymSave = (req, res, next) => {
 }
 
 const synonymDelete = (req, res, next) => {
-    synonymModel.findOneAndDelete({ keyWord: req.body.tag }).exec((err, data) => {
+    SynonymModel.findOneAndDelete({ keyWord: req.body.tag }).exec((err, data) => {
         if (err) {
             console.error(err)
             return res.status(500).end('Error');
@@ -44,13 +44,13 @@ const synonymDelete = (req, res, next) => {
 }
 
 const synonymUpdate = (req, res, next) => {
-    var id = req.body.id;
-    var toDelete = JSON.parse(req.body.delete);
-    var toAdd = JSON.parse(req.body.add);
+    const id = req.body.id;
+    const toDelete = JSON.parse(req.body.delete);
+    const toAdd = JSON.parse(req.body.add);
     if (!id) return res.status(400).end('Id not provided')
-    synonymModel.findById(id).exec((err, synonyms) => {
+    SynonymModel.findById(id).exec((err, synonyms) => {
         if (!synonyms) return res.status(400).end('Intent not found')
-        var newSynonym = [];
+        let newSynonym = [];
         if (toDelete.length > 0) {
             synonyms.synonyms.forEach((el) => {
                 if (!toDelete.indexOf(el) > -1) {

@@ -1,6 +1,6 @@
 
 const mongoose = require('mongoose');
-const config = require('../Libs/BotConfig');
+const config = require('../bin/Config');
 
 var intentsModels = require('../models/intents');
 var synonymModel = require('../models/synonyms');

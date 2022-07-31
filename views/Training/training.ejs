@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
-    <% include ../Fixed/Header.ejs %>
+    <%- include('../Fixed/Header.ejs'); %>
     
     <body class="skin-black">
-        <% include ../Fixed/HeaderLogo.ejs %>
+        <%- include('../Fixed/HeaderLogo.ejs'); %>
 
 
         <div class="wrapper row-offcanvas row-offcanvas-left">
-            <% include ../Fixed/NavBar.ejs %>
+            <%- include('../Fixed/NavBar.ejs'); %>
 
             <!-- Right side column. Contains the navbar and content of the page -->
             <aside class="right-side">    
@@ -62,7 +62,7 @@
         </div><!-- ./wrapper -->
 
 
-        <% include ../Fixed/footer.ejs %>     
+        <%- include('../Fixed/footer.ejs'); %>     
         
         <script>
             var deleteList = [];
@@ -96,7 +96,7 @@
                 if(deleteList.length > 0 || appendlist.length > 0){
                     $.ajax({
                         type: "POST",
-                        url: "/intent/update/patterns",
+                        url: "/api/intent/update/patterns",
                         data: {                   
                             id: $('#idIntent').val(),
                             delete: JSON.stringify(deleteList),

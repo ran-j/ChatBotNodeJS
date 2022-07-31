@@ -1,6 +1,6 @@
 {
   "name": "chatbottensorflow",
-  "version": "2.7.3",
+  "version": "3.7.3",
   "private": true,
   "scripts": {
     "start": "node --trace-warnings ./bin/www",
@@ -13,14 +13,12 @@
     "cookie-parser": "~1.4.3",
     "debug": "^2.6.9",
     "dotenv": "^16.0.0",
-    "ejs": "~2.5.7",
+    "ejs": "^3.1.8",
     "express": "^4.17.3",
     "express-session": "^1.17.2",
-    "http-errors": "~1.6.2",
     "mongoose": "^6.3.1",
     "morgan": "~1.9.0",
     "natural": "^0.6.1",
-    "shuffle-array": "^1.0.1",
     "static-eval": "^2.0.0"
   }
 }

@@ -1,6 +1,6 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-var IntentsSchema = new mongoose.Schema({
+const IntentsSchema = new mongoose.Schema({
   tag: {
     type: String,
     unique: true,
@@ -8,13 +8,13 @@ var IntentsSchema = new mongoose.Schema({
     trim: true
   },
   patterns: {
-    type : Array ,
+    type: Array,
     required: true,
   },
   title: {
-    type : String ,
+    type: String,
     required: true,
-  },  
+  },
   responses: {
     type: Array,
     required: true,
@@ -27,6 +27,6 @@ var IntentsSchema = new mongoose.Schema({
   }
 });
 
-var Intents = mongoose.model('IntentsSchema', IntentsSchema);
+const Intents = mongoose.model('IntentsSchema', IntentsSchema);
 
 module.exports = Intents;

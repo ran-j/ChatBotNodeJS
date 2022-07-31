@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <% include ./Fixed/Header.ejs %>
+    <%- include('./Fixed/Header.ejs'); %>
     <style>
         .container-fluid {
             margin-right: auto;
@@ -106,7 +106,7 @@
                 $('#chat-box').append('<div class="item"><img src="img/user.png" alt="user image" class="online"/><p class="message"><a href="#" class="name"><small class="text-muted pull-right"><i class="fa fa-clock-o"></i>' + hora + '</small> You</a>' + $('#m').val() + '</p></div>');
                 messages.scrollTop = messages.scrollHeight;
 
-                $.post("/ask", {
+                $.post("/api/ask", {
                     uID: userid,
                     say: $('#m').val()
                 },

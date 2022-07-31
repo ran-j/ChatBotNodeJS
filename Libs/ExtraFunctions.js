@@ -1,6 +1,5 @@
+// TODO OPTIMIZE THIS Class
 module.exports = new class SysFunctions {
-    constructor() {
-    }
 
     async zeroTest(myArray) {
         var flag = false;
@@ -21,7 +20,7 @@ module.exports = new class SysFunctions {
         return arr1.find(val => Array.isArray(val) ? UserFilter(val, toFind) : val.uID === toFind) !== undefined;
     }
 
-    inArray(key, A) {
+    hasKey(key, A) {
         if (A[key] != undefined && A[key] != null && A[key].length > 0) {
             return true;
         }
@@ -108,9 +107,20 @@ module.exports = new class SysFunctions {
         });
     };
 
-    removeDups(data) {
+    unique(data) {
         let process = (names) => names.filter((v, i) => names.indexOf(v) === i)
         return process(data)
+    }
+
+    containsInArray(arr, check) {
+        let found = false;
+        for (let i = 0; i < check.length; i++) {
+            if (arr.indexOf(check[i]) > -1) {
+                found = true;
+                break;
+            }
+        }
+        return found;
     }
 
 };

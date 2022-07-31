@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
-<% include ../Fixed/Header.ejs %>
+<%- include('../Fixed/Header.ejs'); %>
 
 <body class="skin-black">
-    <% include ../Fixed/HeaderLogo.ejs %>
+    <%- include('../Fixed/HeaderLogo.ejs'); %>
 
 
     <div class="wrapper row-offcanvas row-offcanvas-left">
-        <% include ../Fixed/NavBar.ejs %>
+        <%- include('../Fixed/NavBar.ejs'); %>
 
         <!-- Right side column. Contains the navbar and content of the page -->
         <aside class="right-side">
@@ -62,7 +62,7 @@
     </div><!-- ./wrapper -->
 
 
-    <% include ../Fixed/footer.ejs %>
+    <%- include('../Fixed/footer.ejs'); %>
 
     <script>
         var pattern = [];
@@ -92,7 +92,7 @@
             if (kword.trim().length > 0 && title.trim().length > 0 && pattern.length > 0) {
                 $.ajax({
                     type: "POST",
-                    url: "/synonym/new",
+                    url: "/api/synonym/new",
                     data: {
                         wd: kword,
                         synonyms: JSON.stringify(pattern),

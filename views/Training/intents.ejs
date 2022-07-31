@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
-<% include ../Fixed/Header.ejs %>
+<%- include('../Fixed/Header.ejs'); %>
 
     <body class="skin-black">
             
-        <% include ../Fixed/HeaderLogo.ejs %>
+        <%- include('../Fixed/HeaderLogo.ejs'); %>
 
 
         <div class="wrapper row-offcanvas row-offcanvas-left">
-            <% include ../Fixed/NavBar.ejs %>
+            <%- include('../Fixed/NavBar.ejs'); %>
 
                 <!-- Right side column. Contains the navbar and content of the page -->
                 <aside class="right-side">
@@ -73,7 +73,7 @@
         <!-- ./wrapper -->
 
 
-        <% include ../Fixed/footer.ejs %>
+        <%- include('../Fixed/footer.ejs'); %>
 
     </body>
     <script>      
@@ -90,7 +90,7 @@
             function(){
                 $.ajax({
                     type: "POST",
-                    url: "/intent/delete",
+                    url: "/api/intent/delete",
                     data: {                    
                         tag: v                                         
                     },
@@ -121,7 +121,7 @@
                 },
                 function () {
                     $.ajax({
-                        url: "/build",
+                        url: "/api/build",
                         type: "POST",
                         data: {},
                         dataType: "text xml",
