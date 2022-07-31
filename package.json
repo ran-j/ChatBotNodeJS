@@ -1,6 +1,6 @@
 {
   "name": "chatbottensorflow",
-  "version": "3.7.3",
+  "version": "3.8.3",
   "private": true,
   "scripts": {
     "start": "node --trace-warnings ./bin/www",
@@ -8,6 +8,7 @@
     "rebuild:tensroflow": "npm rebuild @tensorflow/tfjs --build-from-source"
   },
   "dependencies": {
+    "@microsoft/recognizers-text-suite": "^1.3.0",
     "@tensorflow/tfjs-node": "^3.16.0",
     "connect-mongo": "^4.6.0",
     "cookie-parser": "~1.4.3",

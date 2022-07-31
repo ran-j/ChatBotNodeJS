@@ -6,7 +6,7 @@
 
 <h2 align="center">ChatBotJS</h2>
 
-A contextual Chatbot build with TensorflowJS and NodeJS
+A contextual Chatbot with entities extractor build with TensorflowJS and NodeJS
 
 Install dependencies and run.
 
@@ -51,7 +51,7 @@ $ docker run --publish 3000:3000 --detach --name chatbotnodejs chatbotnodejs:lat
 
 # Configuration
 
-Change mongoURI in `./Libs/BotConfig.js`
+Change mongoURI in `./bin/Config.js`
 
 # Routes
 
@@ -73,6 +73,7 @@ You can register your intents and the build agent.
 - [ ] Fallback dashboard
 - [ ] Token for requests
 - [ ] Metricis (Count request numbers ...)
+- [x] Entity Extractor
 - [X] Docker
 - [X] Update Tensorflow JS
 - [X] Log conversation and fallbacks

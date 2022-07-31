@@ -15,7 +15,7 @@ const buildAgent = async (req, res, next) => {
 const ask = async (req, res, next) => {
     try {
         const resp = await Global.AgentInstance.response(req.body.say, req.body.uID)
-        res.end(resp)
+        res.json(resp)
     } catch (error) {
         res.end("Ops, internal error X(")
     }
