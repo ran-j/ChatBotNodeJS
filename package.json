@@ -16,7 +16,6 @@
     "ejs": "^3.1.8",
     "express": "^4.17.3",
     "express-session": "^1.17.2",
-    "http-errors": "~1.6.2",
     "mongoose": "^6.3.1",
     "morgan": "~1.9.0",
     "natural": "^0.6.1",
