@@ -19,7 +19,6 @@ class Agent extends EventEmitter {
     constructor(language, debug = false) {
         super();
         this.isAgentBuilding = false;
-        // this._debug = true
         this._debug = debug
         this._setTokenizer(language);
         //path to model already save
@@ -180,6 +179,9 @@ class Agent extends EventEmitter {
     trainBuilder() {
         return new Promise(async (resolve, reject) => {
             try {
+                //set model to null to prevent cache
+                this.model = null
+                //create trains data
                 const trainingData = this._createTrainingData()
 
                 //create train arrays
@@ -206,10 +208,10 @@ class Agent extends EventEmitter {
                     }
                 })
 
-                if (this._debug) console.log('Saving model....');
                 //Print a text summary of the model's layers.
                 model.summary();
-
+                
+                if (this._debug) console.log('Saving model....');
                 await model.save('file://' + this.modelpath)
 
                 if (this._debug) {
