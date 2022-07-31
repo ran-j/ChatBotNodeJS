@@ -13,6 +13,9 @@ const Config = require('../../bin/config');
 
 const Global = require('../../Libs/global');
 
+const Recognizers = require('@microsoft/recognizers-text-suite');
+const EntityExtractor = require('../entity-extractor/entity-extractor');
+
 const BotName = Config.BotName
 
 class Agent extends EventEmitter {
@@ -21,6 +24,7 @@ class Agent extends EventEmitter {
         this.isAgentBuilding = false;
         this._debug = debug
         this._setTokenizer(language);
+        this._createEntityExtractor(language);
         //path to model already save
         this.modelpath = path.join(Global.RootPath, 'trained-models');
         //train arrays
@@ -60,6 +64,21 @@ class Agent extends EventEmitter {
         } else {
             throw new Error("Unsupported language.")
         }
+    }
+
+    _createEntityExtractor(language) {
+        let culture = Recognizers.Culture.English;
+        if (language == 'pt') {
+            culture = Recognizers.Culture.Portuguese;
+        } else if (language == 'js') {
+            culture = Recognizers.Culture.Japanese;
+        } else if (language == 'fr') {
+            culture = Recognizers.Culture.French
+        } else if (language == 'it') {
+            culture = Recognizers.Culture.Italian
+        }
+
+        this.entityExtractor = new EntityExtractor(culture)
     }
 
     _setContext(userid, contextText) {
@@ -210,7 +229,7 @@ class Agent extends EventEmitter {
 
                 //Print a text summary of the model's layers.
                 model.summary();
-                
+
                 if (this._debug) console.log('Saving model....');
                 await model.save('file://' + this.modelpath)
 
@@ -427,57 +446,60 @@ class Agent extends EventEmitter {
         return new Promise(async (resolve, reject) => {
             try {
                 const responses = await this.classify(sentence)
-                let results = responses.return_list;
+                const results = responses.return_list ?? [];
+                const entities = this.entityExtractor.extract(sentence);
                 //if we have a classification then find the matching intent tag
-                if (results && results.length > 0) {
-                    let i = 0;
-                    //loop as long as there are matches to process
-                    while (results[i]) {
-                        const jMax = this.intents.length;
-                        for (let j = 0; j < jMax; j++) {
-                            //set context for this intent if necessary
-                            if (this.intents[j].tag == results[i][0]) {
-                                const intentHasContextSet = utils.hasKey('context_set', this.intents[j])
+                let i = 0;
+                //loop as long as there are matches to process
+                while (results[i]) {
+                    const jMax = this.intents.length;
+                    for (let j = 0; j < jMax; j++) {
+                        //set context for this intent if necessary
+                        if (this.intents[j].tag == results[i][0]) {
+                            const intentHasContextSet = utils.hasKey('context_set', this.intents[j])
 
-                                // check if this intent was context set and set it to user context
-                                if (intentHasContextSet) {
-                                    //set context
-                                    this._setContext(userID, this.intents[j]['context_set']);
-                                    if (this.debug) console.log('set context: ' + this.intents[j]['context_set'])
+                            // check if this intent was context set and set it to user context
+                            if (intentHasContextSet) {
+                                //set context
+                                this._setContext(userID, this.intents[j]['context_set']);
+                                if (this.debug) console.log('set context: ' + this.intents[j]['context_set'])
+                            }
+
+                            const userContext = this._getContext(userID) ?? [];
+                            const contextFilterInIntents = utils.hasKey('context_filter', this.intents[j]);
+                            const userContextHasFilter = userContext.includes(this.intents[j]['context_filter'])
+
+                            if (
+                                !contextFilterInIntents ||
+                                (
+                                    contextFilterInIntents &&
+                                    userContextHasFilter
+                                )
+                            ) {
+                                const userResponse = this._configResponse(this.intents[j]['responses'])
+                                if (!intentHasContextSet && userContextHasFilter) {
+                                    if (this.debug) console.log('removing context: ' + this.intents[j]['context_filter'])
+                                    //clear context after response user
+                                    userContext.splice(userContext.indexOf(this.intents[j]['context_filter']), 1)
+                                    this._setContext(userID, userContext);
                                 }
+                                //save conversation
+                                this._saveConversation(sentence, userResponse, this.intents[j].tag, results[i][1], userID)
+                                //random response
 
-                                const userContext = this._getContext(userID) ?? [];
-                                const contextFilterInIntents = utils.hasKey('context_filter', this.intents[j]);
-                                const userContextHasFilter = userContext.includes(this.intents[j]['context_filter'])
-
-                                if (
-                                    !contextFilterInIntents ||
-                                    (
-                                        contextFilterInIntents &&
-                                        userContextHasFilter
-                                    )
-                                ) {
-                                    const userResponse = this._configResponse(this.intents[j]['responses'])
-                                    if (!intentHasContextSet && userContextHasFilter) {
-                                        if (this.debug) console.log('removing context: ' + this.intents[j]['context_filter'])
-                                        //clear context after response user
-                                        userContext.splice(userContext.indexOf(this.intents[j]['context_filter']), 1)
-                                        this._setContext(userID, userContext);
-                                    }
-                                    //save conversation
-                                    this._saveConversation(sentence, userResponse, this.intents[j].tag, results[i][1], userID)
-                                    //random response
-                                    return resolve(userResponse);
-                                }
-
-                                return resolve(this._emitAndGetFallback(sentence, responses, userID))
+                                return resolve({
+                                    response: userResponse,
+                                    entities: entities,
+                                });
                             }
                         }
-                        i++;
                     }
-                } else {
-                    return resolve(this._emitAndGetFallback(sentence, responses, userID))
+                    i++;
                 }
+                return resolve({
+                    response: this._emitAndGetFallback(sentence, responses, userID),
+                    entities: entities,
+                })
             } catch (error) {
                 console.log(error)
                 resolve(error.message)

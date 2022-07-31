@@ -111,8 +111,9 @@
                     say: $('#m').val()
                 },
                     function (result, response) {
+                        console.log(result)
                         if (result != null) {                            
-                            $('#chat-box').append('<div class="item"><img src="img/bot1.png" alt="user image" class="online" /><p class="message"><a href="#" class="name"><small class="text-muted pull-right"><i class="fa fa-clock-o"></i>' + hora + '</small> BotJs </a>' + result + '</p></div>');
+                            $('#chat-box').append('<div class="item"><img src="img/bot1.png" alt="user image" class="online" /><p class="message"><a href="#" class="name"><small class="text-muted pull-right"><i class="fa fa-clock-o"></i>' + hora + '</small> BotJs </a>' + result.response + '</p></div>');
                             messages.scrollTop = messages.scrollHeight;
                         }
                     });
