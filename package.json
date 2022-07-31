@@ -1,6 +1,6 @@
 {
   "name": "chatbottensorflow",
-  "version": "2.7.3",
+  "version": "3.7.3",
   "private": true,
   "scripts": {
     "start": "node --trace-warnings ./bin/www",

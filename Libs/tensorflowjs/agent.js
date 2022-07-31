@@ -137,7 +137,7 @@ class Agent extends EventEmitter {
 
     _emitAndGetFallback(sentence, response, userID) {
         const fallbackMsg = utils.random(this._getFallBack())
-        if (debug) console.log(`Registering fallback to user ${userID}`)
+        if (this.debug) console.log(`Registering fallback to user ${userID}`)
         this.emit('conversation', [
             {
                 msg: sentence,
@@ -157,7 +157,7 @@ class Agent extends EventEmitter {
         return fallbackMsg
     }
 
-    _saveConversation(sentence, userResponse, tag, confidence) {
+    _saveConversation(sentence, userResponse, tag, confidence, userID) {
         this.emit('conversation', [
             {
                 msg: sentence,
@@ -337,7 +337,7 @@ class Agent extends EventEmitter {
         return sentence_words;
     }
 
-    async bow(sentence, debug) {
+    async bow(sentence) {
         //tokenize the pattern
         const sentence_words = await this.clean_up_sentence(sentence);
         //bag of words
@@ -350,7 +350,7 @@ class Agent extends EventEmitter {
                 if (sentence_words[i] == this.words[j]) {
                     //set 1 if found the match word and 0 for the others
                     bag[j] = 1;
-                    if (debug) { console.log("found in bag: " + j) }
+                    if (this.debug) { console.log("found in bag: " + j) }
                 }
             }
         }
@@ -368,7 +368,7 @@ class Agent extends EventEmitter {
             //load model
             if (!this.model) this.model = await tf.loadLayersModel('file://' + this.modelpath + '/model.json');
             //bow sentence
-            const bowData = await this.bow(sentence, this._debug);
+            const bowData = await this.bow(sentence);
             //Output array
             let return_list = [];
             let guesses_list = [];
@@ -423,7 +423,7 @@ class Agent extends EventEmitter {
         })
     }
 
-    response(sentence, userID, debug) {
+    response(sentence, userID) {
         return new Promise(async (resolve, reject) => {
             try {
                 const responses = await this.classify(sentence)
@@ -443,7 +443,7 @@ class Agent extends EventEmitter {
                                 if (intentHasContextSet) {
                                     //set context
                                     this._setContext(userID, this.intents[j]['context_set']);
-                                    if (debug) console.log('set context: ' + this.intents[j]['context_set'])
+                                    if (this.debug) console.log('set context: ' + this.intents[j]['context_set'])
                                 }
 
                                 const userContext = this._getContext(userID) ?? [];
@@ -459,13 +459,13 @@ class Agent extends EventEmitter {
                                 ) {
                                     const userResponse = this._configResponse(this.intents[j]['responses'])
                                     if (!intentHasContextSet && userContextHasFilter) {
-                                        if (debug) console.log('removing context: ' + this.intents[j]['context_filter'])
+                                        if (this.debug) console.log('removing context: ' + this.intents[j]['context_filter'])
                                         //clear context after response user
                                         userContext.splice(userContext.indexOf(this.intents[j]['context_filter']), 1)
                                         this._setContext(userID, userContext);
                                     }
                                     //save conversation
-                                    this._saveConversation(sentence, userResponse, this.intents[j].tag, results[i][1])
+                                    this._saveConversation(sentence, userResponse, this.intents[j].tag, results[i][1], userID)
                                     //random response
                                     return resolve(userResponse);
                                 }
