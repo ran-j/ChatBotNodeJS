@@ -6,7 +6,7 @@ const attendence = (req, res, next) => {
 const buildAgent = async (req, res, next) => {
     if (Agent.isAgentBuilding) return res.status(403).end('Agent are building');
     try {
-        await Agent.BuildAgent(true)
+        await Agent.buildAgent(true)
         res.end("done")
     } catch (error) {
         console.error(error)

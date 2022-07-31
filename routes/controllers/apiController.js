@@ -1,9 +1,9 @@
-const global = require('../../Libs/Global');
+const Global = require('../../Libs/Global');
 
 const buildAgent = async (req, res, next) => {
-    if (global.AgentInstance.isAgentBuilding) return res.status(403).end('Agent are building');
+    if (Global.AgentInstance.isAgentBuilding) return res.status(403).end('Agent are building');
     try {
-        await global.AgentInstance.BuildAgent(true)
+        await Global.AgentInstance.buildAgent(true)
         res.end("done")
     } catch (error) {
         console.error(error)
@@ -13,7 +13,7 @@ const buildAgent = async (req, res, next) => {
 
 const ask = async (req, res, next) => {
     try {
-        const resp = await global.AgentInstance.response(req.body.say, req.body.uID, true)
+        const resp = await Global.AgentInstance.response(req.body.say, req.body.uID, true)
         res.end(resp)
     } catch (error) {
         res.end("Ops, internal error X(")

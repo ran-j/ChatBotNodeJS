@@ -1,23 +1,14 @@
 const natural = require('natural');
-const shuffle = require('shuffle-array');
 const EventEmitter = require('events');
 const tf = require('@tensorflow/tfjs-node');
 const path = require("path");
-
-let tfNodeLoaded = false
-try {
-    require('@tensorflow/tfjs-node');
-    tfNodeLoaded = true
-} catch (error) {
-    console.warn('@tensorflow/tfjs-node not loaded')
-}
 
 //models
 const synonymModel = require('../../models/synonyms');
 const intentsModels = require('../../models/intents');
 
 //extras
-const arr = require('../ExtraFunctions');
+const utils = require('../ExtraFunctions');
 const Config = require('../../bin/config');
 
 const Global = require('../../Libs/global');
@@ -25,38 +16,20 @@ const Global = require('../../Libs/global');
 const BotName = Config.BotName
 
 class Agent extends EventEmitter {
-    constructor(Language, debug = false) {
+    constructor(language, debug = false) {
         super();
         this.isAgentBuilding = false;
         // this._debug = true
-        this._debug = true
-        if (Language == 'pt') {
-            natural.PorterStemmerPt.attach();
-            this.tokenizer = new natural.AggressiveTokenizerPt();
-        } else if (Language == 'js') {
-            natural.StemmerJa.attach();
-            this.tokenizer = new natural.WordTokenizer();
-        } else if (Language == 'fr') {
-            natural.PorterStemmerFr.attach();
-            this.tokenizer = new natural.WordTokenizer();
-        } else if (Language == 'it') {
-            natural.PorterStemmerIt.attach();
-            this.tokenizer = new natural.WordTokenizer();
-        } else if (Language == 'en') {
-            natural.LancasterStemmer.attach();
-            this.tokenizer = new natural.WordTokenizer();
-        } else {
-            throw new Error("Unsupported language.")
-        }
-
+        this._debug = debug
+        this._setTokenizer(language);
         //path to model already save
         this.modelpath = path.join(Global.RootPath, 'trained-models');
         //train arrays
         this.words = [];
         this.classes = [];
         this.documents = [];
-        this.ignore_words = ['?'];
-        this.context = [];
+        this.ignore_words = ['?', '!', '.', ','];
+        this.context = new Map();
         //intents array
         this.intents = [];
         //synonyms array
@@ -69,43 +42,43 @@ class Agent extends EventEmitter {
         this.model = null
     }
 
-    _containsInArray(arr, check) {
-        let found = false;
-        for (let i = 0; i < check.length; i++) {
-            if (arr.indexOf(check[i]) > -1) {
-                found = true;
-                break;
-            }
+    _setTokenizer(language) {
+        if (language == 'pt') {
+            natural.PorterStemmerPt.attach();
+            this.tokenizer = new natural.AggressiveTokenizerPt();
+        } else if (language == 'js') {
+            natural.StemmerJa.attach();
+            this.tokenizer = new natural.WordTokenizer();
+        } else if (language == 'fr') {
+            natural.PorterStemmerFr.attach();
+            this.tokenizer = new natural.WordTokenizer();
+        } else if (language == 'it') {
+            natural.PorterStemmerIt.attach();
+            this.tokenizer = new natural.WordTokenizer();
+        } else if (language == 'en') {
+            natural.LancasterStemmer.attach();
+            this.tokenizer = new natural.WordTokenizer();
+        } else {
+            throw new Error("Unsupported language.")
         }
-        return found;
-    }
-
-    _sort(A) {
-        let result = []
-        const iMax = A.length;
-        for (let i = 0; i < iMax; i++) {
-            if (result.indexOf(A[i]) < 0) {
-                result.push(A[i]);
-            }
-        }
-        return result
-    }
-
-    _replaceAll(str, needle, replacement) {
-        return str.split(needle).join(replacement);
     }
 
     _setContext(userid, contextText) {
-        if (!arr.UserFilter(context, userid)) {
-            this.context.push({ uID: userid, ctx: contextText })
-        } else {
-            this.context[context.findIndex(x => x.uID == userid)].context = contextText;
-        }
+        const userContext = this._getContext(userid) ?? [];
+        userContext.push(contextText);
+        this.context.set(userid, utils.unique(userContext));
+    }
+
+    _getContext(userid) {
+        return this.context.get(userid)
     }
 
     _configResponse(sentence) {
-        let resp = this._replaceAll(arr.random(sentence), '{botname}', BotName);
-        resp = this._replaceAll(resp, '{botversion}', '2.5.3');
+        const replaceAll = (str, needle, replacement) => {
+            return str.split(needle).join(replacement);
+        }
+        let resp = replaceAll(utils.random(sentence), '{botname}', BotName);
+        resp = replaceAll(resp, '{botversion}', '2.5.3');
         return resp;
     }
 
@@ -163,14 +136,55 @@ class Agent extends EventEmitter {
         return training
     }
 
-    TrainBuilder() {
+    _emitAndGetFallback(sentence, response, userID) {
+        const fallbackMsg = utils.random(this._getFallBack())
+        if (debug) console.log(`Registering fallback to user ${userID}`)
+        this.emit('conversation', [
+            {
+                msg: sentence,
+                is_bot: false,
+                time: new Date().toLocaleString()
+            },
+            {
+                msg: fallbackMsg,
+                is_bot: true,
+                time: new Date().toLocaleString(),
+                intent: null
+            },
+        ], userID);
+
+        this.emit('fallback', sentence, userID, response?.guesses_list);
+
+        return fallbackMsg
+    }
+
+    _saveConversation(sentence, userResponse, tag, confidence) {
+        this.emit('conversation', [
+            {
+                msg: sentence,
+                is_bot: false,
+                time: new Date().toLocaleString()
+            },
+            {
+                msg: userResponse,
+                is_bot: true,
+                time: new Date().toLocaleString(),
+                intent: {
+                    tag: tag,
+                    confidence: confidence
+                }
+            }
+        ], userID);
+    }
+
+    trainBuilder() {
         return new Promise(async (resolve, reject) => {
             try {
                 const trainingData = this._createTrainingData()
 
                 //create train arrays
-                let train_x = arr.pick(trainingData, 0);
-                let train_y = arr.pick(trainingData, 1);
+                let train_x = utils.pick(trainingData, 0);
+                let train_y = utils.pick(trainingData, 1);
 
                 // Build neural network:
                 const model = this._createModel(train_x[0].length, train_y[0].length);
@@ -195,7 +209,6 @@ class Agent extends EventEmitter {
                 if (this._debug) console.log('Saving model....');
                 //Print a text summary of the model's layers.
                 model.summary();
-                console.log(this.modelpath)
 
                 await model.save('file://' + this.modelpath)
 
@@ -207,7 +220,7 @@ class Agent extends EventEmitter {
                     console.log("classes " + this.classes.length);
                     console.log("unique stemmed words " + this.words.length);
                 }
-                //release memory
+                //release tensors from memory
                 xs.dispose();
                 ys.dispose();
                 // model.dispose();
@@ -218,27 +231,31 @@ class Agent extends EventEmitter {
         })
     }
 
-    BuildAgent(fullBuild) {
+    buildAgent(fullBuild) {
         return new Promise(async (resolve, reject) => {
             if (this.isAgentBuilding) return { error: true, msg: "Agent is buinding" }
             try {
                 this.isAgentBuilding = true;
+
                 const intentsList = await intentsModels.find({}).lean()
-                const iMax = intentsList.length
                 this.intents = intentsList
+
+                const iMax = intentsList.length
                 for (let i = 0; i < iMax; i++) {
+
                     const jMax = intentsList[i].patterns.length
                     for (let j = 0; j < jMax; j++) {
                         //stem and tokenize each word in the sentence
                         const wd = this.tokenizer.tokenize(intentsList[i].patterns[j]);
-                        let x = 0;
                         const xMax = wd.length
+
                         //remove ignored words
-                        for (; x < xMax; x++) {
+                        for (let x = 0; x < xMax; x++) {
                             if (this.ignore_words.indexOf(wd[x]) > -1) {
                                 wd.splice(x, 1)
                             }
                         }
+
                         //stem and lower each word
                         let steamWords = wd.map(word => word.toLowerCase().stem())
                         //add to words list the steam words
@@ -246,15 +263,16 @@ class Agent extends EventEmitter {
                         //add to documents in corpus
                         this.documents.push([steamWords, intentsList[i].tag]);
                         //add the tag to classes list 
-                        if (!this._containsInArray(this.classes, intentsList[i].tag)) {
+                        if (!utils.containsInArray(this.classes, intentsList[i].tag)) {
                             this.classes.push(intentsList[i].tag);
                         }
                     }
                 }
+
                 //sort and remove duplicates
-                this.words = this._sort(arr.removeDups(this.words));
+                this.words = utils.unique(this.words);
                 //sort classes
-                this.classes = this._sort(this.classes);
+                this.classes = utils.unique(this.classes);
 
                 if (this._debug) {
                     console.log("documents:", this.documents.length);
@@ -263,11 +281,12 @@ class Agent extends EventEmitter {
                 }
 
                 if (fullBuild) {
+
                     if (this._debug) {
                         console.log();
                         console.log('Training...');
                     }
-                    this.TrainBuilder().then(() => {
+                    this.trainBuilder().then(() => {
                         this.isAgentBuilding = false;
                         return resolve({ error: false, msg: "Building successful" })
                     }).catch((error) => {
@@ -275,6 +294,7 @@ class Agent extends EventEmitter {
                         this.isAgentBuilding = false;
                         return resolve({ error: true, msg: "Core error" })
                     });
+
                 } else {
                     this.isAgentBuilding = false;
                     if (this._debug) {
@@ -303,21 +323,21 @@ class Agent extends EventEmitter {
         for (let i = 0; i < iMax; i++) { //sentence_words         
             const jMax = synonym.length;
             for (let j = 0; j < jMax; j++) { //synonym
+                sentence_words[i] = sentence_words[i].toLowerCase().stem();
                 const xMax = synonym[j].synonyms.length;
                 for (let x = 0; x < xMax; x++) { //synonym list
-                    if (synonym[j].synonyms[x].toLowerCase() == sentence_words[i].toLowerCase()) {
+                    if (synonym[j].synonyms[x].toLowerCase() === sentence_words[i]) {
                         sentence_words[i] = sentence_words[i].replace(sentence_words[i], synonym[j].keyWord);
                     }
                 }
             }
-            sentence_words[i] = sentence_words[i].toLowerCase().stem();
         }
         return sentence_words;
     }
 
-    async bow(sentence, show_details) {
+    async bow(sentence, debug) {
         //tokenize the pattern
-        let sentence_words = await this.clean_up_sentence(sentence);
+        const sentence_words = await this.clean_up_sentence(sentence);
         //bag of words
         let bag = new Array(this.words.length).fill(0)
 
@@ -328,7 +348,7 @@ class Agent extends EventEmitter {
                 if (sentence_words[i] == this.words[j]) {
                     //set 1 if found the match word and 0 for the others
                     bag[j] = 1;
-                    if (show_details) { console.log("found in bag: " + j) }
+                    if (debug) { console.log("found in bag: " + j) }
                 }
             }
         }
@@ -341,8 +361,8 @@ class Agent extends EventEmitter {
     }
 
     classify(sentence, catchGuess = false) {
-        sentence = sentence.toLowerCase();
         return new Promise(async (resolve, reject) => {
+            sentence = sentence.toLowerCase();
             //load model
             if (!this.model) this.model = await tf.loadLayersModel('file://' + this.modelpath + '/model.json');
             //bow sentence
@@ -351,7 +371,7 @@ class Agent extends EventEmitter {
             let return_list = [];
             let guesses_list = [];
             //test if the BowData is a array of zeros (If enable)
-            let NotAllZeros = catchGuess ? true : await arr.zeroTest(bowData);
+            let NotAllZeros = catchGuess ? true : await utils.zeroTest(bowData);
             // test if the result isn't all zeros
             if (NotAllZeros) {
                 //to prevent memory leak
@@ -401,77 +421,64 @@ class Agent extends EventEmitter {
         })
     }
 
-    response(sentence, userID, show_details) {
+    response(sentence, userID, debug) {
         return new Promise(async (resolve, reject) => {
             try {
-                let i = 0;
-                this.classify(sentence).then((response) => {
-                    let results = response.return_list;
-                    //if we have a classification then find the matching intent tag
-                    if (results && results.length > 0) {
-                        //loop as long as there are matches to process
-                        while (results[i]) {
-                            const jMax = this.intents.length;
-                            for (let j = 0; j < jMax; j++) {
-                                //set context for this intent if necessary
-                                if (this.intents[j].tag == results[0][0]) {
+                const responses = await this.classify(sentence)
+                let results = responses.return_list;
+                //if we have a classification then find the matching intent tag
+                if (results && results.length > 0) {
+                    let i = 0;
+                    //loop as long as there are matches to process
+                    while (results[i]) {
+                        const jMax = this.intents.length;
+                        for (let j = 0; j < jMax; j++) {
+                            //set context for this intent if necessary
+                            if (this.intents[j].tag == results[i][0]) {
+                                const intentHasContextSet = utils.hasKey('context_set', this.intents[j])
 
-                                    if (arr.inArray('context_set', this.intents[j])) {
-                                        //set context
-                                        this._setContext(userID, this.intents[j]['context_set']);
-                                        if (show_details) console.log('context: ' + this.intents[j]['context_set'])
-                                    }
-
-                                    let userResponse = this._configResponse(this.intents[j]['responses'])
-
-                                    //save conversation
-                                    this.emit('conversation', [{ msg: sentence, is_bot: false, time: new Date().toLocaleString() }, { msg: userResponse, is_bot: true, time: new Date().toLocaleString(), intent: { tag: this.intents[j].tag, confidence: results[0][1] } }], userID);
-
-                                    //check if this intent is contextual and applies to this user's conversation
-                                    if (!arr.inArray('context_filter', this.intents[j])
-                                        || arr.UserFilter(this.context, userID)
-                                        && arr.inArray('context_filter', this.intents[j])
-                                        && this.intents[j]['context_filter'] == this.context[this.context.findIndex(x => x.uID == userID)].ctx) {
-                                        if (show_details) console.log('tag: ' + this.intents[j]['tag']);
-                                        //remove user context
-                                        this.context.slice(this.context.findIndex(x => x.uID == userID), 1)
-                                        //a random response from the intent             
-                                        return resolve(userResponse);
-                                    } else {
-                                        //a random response from the intent             
-                                        return resolve(userResponse);
-                                    }
+                                // check if this intent was context set and set it to user context
+                                if (intentHasContextSet) {
+                                    //set context
+                                    this._setContext(userID, this.intents[j]['context_set']);
+                                    if (debug) console.log('set context: ' + this.intents[j]['context_set'])
                                 }
+
+                                const userContext = this._getContext(userID) ?? [];
+                                const contextFilterInIntents = utils.hasKey('context_filter', this.intents[j]);
+                                const userContextHasFilter = userContext.includes(this.intents[j]['context_filter'])
+
+                                if (
+                                    !contextFilterInIntents ||
+                                    (
+                                        contextFilterInIntents &&
+                                        userContextHasFilter
+                                    )
+                                ) {
+                                    const userResponse = this._configResponse(this.intents[j]['responses'])
+                                    if (!intentHasContextSet && userContextHasFilter) {
+                                        if (debug) console.log('removing context: ' + this.intents[j]['context_filter'])
+                                        //clear context after response user
+                                        userContext.splice(userContext.indexOf(this.intents[j]['context_filter']), 1)
+                                        this._setContext(userID, userContext);
+                                    }
+                                    //save conversation
+                                    this._saveConversation(sentence, userResponse, this.intents[j].tag, results[i][1])
+                                    //random response
+                                    return resolve(userResponse);
+                                }
+
+                                return resolve(this._emitAndGetFallback(sentence, responses, userID))
                             }
-                            results.shift();
-                            i++;
                         }
-                    } else {
-                        let fallbackMsg = arr.random(this._getFallBack())
-                        if (show_details) console.log(`Registering fallback to user ${userID}`)
-                        this.emit('conversation', [
-                            {
-                                msg: sentence,
-                                is_bot: false,
-                                time: new Date().toLocaleString()
-                            },
-                            {
-                                msg: fallbackMsg,
-                                is_bot: true,
-                                time: new Date().toLocaleString(),
-                                intent: null
-                            },
-                        ], userID);
-                        this.emit('fallback', sentence, userID, response.guesses_list);
-                        resolve(fallbackMsg)
+                        i++;
                     }
-                }).catch((err) => {
-                    console.error(err)
-                    resolve("Sorry, Internal error >X(")
-                })
+                } else {
+                    return resolve(this._emitAndGetFallback(sentence, responses, userID))
+                }
             } catch (error) {
                 console.log(error)
-                resolve("Internal error >X(")
+                resolve(error.message)
             }
         })
     }

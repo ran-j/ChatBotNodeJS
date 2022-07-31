@@ -29,7 +29,7 @@ mongoose
     console.log('MongoDB Connected')
     //setup the agent
     console.log('Starting build agent')
-    await AgentInstance.BuildAgent(false)
+    await AgentInstance.buildAgent(false)
     console.log("Agent ready")
     //events
     AgentInstance.on("fallback", mlLogs.logFallback)
