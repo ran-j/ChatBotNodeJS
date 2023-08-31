@@ -17,7 +17,7 @@
     "ejs": "^3.1.8",
     "express": "^4.17.3",
     "express-session": "^1.17.2",
-    "mongoose": "^6.3.1",
+    "mongoose": "^6.12.0",
     "morgan": "~1.9.0",
     "natural": "^0.6.1",
     "static-eval": "^2.0.0"
